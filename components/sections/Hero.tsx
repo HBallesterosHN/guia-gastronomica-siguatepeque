@@ -22,7 +22,7 @@ export function Hero() {
             Ver restaurantes
           </Link>
           <Link
-            href="#guias-destacadas"
+            href="/guias"
             className="rounded-xl border border-white/70 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
           >
             Ver guías

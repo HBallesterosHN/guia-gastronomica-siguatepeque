@@ -115,6 +115,24 @@ export default function MejoresSopasEnSiguatepequePage() {
         })}
       </ol>
 
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <h2 className="text-lg font-semibold text-zinc-900">Otras guías que te pueden interesar</h2>
+        <div className="mt-3 flex flex-wrap gap-3 text-sm">
+          <Link
+            href="/guias/mejores-desayunos-en-siguatepeque"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
+          >
+            Mejores desayunos en Siguatepeque
+          </Link>
+          <Link
+            href="/guias/cafes-recomendados-en-siguatepeque"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
+          >
+            Cafés recomendados en Siguatepeque
+          </Link>
+        </div>
+      </section>
+
       <footer className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 text-sm text-zinc-600">
         <p>
           Esta guía es una selección editorial: son lugares y platos que ya están en el sitio,

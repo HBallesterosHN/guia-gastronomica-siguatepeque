@@ -43,7 +43,7 @@ export default function RootLayout({
                 Restaurantes
               </Link>
               <Link
-                href="/guias/mejores-sopas-en-siguatepeque"
+                href="/guias"
                 className="hover:text-zinc-900"
               >
                 Guías

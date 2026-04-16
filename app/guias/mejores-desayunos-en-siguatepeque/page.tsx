@@ -6,7 +6,7 @@ import { getRestaurantBySlug } from "@/lib/restaurants";
 export const metadata: Metadata = {
   title: "Mejores desayunos en Siguatepeque para arrancar bien el día | Guía",
   description:
-    "Una guía editorial con desayunos recomendados en Siguatepeque: opciones típicas, de carretera y de café para empezar la mañana.",
+    "Una guía editorial de desayunos recomendados en Siguatepeque, con Villa Verde como opción destacada.",
 };
 
 const guideEntries = [
@@ -17,30 +17,6 @@ const guideEntries = [
     placeName: "Restaurante Villa Verde",
     description:
       "Para nosotros, Villa Verde abre este ranking porque en su propia ficha se define para desayuno, almuerzo y cena, y eso se nota en la costumbre local de llegar temprano sobre la CA-5. • Lo recomendamos cuando quieres empezar el día con ambiente campestre y sin correr. • Es de esos lugares que funcionan tanto para desayuno familiar como para parada de viaje.",
-  },
-  {
-    slug: "tipicos-guancasco" as const,
-    emoji: "🍳",
-    dishName: "Desayuno típico",
-    placeName: "Tipicos Guancasco",
-    description:
-      "Lo ponemos segundo porque, si te gusta arrancar con sabor catracho, aquí la cocina típica y el horario desde las 8:00 AM lo vuelven una apuesta muy segura. • Es la opción que solemos sugerir cuando alguien pide desayuno tradicional. • Sirve muy bien para mañanas de fin de semana con hambre de plato completo.",
-  },
-  {
-    slug: "restaurante-rosquillas-paola" as const,
-    emoji: "🫓",
-    dishName: "Parada de carretera",
-    placeName: "Restaurante Rosquillas Paola",
-    description:
-      "Va en tercer lugar porque Rosquillas Paola mezcla lo práctico y lo tradicional: restaurante sobre la CA-5 y rosquillería en el mismo punto. • Si andas en ruta, es de las paradas que más recomendamos para desayunar sin complicarte. • También suma cuando buscas algo típico y luego llevar producto para el camino.",
-  },
-  {
-    slug: "la-pastela" as const,
-    emoji: "☕",
-    dishName: "Café y repostería",
-    placeName: "La Pastela",
-    description:
-      "La cerramos en cuarto como opción distinta: no compite con el desayuno típico pesado, sino que resuelve mañanas de café, postre o reunión tranquila. • Según su ficha, abre desde las 8:00 AM, así que encaja bien para empezar temprano. • Es nuestra recomendación cuando quieres algo más ligero, pero con ambiente agradable.",
   },
 ];
 
@@ -56,8 +32,8 @@ export default function MejoresDesayunosEnSiguatepequePage() {
         </h1>
         <p className="max-w-2xl text-lg leading-relaxed text-zinc-600">
           En Siguatepeque, el desayuno muchas veces marca el ritmo del día: salida temprano,
-          parada en carretera o mesa en familia antes de arrancar. Este ranking reúne lugares que
-          sí recomendamos cuando alguien nos pregunta dónde desayunar bien, sin vueltas.
+          parada en carretera o mesa en familia antes de arrancar. En esta guía dejamos una
+          recomendación concreta que sí sugerimos cuando alguien pregunta dónde desayunar bien.
         </p>
       </header>
 
@@ -112,6 +88,24 @@ export default function MejoresDesayunosEnSiguatepequePage() {
           );
         })}
       </ol>
+
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <h2 className="text-lg font-semibold text-zinc-900">Otras guías que te pueden interesar</h2>
+        <div className="mt-3 flex flex-wrap gap-3 text-sm">
+          <Link
+            href="/guias/mejores-sopas-en-siguatepeque"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
+          >
+            Mejores sopas en Siguatepeque
+          </Link>
+          <Link
+            href="/guias/cafes-recomendados-en-siguatepeque"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
+          >
+            Cafés recomendados en Siguatepeque
+          </Link>
+        </div>
+      </section>
 
       <footer className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 text-sm text-zinc-600">
         <p>
