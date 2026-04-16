@@ -8,11 +8,11 @@ export function Hero() {
           Guía Gastronómica de Siguatepeque
         </p>
         <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
-          Descubre sabores locales y experiencias inolvidables
+          Descubre dónde comer en Siguatepeque
         </h1>
         <p className="text-lg text-emerald-50">
-          Explora restaurantes con información clara de ubicación, contacto,
-          delivery, reservas y reseñas.
+          Una guía local con recomendaciones reales de restaurantes, cafés y comida típica para
+          locales y visitantes.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link
@@ -21,12 +21,12 @@ export function Hero() {
           >
             Ver restaurantes
           </Link>
-          <a
-            href="#destacados"
+          <Link
+            href="#guias-destacadas"
             className="rounded-xl border border-white/70 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
           >
-            Restaurantes destacados
-          </a>
+            Ver guías
+          </Link>
         </div>
       </div>
     </section>

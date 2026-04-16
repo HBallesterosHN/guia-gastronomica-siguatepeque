@@ -48,8 +48,8 @@ export default function RootLayout({
               >
                 Guías
               </Link>
-              <Link href="/sobre-esta-guia" className="hover:text-zinc-900">
-                Sobre esta guía
+              <Link href="/sobre" className="hover:text-zinc-900">
+                SOBRE
               </Link>
             </nav>
           </div>
