@@ -46,7 +46,7 @@ export default function SobrePage() {
 
       <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6">
         <p className="text-base leading-7 text-zinc-700">
-          Si tienes algún lugar que crees que deberíamos probar, escríbenos en Instagram:{" "}
+          Si tienes algún lugar que crees que deberíamos probar, escríbenos en Instagram{" "}
           <a
             href="https://www.instagram.com/mevoyasigua/"
             className="font-semibold text-emerald-700 hover:text-emerald-800"
@@ -55,6 +55,7 @@ export default function SobrePage() {
           >
             @mevoyasigua
           </a>
+          .
         </p>
         <p className="mt-3 text-sm">
           <Link href="/restaurantes" className="font-semibold text-emerald-700 hover:text-emerald-800">

@@ -99,6 +99,12 @@ export default function MejoresDesayunosEnSiguatepequePage() {
             Mejores sopas en Siguatepeque
           </Link>
           <Link
+            href="/guias/mejores-desayunos-en-siguatepeque"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
+          >
+            Mejores desayunos en Siguatepeque
+          </Link>
+          <Link
             href="/guias/cafes-recomendados-en-siguatepeque"
             className="font-semibold text-emerald-700 hover:text-emerald-800"
           >

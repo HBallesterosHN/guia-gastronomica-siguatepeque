@@ -119,6 +119,12 @@ export default function MejoresSopasEnSiguatepequePage() {
         <h2 className="text-lg font-semibold text-zinc-900">Otras guías que te pueden interesar</h2>
         <div className="mt-3 flex flex-wrap gap-3 text-sm">
           <Link
+            href="/guias/mejores-sopas-en-siguatepeque"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
+          >
+            Mejores sopas en Siguatepeque
+          </Link>
+          <Link
             href="/guias/mejores-desayunos-en-siguatepeque"
             className="font-semibold text-emerald-700 hover:text-emerald-800"
           >

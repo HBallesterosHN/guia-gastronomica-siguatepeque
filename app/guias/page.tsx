@@ -39,8 +39,8 @@ export default function GuiasPage() {
           Guías gastronómicas en Siguatepeque
         </h1>
         <p className="max-w-3xl text-zinc-600">
-          Explora nuestras recomendaciones locales sobre dónde comer en Siguatepeque: sopas,
-          desayunos, cafés y más.
+          Si no sabes por dónde empezar, aquí tienes nuestras recomendaciones locales para comer
+          bien en Siguatepeque: sopas, desayunos, cafés y más.
         </p>
       </header>
 

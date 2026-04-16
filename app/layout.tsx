@@ -49,7 +49,7 @@ export default function RootLayout({
                 Guías
               </Link>
               <Link href="/sobre" className="hover:text-zinc-900">
-                SOBRE
+                Sobre
               </Link>
             </nav>
           </div>

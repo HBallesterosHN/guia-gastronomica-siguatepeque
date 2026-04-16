@@ -103,6 +103,12 @@ export default function CafesRecomendadosEnSiguatepequePage() {
           >
             Mejores desayunos en Siguatepeque
           </Link>
+          <Link
+            href="/guias/cafes-recomendados-en-siguatepeque"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
+          >
+            Cafés recomendados en Siguatepeque
+          </Link>
         </div>
       </section>
 
