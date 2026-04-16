@@ -4,9 +4,9 @@ import Link from "next/link";
 import { getRestaurantBySlug } from "@/lib/restaurants";
 
 export const metadata: Metadata = {
-  title: "Mejores sopas en Siguatepeque | Guia Gastronomica",
+  title: "Sopas en Siguatepeque que vale la pena pedir cuando el frío pega | Guía",
   description:
-    "Seleccion editorial: gallina india, marinera, sopa de res y mondongo en Siguatepeque.",
+    "Cuatro sopas que seguimos pidiendo en Siguatepeque —gallina india, marinera, sopa de res y mondongo— y el restaurante donde las encontramos.",
 };
 
 const guideEntries = [
@@ -14,33 +14,33 @@ const guideEntries = [
     slug: "tipicos-guancasco" as const,
     emoji: "🐔",
     dishName: "Gallina india",
-    placeName: "Guancasco",
+    placeName: "Tipicos Guancasco",
     description:
-      "Sopa contundente de gallina india, con el punto justo de sazon y aroma que recuerda a la cocina de barrio.",
+      "Para nosotros esta va primero porque es la sopa que encaja con un almuerzo familiar en Siguatepeque: cocina tipica hondurena, mesa llena y ese caldo de gallina india que te quita el frío de golpe. • Es el plato que uno pide cuando quiere sabor de casa, sin rodeos. • Si te toca día nublado o tarde larga, aquí encontramos el consuelo clásico.",
   },
   {
     slug: "el-torito-steak-house" as const,
     emoji: "🐟",
     dishName: "Marinera",
-    placeName: "El Torito",
+    placeName: "El Torito Steak House",
     description:
-      "Caldo de pescado y mariscos con sabor intenso al mar, ideal cuando quieres algo caliente y distinto.",
+      "La dejamos en segundo lugar porque cuando ya comimos mucha sopa de tierra, en El Torito la marinera nos cambia el chip: caldo de pescado y mariscos, en un lugar en la CA-5 frente a Uniplaza que en el sitio figura como referencia en parrilladas, mariscos y sopas. • Sirve para el antojo de mar sin complicarse. • Si quieres algo caliente pero distinto al caldo de siempre, esta es nuestra apuesta.",
   },
   {
     slug: "restaurante-rosquillas-paola" as const,
     emoji: "🥩",
     dishName: "Sopa de res",
-    placeName: "Rosquillería Paola",
+    placeName: "Restaurante Rosquillas Paola",
     description:
-      "Sopa de res con verduras, reconfortante y generosa, perfecta para compartir en mesa larga.",
+      "Va tercera porque en la misma CA-5, en Rosquillas Paola, la sopa de res nos remite a lo tradicional de carretera: sabor fuerte, plato lleno y ese ambiente de restaurante y rosquilleria donde uno se siente en confianza. • Es la sopa de res que pedimos cuando queremos algo contundente y sencillo. • Si vas en grupo o con hambre de verdad, aquí no quedamos con el plato a medias.",
   },
   {
     slug: "habana-mex" as const,
     emoji: "🥣",
     dishName: "Mondongo",
-    placeName: "Abanamex",
+    placeName: "Habana Mex",
     description:
-      "Mondongo bien cocido, caldo espeso y sazon que pide repetir; la especialidad de la casa.",
+      "La cerramos en cuarto no porque falte sabor, sino porque el ranking va de lo más típico de almuerzo hondureño hacia un perfil con influencia mexicana; en la ficha de Habana Mex la sopa de mondongo aparece como especialidad de la casa. • Si te late el mondongo bien cocido y con sazón, aquí lo pedimos sin pena. • Es el cierre que pedimos cuando ya dimos la vuelta a las otras y queremos un caldo distinto pero igual de llenador.",
   },
 ];
 
@@ -52,11 +52,14 @@ export default function MejoresSopasEnSiguatepequePage() {
           Guia editorial
         </p>
         <h1 className="text-3xl font-bold leading-tight text-zinc-900 sm:text-4xl">
-          🍲 Mejores sopas en Siguatepeque
+          🍲 Sopas en Siguatepeque que pedimos cuando el frío pega
         </h1>
         <p className="max-w-2xl text-lg leading-relaxed text-zinc-600">
-          Cuatro sopas emblematicas y donde encontrarlas hoy en Siguatepeque. Toca cada ficha
-          para ver el restaurante completo.
+          En Siguatepeque el frío se siente en la piel y en la mesa: la sopa no es moda, es
+          costumbre de almuerzo, de domingo con familia o de ese día en que uno solo quiere un
+          caldo honesto. Estas son cuatro sopas que seguimos recomendando, en el orden en que
+          nosotros las pediríamos; toca cada ficha para ver horarios, ubicación y el perfil
+          completo del restaurante.
         </p>
       </header>
 
@@ -114,8 +117,19 @@ export default function MejoresSopasEnSiguatepequePage() {
 
       <footer className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 text-sm text-zinc-600">
         <p>
-          Esta guia es una seleccion editorial. Los platos pueden variar segun temporada y
-          carta del dia. Siempre confirma disponibilidad directamente con el restaurante.
+          Esta guia es una seleccion editorial: son lugares y platos que ya estan en el sitio,
+          pero la carta puede cambiar con el dia o la temporada. Antes de salir, confirma por
+          telefono o WhatsApp si la sopa sigue disponible. ¿Nos faltó alguna sopa que para ti
+          deberia estar aqui? Escríbenos en Instagram{" "}
+          <a
+            href="https://www.instagram.com/mevoyasigua/"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            @mevoyasigua
+          </a>
+          .
         </p>
         <p className="mt-3">
           <Link
