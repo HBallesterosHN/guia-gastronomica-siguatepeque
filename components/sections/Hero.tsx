@@ -5,13 +5,13 @@ export function Hero() {
     <section className="rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 px-6 py-14 text-white shadow-xl sm:px-10">
       <div className="max-w-3xl space-y-5">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-50">
-          Guia Gastronomica de Siguatepeque
+          Guía Gastronómica de Siguatepeque
         </p>
         <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
           Descubre sabores locales y experiencias inolvidables
         </h1>
         <p className="text-lg text-emerald-50">
-          Explora restaurantes con informacion clara de ubicacion, contacto,
+          Explora restaurantes con información clara de ubicación, contacto,
           delivery, reservas y reseñas.
         </p>
         <div className="flex flex-wrap gap-3">

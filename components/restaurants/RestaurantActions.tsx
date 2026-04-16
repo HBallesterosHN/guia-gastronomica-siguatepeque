@@ -31,7 +31,7 @@ export function RestaurantActions({ restaurant }: RestaurantActionsProps) {
         rel="noreferrer"
         className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-center text-sm font-semibold text-zinc-800 transition hover:bg-zinc-100"
       >
-        Como llegar
+        Cómo llegar
       </a>
     </div>
   );

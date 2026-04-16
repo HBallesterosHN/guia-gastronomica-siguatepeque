@@ -30,7 +30,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${restaurant.identity.name} | Guia Gastronomica de Siguatepeque`,
+    title: `${restaurant.identity.name} | Guía Gastronómica de Siguatepeque`,
     description: restaurant.copy.summary,
   };
 }
@@ -124,7 +124,7 @@ export default async function RestaurantDetailPage({
 
             <section className="space-y-4">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold text-zinc-900">Galeria</h2>
+                <h2 className="text-2xl font-semibold text-zinc-900">Galería</h2>
                 <p className="text-sm text-zinc-500">
                   {media.gallery.length > 0
                     ? `${media.gallery.length} fotos`
@@ -147,7 +147,7 @@ export default async function RestaurantDetailPage({
                 </div>
               ) : (
                 <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-6 text-sm text-zinc-600">
-                  Este perfil todavia no tiene galeria adicional.
+                  Este perfil todavía no tiene galería adicional.
                 </div>
               )}
             </section>
@@ -170,7 +170,7 @@ export default async function RestaurantDetailPage({
           <aside className="h-fit space-y-6 rounded-[1.75rem] border border-zinc-200 bg-gradient-to-b from-white to-zinc-50 p-6 shadow-sm">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                Informacion util
+                Información útil
               </p>
               <h2 className="mt-2 text-2xl font-semibold text-zinc-900">
                 Todo para tu visita
@@ -185,7 +185,7 @@ export default async function RestaurantDetailPage({
                   Delivery
                 </p>
                 <p className="mt-2 text-sm font-semibold text-zinc-900">
-                  {services.offersDelivery ? "Si, disponible" : "No disponible"}
+                  {services.offersDelivery ? "Sí, disponible" : "No disponible"}
                 </p>
               </div>
               <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
@@ -194,7 +194,7 @@ export default async function RestaurantDetailPage({
                 </p>
                 <p className="mt-2 text-sm font-semibold text-zinc-900">
                   {services.acceptsReservations
-                    ? "Si, acepta reservas"
+                    ? "Sí, acepta reservas"
                     : "No acepta reservas"}
                 </p>
               </div>
@@ -203,7 +203,7 @@ export default async function RestaurantDetailPage({
             <div className="space-y-4 text-sm text-zinc-700">
               <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Categoria
+                  Categoría
                 </p>
                 <p className="mt-2 font-semibold text-zinc-900">
                   {categoryLabels[classification.category]}
@@ -211,7 +211,7 @@ export default async function RestaurantDetailPage({
               </div>
               <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Direccion completa
+                  Dirección completa
                 </p>
                 <p className="mt-2 leading-6 text-zinc-900">{location.address}</p>
               </div>
@@ -223,7 +223,7 @@ export default async function RestaurantDetailPage({
               </div>
               <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Telefono
+                  Teléfono
                 </p>
                 <p className="mt-2 font-semibold text-zinc-900">
                   {restaurant.contact.phone}

@@ -28,7 +28,7 @@ export function RestaurantFilters({
     >
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <label className="space-y-1 text-sm">
-          <span className="font-medium text-zinc-700">Categoria</span>
+          <span className="font-medium text-zinc-700">Categoría</span>
           <select
             name="categoria"
             defaultValue={selectedCategory ?? ""}
@@ -86,7 +86,7 @@ export function RestaurantFilters({
         </label>
 
         <label className="space-y-1 text-sm">
-          <span className="font-medium text-zinc-700">Calificacion minima</span>
+          <span className="font-medium text-zinc-700">Calificación mínima</span>
           <select
             name="ratingMinimo"
             defaultValue={selectedMinRating?.toString() ?? ""}

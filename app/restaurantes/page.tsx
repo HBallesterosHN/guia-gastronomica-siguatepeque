@@ -70,12 +70,12 @@ export default async function RestaurantsPage({
     <main className="mx-auto w-full max-w-6xl space-y-8 px-4 py-10 sm:px-6">
       <header className="space-y-3">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          Guia Gastronomica de Siguatepeque
+          Guía Gastronómica de Siguatepeque
         </p>
         <h1 className="text-3xl font-bold text-zinc-900">Todos los restaurantes</h1>
         <p className="max-w-2xl text-zinc-600">
-          Filtra por categoria, precio, delivery, reservas y rating para encontrar
-          rapido el lugar ideal para tu visita en Siguatepeque.
+          Filtra por categoría, precio, delivery, reservas y rating para encontrar
+          rápido el lugar ideal para tu visita en Siguatepeque.
         </p>
       </header>
 
@@ -104,7 +104,7 @@ export default async function RestaurantsPage({
             No hay resultados con esos filtros
           </h2>
           <p className="mt-2 text-sm text-zinc-600">
-            Prueba cambiando el rango de precio o bajando la calificacion minima.
+            Prueba cambiando el rango de precio o bajando la calificación mínima.
           </p>
         </section>
       )}

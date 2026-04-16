@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Guia Gastronomica de Siguatepeque",
+  title: "Guía Gastronómica de Siguatepeque",
   description:
-    "Descubre restaurantes, cafe, comida tipica y experiencias gastronomicas en Siguatepeque.",
+    "Descubre restaurantes, café, comida típica y experiencias gastronómicas en Siguatepeque.",
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
         <header className="border-b border-zinc-200 bg-white/90 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
             <Link href="/" className="text-lg font-bold text-zinc-900">
-              Guia Gastronomica
+              Guía Gastronómica
             </Link>
             <nav className="flex items-center gap-4 text-sm font-medium text-zinc-700">
               <Link href="/" className="hover:text-zinc-900">
@@ -46,7 +46,10 @@ export default function RootLayout({
                 href="/guias/mejores-sopas-en-siguatepeque"
                 className="hover:text-zinc-900"
               >
-                Guias
+                Guías
+              </Link>
+              <Link href="/sobre-esta-guia" className="hover:text-zinc-900">
+                Sobre esta guía
               </Link>
             </nav>
           </div>

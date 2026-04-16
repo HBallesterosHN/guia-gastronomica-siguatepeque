@@ -4,47 +4,47 @@ import Link from "next/link";
 import { getRestaurantBySlug } from "@/lib/restaurants";
 
 export const metadata: Metadata = {
-  title: "Sopas en Siguatepeque que vale la pena pedir cuando el frío pega | Guía",
+  title: "Mejores desayunos en Siguatepeque para arrancar bien el día | Guía",
   description:
-    "Cuatro sopas que seguimos pidiendo en Siguatepeque —gallina india, marinera, sopa de res y mondongo— y el restaurante donde las encontramos.",
+    "Una guía editorial con desayunos recomendados en Siguatepeque: opciones típicas, de carretera y de café para empezar la mañana.",
 };
 
 const guideEntries = [
   {
-    slug: "tipicos-guancasco" as const,
-    emoji: "🐔",
-    dishName: "Gallina india",
-    placeName: "Tipicos Guancasco",
+    slug: "restaurante-villa-verde" as const,
+    emoji: "🌄",
+    dishName: "Desayuno completo",
+    placeName: "Restaurante Villa Verde",
     description:
-      "Para nosotros esta va primero porque es la sopa que encaja con un almuerzo familiar en Siguatepeque: cocina típica hondureña, mesa llena y ese caldo de gallina india que te quita el frío de golpe. • Es el plato que uno pide cuando quiere sabor de casa, sin rodeos. • Si te toca día nublado o tarde larga, aquí encontramos el consuelo clásico.",
+      "Para nosotros, Villa Verde abre este ranking porque en su propia ficha se define para desayuno, almuerzo y cena, y eso se nota en la costumbre local de llegar temprano sobre la CA-5. • Lo recomendamos cuando quieres empezar el día con ambiente campestre y sin correr. • Es de esos lugares que funcionan tanto para desayuno familiar como para parada de viaje.",
   },
   {
-    slug: "el-torito-steak-house" as const,
-    emoji: "🐟",
-    dishName: "Marinera",
-    placeName: "El Torito Steak House",
+    slug: "tipicos-guancasco" as const,
+    emoji: "🍳",
+    dishName: "Desayuno típico",
+    placeName: "Tipicos Guancasco",
     description:
-      "La dejamos en segundo lugar porque cuando ya comimos mucha sopa de tierra, en El Torito la marinera nos cambia el chip: caldo de pescado y mariscos, en un lugar en la CA-5 frente a Uniplaza que en el sitio figura como referencia en parrilladas, mariscos y sopas. • Sirve para el antojo de mar sin complicarse. • Si quieres algo caliente pero distinto al caldo de siempre, esta es nuestra apuesta.",
+      "Lo ponemos segundo porque, si te gusta arrancar con sabor catracho, aquí la cocina típica y el horario desde las 8:00 AM lo vuelven una apuesta muy segura. • Es la opción que solemos sugerir cuando alguien pide desayuno tradicional. • Sirve muy bien para mañanas de fin de semana con hambre de plato completo.",
   },
   {
     slug: "restaurante-rosquillas-paola" as const,
-    emoji: "🥩",
-    dishName: "Sopa de res",
+    emoji: "🫓",
+    dishName: "Parada de carretera",
     placeName: "Restaurante Rosquillas Paola",
     description:
-      "Va tercera porque, en la misma CA-5, en Rosquillas Paola, la sopa de res nos remite a lo tradicional de carretera: sabor fuerte, plato lleno y ese ambiente de restaurante y rosquillería donde uno se siente en confianza. • Es la sopa de res que pedimos cuando queremos algo contundente y sencillo. • Si vas en grupo o con hambre de verdad, aquí no quedamos con el plato a medias.",
+      "Va en tercer lugar porque Rosquillas Paola mezcla lo práctico y lo tradicional: restaurante sobre la CA-5 y rosquillería en el mismo punto. • Si andas en ruta, es de las paradas que más recomendamos para desayunar sin complicarte. • También suma cuando buscas algo típico y luego llevar producto para el camino.",
   },
   {
-    slug: "habana-mex" as const,
-    emoji: "🥣",
-    dishName: "Mondongo",
-    placeName: "Habana Mex",
+    slug: "la-pastela" as const,
+    emoji: "☕",
+    dishName: "Café y repostería",
+    placeName: "La Pastela",
     description:
-      "La cerramos en cuarto no porque falte sabor, sino porque el ranking va de lo más típico de almuerzo hondureño hacia un perfil con influencia mexicana; en la ficha de Habana Mex la sopa de mondongo aparece como especialidad de la casa. • Si te late el mondongo bien cocido y con sazón, aquí lo pedimos sin pena. • Es el cierre que pedimos cuando ya dimos la vuelta a las otras y queremos un caldo distinto pero igual de llenador.",
+      "La cerramos en cuarto como opción distinta: no compite con el desayuno típico pesado, sino que resuelve mañanas de café, postre o reunión tranquila. • Según su ficha, abre desde las 8:00 AM, así que encaja bien para empezar temprano. • Es nuestra recomendación cuando quieres algo más ligero, pero con ambiente agradable.",
   },
 ];
 
-export default function MejoresSopasEnSiguatepequePage() {
+export default function MejoresDesayunosEnSiguatepequePage() {
   return (
     <main className="mx-auto w-full max-w-6xl space-y-12 px-4 py-10 sm:px-6">
       <header className="space-y-4">
@@ -52,14 +52,12 @@ export default function MejoresSopasEnSiguatepequePage() {
           Guía editorial
         </p>
         <h1 className="text-3xl font-bold leading-tight text-zinc-900 sm:text-4xl">
-          🍲 Sopas en Siguatepeque que pedimos cuando el frío pega
+          🍽️ Mejores desayunos en Siguatepeque para empezar bien el día
         </h1>
         <p className="max-w-2xl text-lg leading-relaxed text-zinc-600">
-          En Siguatepeque el frío se siente en la piel y en la mesa: la sopa no es moda, es
-          costumbre de almuerzo, de domingo con familia o de ese día en que uno solo quiere un
-          caldo honesto. Estas son cuatro sopas que seguimos recomendando, en el orden en que
-          nosotros las pediríamos; toca cada ficha para ver horarios, ubicación y el perfil
-          completo del restaurante.
+          En Siguatepeque, el desayuno muchas veces marca el ritmo del día: salida temprano,
+          parada en carretera o mesa en familia antes de arrancar. Este ranking reúne lugares que
+          sí recomendamos cuando alguien nos pregunta dónde desayunar bien, sin vueltas.
         </p>
       </header>
 
@@ -117,10 +115,9 @@ export default function MejoresSopasEnSiguatepequePage() {
 
       <footer className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 text-sm text-zinc-600">
         <p>
-          Esta guía es una selección editorial: son lugares y platos que ya están en el sitio,
-          pero la carta puede cambiar con el día o la temporada. Antes de salir, confirma por
-          teléfono o WhatsApp si la sopa sigue disponible. ¿Nos faltó alguna sopa que, para ti,
-          debería estar aquí? Escríbenos en Instagram{" "}
+          Esta guía es una selección editorial y puede variar según el día, el horario o la
+          disponibilidad del restaurante. ¿Nos faltó algún desayuno que, para ti, sí debería estar
+          aquí? Escríbenos en Instagram{" "}
           <a
             href="https://www.instagram.com/mevoyasigua/"
             className="font-semibold text-emerald-700 hover:text-emerald-800"
