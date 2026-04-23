@@ -13,6 +13,8 @@ import { restaurantLaPastela } from "@/data/restaurants/entries/la-pastela";
 import { restaurantRosquillasPaola } from "@/data/restaurants/entries/restaurante-rosquillas-paola";
 import { restaurantTipicosGuancasco } from "@/data/restaurants/entries/tipicos-guancasco";
 import { restaurantVillaVerde } from "@/data/restaurants/entries/restaurante-villa-verde";
+
+import { restaurantElDeArriba } from "@/data/restaurants/entries/el-de-arriba";
 import type { Restaurant } from "@/types/restaurant";
 
 export const restaurants: Restaurant[] = [
@@ -22,5 +24,5 @@ export const restaurants: Restaurant[] = [
   restaurantRosquillasPaola,
   restaurantVillaVerde,
   restaurantHabanaMex,
-  restaurantElToritoSteakHouse,
+  restaurantElToritoSteakHouse,  restaurantElDeArriba,
 ];

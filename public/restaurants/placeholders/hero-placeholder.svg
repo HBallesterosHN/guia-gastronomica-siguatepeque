@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Imagen pendiente">
+  <rect width="1200" height="800" fill="#e4e4e7"/>
+  <rect x="80" y="80" width="1040" height="640" rx="24" fill="#d4d4d8"/>
+  <text x="600" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" fill="#52525b">
+    Imagen pendiente
+  </text>
+  <text x="600" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#71717a">
+    Reemplazar en /public/restaurants/{slug}/hero.jpg
+  </text>
+</svg>

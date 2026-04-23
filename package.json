@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "restaurant:add-draft": "tsx scripts/add-restaurant-draft.ts",
+    "restaurant:enrich-draft": "tsx scripts/enrich-restaurant-draft.ts",
+    "restaurant:intake": "tsx scripts/restaurant-intake/index.ts"
   },
   "dependencies": {
     "next": "16.2.3",
@@ -21,6 +24,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }
