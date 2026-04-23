@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { ImageDownloadScope } from "./types";
 
 const ROOT = process.cwd();
 const PUBLIC_RESTAURANTS_DIR = path.join(ROOT, "public", "restaurants");
@@ -98,19 +99,21 @@ export type PlacePhotosDownloadResult = {
 };
 
 /**
- * Descarga hasta 1 hero + hasta 4 gallery desde recursos de foto de Places API.
+ * Descarga hasta 1 hero + hasta 10 gallery desde recursos de foto de Places API.
  */
 export async function saveRestaurantImagesFromPlacePhotos(
   slug: string,
   photoResourceNames: string[],
   apiKey: string,
   dryRun: boolean,
+  scope: ImageDownloadScope = "all",
 ): Promise<PlacePhotosDownloadResult> {
+  const MAX_GALLERY = 10;
+  const MAX_TOTAL_IMAGES = 1 + MAX_GALLERY; // hero + gallery
   const log: string[] = [];
   const errors: string[] = [];
   const selectedUrls: string[] = [];
-  const maxTotal = 5;
-  const names = photoResourceNames.filter(Boolean).slice(0, maxTotal);
+  const names = photoResourceNames.filter(Boolean).slice(0, MAX_TOTAL_IMAGES);
 
   if (!names.length) {
     log.push("Places fotos: sin recursos de foto en el detalle.");
@@ -118,17 +121,40 @@ export async function saveRestaurantImagesFromPlacePhotos(
   }
 
   const targets: SaveRestaurantImageItem[] = [];
+  let galleryCount = 0;
   names.forEach((resourceName, i) => {
     const mediaUrl = buildPlacePhotoMediaUrl(resourceName, apiKey);
     selectedUrls.push(mediaUrl);
-    if (i === 0) targets.push({ url: mediaUrl, filename: "hero.jpg" });
-    else targets.push({ url: mediaUrl, filename: `gallery-${i}.jpg` });
+    if (scope === "hero") {
+      if (i === 0) targets.push({ url: mediaUrl, filename: "hero.jpg" });
+      return;
+    }
+
+    if (scope === "gallery") {
+      if (i === 0) return; // evita tocar hero en modo parcial
+      if (galleryCount < MAX_GALLERY) {
+        galleryCount += 1;
+        targets.push({ url: mediaUrl, filename: `gallery-${galleryCount}.jpg` });
+      }
+      return;
+    }
+
+    if (i === 0) {
+      targets.push({ url: mediaUrl, filename: "hero.jpg" });
+      return;
+    }
+
+    if (galleryCount < MAX_GALLERY) {
+      galleryCount += 1;
+      targets.push({ url: mediaUrl, filename: `gallery-${galleryCount}.jpg` });
+      return;
+    }
   });
 
-  log.push(`Places fotos: intentando ${targets.length} descarga(s).`);
+  log.push(`Places fotos: scope=${scope}; intentando ${targets.length} descarga(s).`);
 
   if (dryRun) {
-    const paths = targets.map((_, i) => (i === 0 ? `/restaurants/${slug}/hero.jpg` : `/restaurants/${slug}/gallery-${i}.jpg`));
+    const paths = targets.map((t) => `/restaurants/${slug}/${t.filename}`);
     return {
       downloaded: false,
       heroPublicPath: paths[0],

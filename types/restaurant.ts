@@ -75,15 +75,18 @@ export interface Restaurant {
   };
   media: {
     hero: RestaurantPublicImagePath;
-    /** Platos destacados (2-3 fotos idealmente). */
-    featured?: RestaurantPublicImagePath[];
-    /** Fotos del ambiente/local. */
-    place?: RestaurantPublicImagePath[];
-    /**
-     * Compatibilidad con entradas antiguas.
-     * @deprecated Usar `featured` y `place`.
-     */
+    /** Galería general (hasta 10 fotos). */
     gallery?: RestaurantPublicImagePath[];
+    /**
+     * Compatibilidad con entradas intermedias.
+     * @deprecated Preferir `gallery`.
+     */
+    featured?: RestaurantPublicImagePath[];
+    /**
+     * Compatibilidad con entradas intermedias.
+     * @deprecated Preferir `gallery`.
+     */
+    place?: RestaurantPublicImagePath[];
   };
   ratings: {
     /** Promedio 0–5 */

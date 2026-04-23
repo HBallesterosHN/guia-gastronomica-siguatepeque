@@ -26,8 +26,6 @@ function toPascalCase(input: string): string {
 function buildEntrySource(draft: NormalizedDraft): string {
   const variableName = `restaurant${toPascalCase(draft.slug)}`;
   const today = new Date().toISOString().slice(0, 10);
-  const featured = draft.gallery.slice(0, 3);
-  const place = draft.gallery.slice(3);
 
   return `import type { Restaurant } from "@/types/restaurant";
 
@@ -67,8 +65,7 @@ export const ${variableName}: Restaurant = {
   },
   media: {
     hero: ${JSON.stringify(draft.hero)},
-    featured: ${JSON.stringify(featured)},
-    place: ${JSON.stringify(place)},
+    gallery: ${JSON.stringify(draft.gallery.slice(0, 10))},
   },
   ratings: {
     average: ${Number(draft.ratings.average) || 0},
@@ -103,17 +100,24 @@ function updateIndexSource(source: string, slug: string, variableName: string): 
     source = lines.join("\n");
   }
 
-  if (source.includes(`  ${variableName},`)) {
-    return source;
+  const arrayMatch = source.match(/export const restaurants:\s*Restaurant\[\]\s*=\s*\[([\s\S]*?)\];/);
+  if (!arrayMatch) {
+    throw new Error("No se encontro el array restaurants en data/restaurants/index.ts");
   }
 
-  const arrayClose = "\n];";
-  const idx = source.lastIndexOf(arrayClose);
-  if (idx === -1) {
-    throw new Error("No se encontro el cierre del array restaurants en data/restaurants/index.ts");
+  const parsedItems = Array.from(
+    new Set(
+      (arrayMatch[1].match(/\brestaurant[A-Za-z0-9_]+\b/g) ?? []).filter(Boolean),
+    ),
+  );
+  if (!parsedItems.includes(variableName)) {
+    parsedItems.push(variableName);
   }
+  const rebuilt = `export const restaurants: Restaurant[] = [\n${parsedItems
+    .map((v) => `  ${v},`)
+    .join("\n")}\n];`;
 
-  return `${source.slice(0, idx)}  ${variableName},${source.slice(idx)}`;
+  return source.replace(/export const restaurants:\s*Restaurant\[\]\s*=\s*\[[\s\S]*?\];/, rebuilt);
 }
 
 export async function persistDraft(draft: NormalizedDraft, dryRun: boolean): Promise<{ slug: string; variableName: string }> {

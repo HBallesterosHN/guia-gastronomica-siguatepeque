@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { RestaurantActions } from "@/components/restaurants/RestaurantActions";
+import { GalleryLightbox } from "@/components/restaurants/GalleryLightbox";
 import { ReviewList } from "@/components/restaurants/ReviewList";
 import { StarRating } from "@/components/restaurants/StarRating";
 import { categoryLabels } from "@/lib/category";
@@ -47,9 +48,10 @@ export default async function RestaurantDetailPage({
 
   const { identity, classification, copy, location, hours, media, ratings, services } =
     restaurant;
-  const featuredImages =
-    (media.featured?.length ?? 0) > 0 ? media.featured ?? [] : (media.gallery ?? []);
-  const placeImages = media.place ?? [];
+  const galleryImages =
+    (media.gallery?.length ?? 0) > 0
+      ? media.gallery ?? []
+      : [...(media.featured ?? []), ...(media.place ?? [])];
   const structuredHours = hours.structured ?? [];
   const currentDayEnglish = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -140,51 +142,7 @@ export default async function RestaurantDetailPage({
               </div>
             </div>
 
-            {featuredImages.length > 0 ? (
-              <section className="space-y-4">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-2xl font-semibold text-zinc-900">
-                    Platos destacados
-                  </h2>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {featuredImages.map((image) => (
-                    <div key={image} className="relative h-56 w-full overflow-hidden rounded-2xl ring-1 ring-zinc-200">
-                      <Image
-                        src={image}
-                        alt={`Foto de ${identity.name}`}
-                        fill
-                        className="object-cover transition duration-500 hover:scale-[1.02]"
-                        sizes="(max-width: 640px) 100vw, 50vw"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            {placeImages.length > 0 ? (
-              <section className="space-y-4">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-2xl font-semibold text-zinc-900">
-                    El lugar
-                  </h2>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {placeImages.map((image) => (
-                    <div key={image} className="relative h-56 w-full overflow-hidden rounded-2xl ring-1 ring-zinc-200">
-                      <Image
-                        src={image}
-                        alt={`Foto del lugar: ${identity.name}`}
-                        fill
-                        className="object-cover transition duration-500 hover:scale-[1.02]"
-                        sizes="(max-width: 640px) 100vw, 50vw"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ) : null}
+            <GalleryLightbox images={galleryImages} restaurantName={identity.name} />
 
             <section className="space-y-4">
               <div className="flex items-center justify-between gap-3">

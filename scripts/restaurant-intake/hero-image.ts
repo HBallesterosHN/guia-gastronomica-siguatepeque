@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { ImageDownloadScope } from "./types";
 
 const ROOT = process.cwd();
 const PUBLIC_RESTAURANTS_DIR = path.join(ROOT, "public", "restaurants");
@@ -44,7 +45,18 @@ export async function resolveHeroImageCandidate(
   slug: string,
   candidateUrls: CandidateWithSource[] | undefined,
   dryRun: boolean,
+  scope: ImageDownloadScope = "all",
+  galleryStartAt = 1,
+  galleryLimit = 10,
 ): Promise<HeroDownloadResult> {
+  const MAX_GALLERY = Math.max(0, galleryLimit);
+  const MAX_TOTAL_DOWNLOADS =
+    scope === "hero"
+      ? 1
+      : scope === "gallery"
+        ? MAX_GALLERY
+        : 1 + MAX_GALLERY;
+  const MAX_GALLERY_DOWNLOADS = MAX_GALLERY;
   const sourcePriority = (source: string): number => {
     if (source.startsWith("maps:")) return 1;
     if (source.startsWith("other:")) return 2;
@@ -90,7 +102,7 @@ export async function resolveHeroImageCandidate(
   const downloadOne = async (
     candidateUrl: string,
     source: string,
-    nameBase: string,
+    fileStem: string,
     hasNonIgCandidate: boolean,
   ): Promise<DownloadedImage | undefined> => {
     let parsed: URL;
@@ -139,10 +151,10 @@ export async function resolveHeroImageCandidate(
         discarded.push({ url: candidateUrl, reason: "Tamaño sospechoso (muy pequeña)." });
         return undefined;
       }
-      const publicPath = `/restaurants/${slug}/${nameBase}.${ext}`;
+      const publicPath = `/restaurants/${slug}/${fileStem}.${ext}`;
       if (!dryRun) {
         const targetDir = path.join(PUBLIC_RESTAURANTS_DIR, slug);
-        const targetFile = path.join(targetDir, `${nameBase}.${ext}`);
+        const targetFile = path.join(targetDir, `${fileStem}.${ext}`);
         await mkdir(targetDir, { recursive: true });
         await writeFile(targetFile, bytes);
       }
@@ -157,13 +169,19 @@ export async function resolveHeroImageCandidate(
   const usedUrls = new Set<string>();
   const hasNonIgCandidate = candidates.some((c) => !c.source.startsWith("instagram:"));
   for (const candidate of candidates) {
-    if (downloaded.length >= 5) break;
+    if (downloaded.length >= MAX_TOTAL_DOWNLOADS) break;
     if (usedUrls.has(candidate.url)) {
       discarded.push({ url: candidate.url, reason: "Duplicada (URL repetida)." });
       continue;
     }
-    const nameBase = downloaded.length === 0 ? "hero" : `gallery-${downloaded.length}`;
-    const one = await downloadOne(candidate.url, candidate.source, nameBase, hasNonIgCandidate);
+    const fileStem = (() => {
+      if (scope === "hero") return "hero";
+      if (scope === "gallery") return `gallery-${galleryStartAt + downloaded.length}`;
+      return downloaded.length === 0
+        ? "hero"
+        : `gallery-${downloaded.length}`;
+    })();
+    const one = await downloadOne(candidate.url, candidate.source, fileStem, hasNonIgCandidate);
     if (!one) continue;
     if (usedUrls.has(one.url)) {
       discarded.push({ url: one.url, reason: "Duplicada (post-normalización)." });
@@ -185,8 +203,13 @@ export async function resolveHeroImageCandidate(
     };
   }
 
-  const heroPublicPath = downloaded[0].publicPath;
-  const galleryPublicPaths = downloaded.slice(1, 5).map((d) => d.publicPath);
+  const heroPublicPath = scope === "all" || scope === "hero" ? downloaded[0]?.publicPath : undefined;
+  const galleryPublicPaths =
+    scope === "all"
+      ? downloaded.slice(1, 1 + MAX_GALLERY_DOWNLOADS).map((d) => d.publicPath)
+      : scope === "hero"
+        ? []
+        : downloaded.slice(0, MAX_GALLERY_DOWNLOADS).map((d) => d.publicPath);
   if (dryRun) {
     return {
       downloaded: false,
@@ -195,8 +218,13 @@ export async function resolveHeroImageCandidate(
       candidatesFound: candidates.length,
       downloadedCount: downloaded.length,
       discarded,
-      selectedHeroUrl: downloaded[0].url,
-      selectedGalleryUrls: downloaded.slice(1, 5).map((d) => d.url),
+      selectedHeroUrl: scope === "all" || scope === "hero" ? downloaded[0]?.url : undefined,
+      selectedGalleryUrls:
+        scope === "all"
+          ? downloaded.slice(1, 1 + MAX_GALLERY_DOWNLOADS).map((d) => d.url)
+          : scope === "hero"
+            ? []
+            : downloaded.slice(0, MAX_GALLERY_DOWNLOADS).map((d) => d.url),
       reason: "Dry-run: candidatas válidas detectadas (sin escritura en disco).",
     };
   }
@@ -207,8 +235,13 @@ export async function resolveHeroImageCandidate(
     candidatesFound: candidates.length,
     downloadedCount: downloaded.length,
     discarded,
-    selectedHeroUrl: downloaded[0].url,
-    selectedGalleryUrls: downloaded.slice(1, 5).map((d) => d.url),
+    selectedHeroUrl: scope === "all" || scope === "hero" ? downloaded[0]?.url : undefined,
+    selectedGalleryUrls:
+      scope === "all"
+        ? downloaded.slice(1, 1 + MAX_GALLERY_DOWNLOADS).map((d) => d.url)
+        : scope === "hero"
+          ? []
+          : downloaded.slice(0, MAX_GALLERY_DOWNLOADS).map((d) => d.url),
     reason:
       downloaded.length > 1
         ? `Hero + ${downloaded.length - 1} imágenes de galería descargadas.`

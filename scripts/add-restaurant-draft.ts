@@ -228,7 +228,7 @@ export const ${variableName}: Restaurant = {
   },
   copy: {
     summary:
-      "Borrador inicial: completar descripcion editorial del restaurante antes de publicar.",
+      "Restaurante en Siguatepeque con información base cargada.",
   },
   location: {
     address: ${asTsStringLiteral(cleanAddress)},
@@ -258,7 +258,7 @@ export const ${variableName}: Restaurant = {
       id: "${slug}-1",
       author: "Pendiente",
       rating: 0,
-      comment: "Completar reseña inicial.",
+      comment: "Reseña por completar.",
       date: "${today}",
     },
   ],

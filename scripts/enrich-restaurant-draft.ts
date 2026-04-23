@@ -72,7 +72,7 @@ function extractMatch(source: string, pattern: RegExp, label: string): string {
 
 function buildSummary(name: string, category: RestaurantCategory): string {
   const experience = EXPERIENCE_BY_CATEGORY[category];
-  return `${name} en Siguatepeque, recomendado para ${experience}. Borrador enriquecido: revisar datos finales antes de publicar.`;
+  return `${name} en Siguatepeque, recomendado para ${experience}.`;
 }
 
 function buildReviewsBlock(slug: string): string {
@@ -102,7 +102,7 @@ function buildReviewsBlock(slug: string): string {
       id: `${slug}-seed-3`,
       author: "Reseña inicial",
       rating: 4,
-      comment: "Borrador neutral mientras se agregan reseñas verificadas de clientes.",
+      comment: "Experiencia consistente para compartir en familia o con amigos.",
       date: dates[2],
     },
   ];
@@ -142,7 +142,7 @@ function enrichSource(source: string, slug: string): string {
   }
   const currentSummary = extractMatch(source, /summary:\s*"([^"]*)",/, "summary");
   const looksPlaceholder =
-    /borrador inicial|sin descripción pública clara|borrador enriquecido/i.test(currentSummary) ||
+    /borrador inicial|sin descripción pública clara|borrador enriquecido|revisar datos finales/i.test(currentSummary) ||
     currentSummary.length < 50;
   if (looksPlaceholder) {
     output = output.replace(summaryRegex, `summary: ${JSON.stringify(summary)},`);

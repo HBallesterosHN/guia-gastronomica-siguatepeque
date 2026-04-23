@@ -8,7 +8,7 @@ import type {
 import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 
-const MAX_GALLERY_IMAGES = 4;
+const MAX_GALLERY_IMAGES = 10;
 const GALLERY_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "avif"] as const;
 
 function stripQuery(url: string): RestaurantPublicImagePath {
@@ -29,13 +29,17 @@ function withAutoVersion(webPathWithOptionalQuery: string): RestaurantPublicImag
   return `${webPath}?v=${version}` as RestaurantPublicImagePath;
 }
 
-function detectGalleryFromPublic(slug: string): RestaurantPublicImagePath[] {
+function detectNumberedImages(
+  slug: string,
+  prefix: "gallery",
+  maxImages: number,
+): RestaurantPublicImagePath[] {
   const detected: RestaurantPublicImagePath[] = [];
   const publicRestaurantsDir = path.join(process.cwd(), "public", "restaurants", slug);
 
-  for (let imageIndex = 1; imageIndex <= MAX_GALLERY_IMAGES; imageIndex += 1) {
+  for (let imageIndex = 1; imageIndex <= maxImages; imageIndex += 1) {
     for (const extension of GALLERY_EXTENSIONS) {
-      const fileName = `gallery-${imageIndex}.${extension}`;
+      const fileName = `${prefix}-${imageIndex}.${extension}`;
       const absolutePath = path.join(publicRestaurantsDir, fileName);
 
       if (existsSync(absolutePath)) {
@@ -48,36 +52,46 @@ function detectGalleryFromPublic(slug: string): RestaurantPublicImagePath[] {
   return detected;
 }
 
-function withDetectedGallery(restaurant: Restaurant): Restaurant {
-  const detectedGallery = detectGalleryFromPublic(restaurant.identity.slug);
-  const legacyGallery = restaurant.media.gallery ?? [];
-  const fallbackFeatured = [
-    ...(restaurant.media.featured ?? []),
-    ...legacyGallery,
-  ].map((imagePath) => withAutoVersion(imagePath));
-  const fallbackPlace = (restaurant.media.place ?? []).map((imagePath) =>
-    withAutoVersion(imagePath),
-  );
+function detectHeroFromPublic(slug: string): RestaurantPublicImagePath | undefined {
+  const publicRestaurantsDir = path.join(process.cwd(), "public", "restaurants", slug);
+  for (const extension of GALLERY_EXTENSIONS) {
+    const fileName = `hero.${extension}`;
+    const absolutePath = path.join(publicRestaurantsDir, fileName);
+    if (existsSync(absolutePath)) {
+      return withAutoVersion(`/restaurants/${slug}/${fileName}`);
+    }
+  }
+  return undefined;
+}
 
-  const detectedFeatured = detectedGallery.slice(0, 3);
-  const detectedPlace = detectedGallery.slice(3);
-  const featured =
-    detectedGallery.length > 0
-      ? detectedFeatured
-      : Array.from(new Set(fallbackFeatured));
-  const place =
-    detectedGallery.length > 0
-      ? detectedPlace
-      : Array.from(new Set(fallbackPlace));
+function withDetectedGallery(restaurant: Restaurant): Restaurant {
+  const detectedHero = detectHeroFromPublic(restaurant.identity.slug);
+  const detectedGallery = detectNumberedImages(
+    restaurant.identity.slug,
+    "gallery",
+    MAX_GALLERY_IMAGES,
+  );
+  const fallbackGallery = Array.from(
+    new Set([
+      ...(restaurant.media.gallery ?? []),
+      ...(restaurant.media.featured ?? []),
+      ...(restaurant.media.place ?? []),
+    ]),
+  )
+    .map((imagePath) => withAutoVersion(imagePath))
+    .slice(0, MAX_GALLERY_IMAGES);
+
+  const gallery = detectedGallery.length > 0 ? detectedGallery : fallbackGallery;
 
   return {
     ...restaurant,
     media: {
       ...restaurant.media,
-      hero: withAutoVersion(restaurant.media.hero),
-      featured,
-      place,
-      gallery: legacyGallery.map((imagePath) => withAutoVersion(imagePath)),
+      hero: detectedHero ?? withAutoVersion(restaurant.media.hero),
+      gallery,
+      // Legacy compatibility only (UI no longer splits by type)
+      featured: (restaurant.media.featured ?? []).map((imagePath) => withAutoVersion(imagePath)),
+      place: (restaurant.media.place ?? []).map((imagePath) => withAutoVersion(imagePath)),
     },
   };
 }

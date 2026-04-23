@@ -1,11 +1,17 @@
 import type { RestaurantCategory } from "../../types/restaurant";
 
+export type ImageDownloadScope = "all" | "hero" | "gallery";
+
 export type IntakeInput = {
   /** Opcional si hay --maps y/o --instagram con datos suficientes para inferir el nombre. */
   name?: string;
   category: RestaurantCategory;
   categoryProvided?: boolean;
   dryRun: boolean;
+  /** Controla qué grupos de imágenes se descargan/escriben. */
+  imagesScope: ImageDownloadScope;
+  /** Fuerza el slug destino para actualizar imágenes del restaurante correcto. */
+  slug?: string;
   mapsUrlCli?: string;
   instagramUrlCli?: string;
 };

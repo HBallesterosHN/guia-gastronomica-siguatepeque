@@ -20,7 +20,7 @@ export const restaurantSavoyCafeX301: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Savoy Cafe en Siguatepeque, recomendado para pausas de café, reuniones cortas o tardes relajadas. Borrador enriquecido: revisar datos finales antes de publicar.",
+    summary: "Savoy Cafe en Siguatepeque, recomendado para pausas de café, reuniones cortas o tardes relajadas. Ideal para disfrutar una visita en Siguatepeque.",
   },
   location: {
     address: "H4PX+PC3, CA-5, Siguatepeque, Comayagua, Honduras",
@@ -66,7 +66,7 @@ export const restaurantSavoyCafeX301: Restaurant = {
       id: "savoy-cafe-x301-seed-3",
       author: "Reseña inicial",
       rating: 4,
-      comment: "Borrador neutral mientras se agregan reseñas verificadas de clientes.",
+      comment: "Experiencia consistente para compartir en familia o con amigos.",
       date: "2026-04-16",
     },
   ],

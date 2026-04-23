@@ -16,6 +16,13 @@ import { restaurantVillaVerde } from "@/data/restaurants/entries/restaurante-vil
 
 import { restaurantElDeArriba } from "@/data/restaurants/entries/el-de-arriba";
 import { restaurantSavoyCafeX301 } from "@/data/restaurants/entries/savoy-cafe-x301";
+import { restaurantPupuseriaIrma } from "@/data/restaurants/entries/pupuseria-irma";
+import { restaurantCampingElOvejo } from "@/data/restaurants/entries/camping-el-ovejo";
+import { restaurantRetroCafe } from "@/data/restaurants/entries/retro-cafe";
+import { restaurantCafeElGranizo } from "@/data/restaurants/entries/cafe-el-granizo";
+import { restaurantGoldenGrill } from "@/data/restaurants/entries/golden-grill";
+import { restaurantChinaWeng } from "@/data/restaurants/entries/china-weng";
+import { restaurantCafeJuanCruz } from "@/data/restaurants/entries/cafe-juan-cruz";
 import type { Restaurant } from "@/types/restaurant";
 
 export const restaurants: Restaurant[] = [
@@ -25,5 +32,14 @@ export const restaurants: Restaurant[] = [
   restaurantRosquillasPaola,
   restaurantVillaVerde,
   restaurantHabanaMex,
-  restaurantElToritoSteakHouse,  restaurantElDeArriba,  restaurantSavoyCafeX301,
+  restaurantElToritoSteakHouse,
+  restaurantElDeArriba,
+  restaurantSavoyCafeX301,
+  restaurantPupuseriaIrma,
+  restaurantCampingElOvejo,
+  restaurantRetroCafe,
+  restaurantCafeElGranizo,
+  restaurantGoldenGrill,
+  restaurantChinaWeng,
+  restaurantCafeJuanCruz,
 ];

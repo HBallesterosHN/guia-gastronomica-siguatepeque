@@ -20,7 +20,7 @@ export const restaurantElDeArriba: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "El de Arriba en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones. Borrador enriquecido: revisar datos finales antes de publicar.",
+    summary: "El de Arriba en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones. Ideal para disfrutar una visita en Siguatepeque.",
   },
   location: {
     address: "Barrio abajo 3ra calle 1 avenida 2 nivel supermercados del corral, 12111 Siguatepeque, Comayagua, Honduras",
@@ -66,7 +66,7 @@ export const restaurantElDeArriba: Restaurant = {
       id: "el-de-arriba-seed-3",
       author: "Reseña inicial",
       rating: 4,
-      comment: "Borrador neutral mientras se agregan reseñas verificadas de clientes.",
+      comment: "Experiencia consistente para compartir en familia o con amigos.",
       date: "2026-04-16",
     },
   ],

@@ -18,7 +18,14 @@ import { saveRestaurantImagesFromPlacePhotos } from "./images";
 import { mergePlacesIntoSourceCandidates, runPlacesIntake } from "./google-places";
 import { gatherSourceCandidates } from "./sources";
 import { isGoogleMapsLink, reasonForDiscard } from "./scoring";
-import type { CandidateDebug, ChannelProvenance, IntakeInput, IntakeReport, ScoredCandidate } from "./types";
+import type {
+  CandidateDebug,
+  ChannelProvenance,
+  ImageDownloadScope,
+  IntakeInput,
+  IntakeReport,
+  ScoredCandidate,
+} from "./types";
 
 function stripVerboseSearchFlag(argv: string[]): { argv: string[]; verboseSearch: boolean } {
   const verboseSearch = argv.includes("--verbose-search");
@@ -187,6 +194,14 @@ function parseArgs(argv: string[]): IntakeInput {
   const mapsUrlCli = map.get("maps")?.trim() || undefined;
   const instagramUrlCli = map.get("instagram")?.trim() || undefined;
   const categoryToken = map.get("category")?.trim();
+  const imagesScopeRaw = map.get("images-scope")?.trim().toLowerCase() as
+    | ImageDownloadScope
+    | "featured"
+    | "place"
+    | undefined;
+  const slug = map.get("slug")?.trim() || undefined;
+  const legacyScope = imagesScopeRaw === "featured" || imagesScopeRaw === "place";
+  const imagesScope: ImageDownloadScope = legacyScope ? "gallery" : imagesScopeRaw ?? "all";
   const rawCategory = (categoryToken ?? "familiar") as RestaurantCategory;
   const categoryProvided = Boolean(categoryToken);
 
@@ -194,14 +209,34 @@ function parseArgs(argv: string[]): IntakeInput {
     throw new Error(
       'Indica al menos uno entre --name, --maps y --instagram (los tres son opcionales salvo que debas elegir al menos una fuente). ' +
         'Ej.: solo nombre: --name "Restaurante". Solo Instagram: --instagram "https://...". Solo Maps: --maps "https://...". ' +
-        "Combinar: npm run restaurant:intake -- --name \"...\" [--maps URL] [--instagram URL] [--category familiar] [--dry-run] [--verbose-search]",
+        "Combinar: npm run restaurant:intake -- --name \"...\" [--maps URL] [--instagram URL] [--slug mi-restaurante] [--category familiar] [--images-scope all|hero|gallery] [--dry-run] [--verbose-search]",
     );
   }
   if (!RESTAURANT_CATEGORIES.includes(rawCategory)) {
     throw new Error(`Categoria invalida: ${rawCategory}. Usa: ${RESTAURANT_CATEGORIES.join(", ")}`);
   }
+  if (!["all", "hero", "gallery"].includes(imagesScope)) {
+    throw new Error('Valor inválido para --images-scope. Usa: "all", "hero" o "gallery".');
+  }
+  if (imagesScope !== "all" && !slug) {
+    throw new Error(
+      'Cuando --images-scope es "hero" o "gallery" debes enviar --slug para actualizar un restaurante existente.',
+    );
+  }
+  if (slug && !/^[a-z0-9-]+$/.test(slug)) {
+    throw new Error(`Slug inválido: ${slug}. Usa minúsculas, números y guiones.`);
+  }
 
-  return { name, category: rawCategory, categoryProvided, dryRun, mapsUrlCli, instagramUrlCli };
+  return {
+    name,
+    category: rawCategory,
+    categoryProvided,
+    dryRun,
+    imagesScope,
+    slug,
+    mapsUrlCli,
+    instagramUrlCli,
+  };
 }
 
 async function main(): Promise<void> {
@@ -251,6 +286,8 @@ async function main(): Promise<void> {
   console.log(`- nombre busqueda: ${nameNorm.searchName}`);
   console.log(`- nombre comercial: ${nameNorm.displayName}`);
   console.log(`- slug sugerido: ${nameNorm.slugBase}`);
+  if (input.slug) console.log(`- --slug destino: ${input.slug}`);
+  console.log(`- images scope: ${input.imagesScope}`);
   if (verboseSearch) {
     console.log("- flag: --verbose-search (HTML preview largo por consulta)");
   }
@@ -289,6 +326,9 @@ async function main(): Promise<void> {
 
   console.log("- etapa 2: normalizacion");
   const { draft, report } = normalizeIntake(input, nameNorm, candidates);
+  if (input.slug) {
+    draft.slug = input.slug;
+  }
   report.placesIntakeMessages = placesIntakeMessages;
   report.placesIntakeErrors = placesIntakeErrors;
 
@@ -306,7 +346,13 @@ async function main(): Promise<void> {
 
   if (apiKey && photoNames.length) {
     console.log("- etapa 2.1: imágenes (prioridad: Place Photos API)");
-    const prPhotos = await saveRestaurantImagesFromPlacePhotos(draft.slug, photoNames, apiKey, input.dryRun);
+    const prPhotos = await saveRestaurantImagesFromPlacePhotos(
+      draft.slug,
+      photoNames,
+      apiKey,
+      input.dryRun,
+      input.imagesScope,
+    );
     prPhotos.log.forEach((m) => console.log(`  ${m}`));
     prPhotos.errors.forEach((e) => console.log(`  (error) ${e}`));
     placesPhotoDownloadLog = [...prPhotos.log, ...prPhotos.errors.map((e) => `ERROR ${e}`)];
@@ -325,11 +371,70 @@ async function main(): Promise<void> {
           ? "Dry-run: rutas proyectadas para Place Photos (sin escritura)."
           : prPhotos.errors[0] ?? "Place Photos no produjo un hero descargable.",
     };
-    if (prPhotos.heroPublicPath) {
+    if ((input.imagesScope === "all" || input.imagesScope === "hero") && prPhotos.heroPublicPath) {
       draft.hero = prPhotos.heroPublicPath;
-      draft.gallery = prPhotos.galleryPublicPaths;
-      imagesFromPlaces = true;
     }
+    if (input.imagesScope === "all" || input.imagesScope === "gallery") {
+      draft.gallery = prPhotos.galleryPublicPaths;
+    } else if (input.imagesScope === "hero") {
+      // no mutar gallery
+    }
+
+    if (
+      input.imagesScope === "all" &&
+      draft.gallery.length < 10 &&
+      (candidates.imageCandidateOrigins?.length ?? 0) > 0
+    ) {
+      const missing = 10 - draft.gallery.length;
+      console.log(`  Place Photos devolvió ${draft.gallery.length}/10 gallery; intentando completar ${missing} con fallback público.`);
+      const topUp = await resolveHeroImageCandidate(
+        draft.slug,
+        candidates.imageCandidateOrigins ?? [],
+        input.dryRun,
+        "gallery",
+        draft.gallery.length + 1,
+        missing,
+      );
+      if (topUp.galleryPublicPaths.length) {
+        const merged = Array.from(new Set([...draft.gallery, ...topUp.galleryPublicPaths]));
+        draft.gallery = merged.slice(0, 10);
+        // Añadimos descartes/fuentes al reporte principal.
+        heroResult.discarded = [...heroResult.discarded, ...topUp.discarded];
+        heroResult.selectedGalleryUrls = [...heroResult.selectedGalleryUrls, ...topUp.selectedGalleryUrls];
+        heroResult.galleryPublicPaths = draft.gallery;
+        heroResult.downloadedCount =
+          (heroResult.heroPublicPath ? 1 : 0) + heroResult.galleryPublicPaths.length;
+      }
+    }
+    if (
+      input.imagesScope === "all" &&
+      draft.gallery.length < 10 &&
+      heroResult.selectedHeroUrl
+    ) {
+      const missing = 10 - draft.gallery.length;
+      console.log(`  Aún faltan ${missing} gallery; reutilizando hero como fallback final para completar correlativo.`);
+      const heroAsGallery = await resolveHeroImageCandidate(
+        draft.slug,
+        [{ url: heroResult.selectedHeroUrl, source: "places:hero-fallback" }],
+        input.dryRun,
+        "gallery",
+        draft.gallery.length + 1,
+        missing,
+      );
+      if (heroAsGallery.galleryPublicPaths.length) {
+        const merged = Array.from(new Set([...draft.gallery, ...heroAsGallery.galleryPublicPaths]));
+        draft.gallery = merged.slice(0, 10);
+        heroResult.discarded = [...heroResult.discarded, ...heroAsGallery.discarded];
+        heroResult.selectedGalleryUrls = [...heroResult.selectedGalleryUrls, ...heroAsGallery.selectedGalleryUrls];
+        heroResult.galleryPublicPaths = draft.gallery;
+        heroResult.downloadedCount =
+          (heroResult.heroPublicPath ? 1 : 0) + heroResult.galleryPublicPaths.length;
+      }
+    }
+    imagesFromPlaces = Boolean(
+      prPhotos.galleryPublicPaths.length ||
+        ((input.imagesScope === "all" || input.imagesScope === "hero") && prPhotos.heroPublicPath),
+    );
   }
 
   if (!imagesFromPlaces) {
@@ -344,11 +449,16 @@ async function main(): Promise<void> {
           ? [{ url: report.heroImageCandidateUrl, source: report.heroImageCandidateSource ?? "unknown" }]
           : []),
       input.dryRun,
+      input.imagesScope,
     );
-    if (heroResult.heroPublicPath) {
+    if ((input.imagesScope === "all" || input.imagesScope === "hero") && heroResult.heroPublicPath) {
       draft.hero = heroResult.heroPublicPath;
     }
-    draft.gallery = heroResult.galleryPublicPaths;
+    if (input.imagesScope === "all" || input.imagesScope === "gallery") {
+      draft.gallery = heroResult.galleryPublicPaths;
+    } else if (input.imagesScope === "hero") {
+      // no mutar gallery
+    }
   }
   report.heroImageDownloaded = heroResult.downloaded;
   report.heroImageLocalPath = heroResult.heroPublicPath;
@@ -372,22 +482,34 @@ async function main(): Promise<void> {
     report.placesPhotoDownloadLog = placesPhotoDownloadLog;
   }
 
-  console.log("- etapa 3: persistencia draft");
-  const persisted = await persistDraft(draft, input.dryRun);
-  if (input.dryRun) {
+  const imagesOnlyMode = input.imagesScope !== "all";
+  let persisted: Awaited<ReturnType<typeof persistDraft>> = {
+    slug: draft.slug,
+    variableName: "(sin persistencia)",
+  };
+  if (imagesOnlyMode) {
+    console.log("- etapa 3: persistencia draft omitida (modo solo imágenes)");
     console.log(
-      "  (--dry-run: no se creó ningún archivo ni se modificó data/restaurants/index.ts; solo simulación.)",
-    );
-    console.log(
-      `  Rutas que se usarían sin --dry-run: data/restaurants/entries/${persisted.slug}.ts + entrada en data/restaurants/index.ts`,
+      `  scope=${input.imagesScope}; se actualizaron archivos de /public/restaurants/${draft.slug}/ sin tocar data/restaurants/entries.`,
     );
   } else {
-    console.log(
-      `  OK: creado data/restaurants/entries/${persisted.slug}.ts y actualizado data/restaurants/index.ts (${persisted.variableName}).`,
-    );
+    console.log("- etapa 3: persistencia draft");
+    persisted = await persistDraft(draft, input.dryRun);
+    if (input.dryRun) {
+      console.log(
+        "  (--dry-run: no se creó ningún archivo ni se modificó data/restaurants/index.ts; solo simulación.)",
+      );
+      console.log(
+        `  Rutas que se usarían sin --dry-run: data/restaurants/entries/${persisted.slug}.ts + entrada en data/restaurants/index.ts`,
+      );
+    } else {
+      console.log(
+        `  OK: creado data/restaurants/entries/${persisted.slug}.ts y actualizado data/restaurants/index.ts (${persisted.variableName}).`,
+      );
+    }
   }
 
-  if (!input.dryRun) {
+  if (!imagesOnlyMode && !input.dryRun) {
     console.log("- etapa 4: enriquecimiento");
     await enrichDraftBySlug(draft.slug, false);
   }
