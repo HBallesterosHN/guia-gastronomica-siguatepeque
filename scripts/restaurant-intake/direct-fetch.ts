@@ -57,7 +57,11 @@ function clip(s: string, max: number): string {
  */
 export function parseLatLngFromGoogleMapsUrl(
   urlStr: string,
-): { lat: number; lng: number; source: "maps_url_3d4d" | "maps_url_at" | "maps_query_ll" } | undefined {
+): {
+  lat: number;
+  lng: number;
+  source: "maps_url_3d4d" | "maps_url_at" | "maps_query_ll" | "maps_html_heuristic";
+} | undefined {
   const d34 = /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/i.exec(urlStr);
   if (d34) {
     const lat = Number(d34[1]);
