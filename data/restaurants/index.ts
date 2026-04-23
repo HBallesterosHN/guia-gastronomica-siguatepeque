@@ -15,6 +15,7 @@ import { restaurantTipicosGuancasco } from "@/data/restaurants/entries/tipicos-g
 import { restaurantVillaVerde } from "@/data/restaurants/entries/restaurante-villa-verde";
 
 import { restaurantElDeArriba } from "@/data/restaurants/entries/el-de-arriba";
+import { restaurantSavoyCafeX301 } from "@/data/restaurants/entries/savoy-cafe-x301";
 import type { Restaurant } from "@/types/restaurant";
 
 export const restaurants: Restaurant[] = [
@@ -24,5 +25,5 @@ export const restaurants: Restaurant[] = [
   restaurantRosquillasPaola,
   restaurantVillaVerde,
   restaurantHabanaMex,
-  restaurantElToritoSteakHouse,  restaurantElDeArriba,
+  restaurantElToritoSteakHouse,  restaurantElDeArriba,  restaurantSavoyCafeX301,
 ];

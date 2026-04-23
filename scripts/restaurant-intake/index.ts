@@ -1,5 +1,9 @@
 import process from "node:process";
+import dotenv from "dotenv";
 import { RESTAURANT_CATEGORIES, type RestaurantCategory } from "../../types/restaurant";
+
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 import {
   fetchDirectInstagramHints,
   fetchDirectMapsHints,
@@ -10,6 +14,8 @@ import { enrichDraftBySlug } from "../enrich-restaurant-draft";
 import { displayNameFromSocialHandle, normalizeIntake, normalizeNameInput } from "./normalize";
 import { persistDraft } from "./persist";
 import { resolveHeroImageCandidate } from "./hero-image";
+import { saveRestaurantImagesFromPlacePhotos } from "./images";
+import { mergePlacesIntoSourceCandidates, runPlacesIntake } from "./google-places";
 import { gatherSourceCandidates } from "./sources";
 import { isGoogleMapsLink, reasonForDiscard } from "./scoring";
 import type { CandidateDebug, ChannelProvenance, IntakeInput, IntakeReport, ScoredCandidate } from "./types";
@@ -260,21 +266,111 @@ async function main(): Promise<void> {
       `Instagram [${lp.instagram.stage}] brutos=${lp.instagram.totalRaw} norm=${lp.instagram.totalNormalized} instaLike=${lp.instagram.instagramLikeCount}`,
   );
 
+  let placesIntakeMessages: string[] = [];
+  let placesIntakeErrors: string[] = [];
+  let placesPhotoDownloadLog: string[] = [];
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY?.trim();
+  if (apiKey) {
+    console.log("- etapa 1.5: Google Places API (fuente principal de datos)");
+    const pr = await runPlacesIntake({
+      apiKey,
+      nameNorm,
+      mapsCanonicalUrl: hintsMaps?.canonicalUrl,
+      mapsCoords: hintsMaps?.coords,
+    });
+    placesIntakeMessages = pr.report.messages;
+    placesIntakeErrors = pr.report.httpErrors;
+    pr.report.messages.forEach((m) => console.log(`  ${m}`));
+    pr.report.httpErrors.forEach((m) => console.log(`  (error) ${m}`));
+    mergePlacesIntoSourceCandidates(candidates, pr.details, { categoryProvided: input.categoryProvided });
+  } else {
+    console.log("- etapa 1.5: Google Places API omitida (sin GOOGLE_MAPS_API_KEY en .env.local / .env)");
+  }
+
   console.log("- etapa 2: normalizacion");
   const { draft, report } = normalizeIntake(input, nameNorm, candidates);
+  report.placesIntakeMessages = placesIntakeMessages;
+  report.placesIntakeErrors = placesIntakeErrors;
 
-  console.log("- etapa 2.1: imagen hero (candidata)");
-  const heroResult = await resolveHeroImageCandidate(
-    draft.slug,
-    report.heroImageCandidateUrl,
-    input.dryRun,
-  );
-  if (heroResult.heroPublicPath) {
-    draft.hero = heroResult.heroPublicPath;
+  const photoNames = candidates.placesPhotoResources ?? [];
+  let heroResult: Awaited<ReturnType<typeof resolveHeroImageCandidate>> = {
+    downloaded: false,
+    galleryPublicPaths: [],
+    candidatesFound: 0,
+    downloadedCount: 0,
+    discarded: [],
+    selectedGalleryUrls: [],
+    reason: "(pendiente)",
+  };
+  let imagesFromPlaces = false;
+
+  if (apiKey && photoNames.length) {
+    console.log("- etapa 2.1: imágenes (prioridad: Place Photos API)");
+    const prPhotos = await saveRestaurantImagesFromPlacePhotos(draft.slug, photoNames, apiKey, input.dryRun);
+    prPhotos.log.forEach((m) => console.log(`  ${m}`));
+    prPhotos.errors.forEach((e) => console.log(`  (error) ${e}`));
+    placesPhotoDownloadLog = [...prPhotos.log, ...prPhotos.errors.map((e) => `ERROR ${e}`)];
+    heroResult = {
+      downloaded: prPhotos.downloaded,
+      heroPublicPath: prPhotos.heroPublicPath,
+      galleryPublicPaths: prPhotos.galleryPublicPaths,
+      candidatesFound: photoNames.length,
+      downloadedCount: prPhotos.downloaded ? 1 + prPhotos.galleryPublicPaths.length : 0,
+      discarded: prPhotos.errors.map((reason, i) => ({ url: `places-photo#${i + 1}`, reason })),
+      selectedHeroUrl: prPhotos.selectedUrls[0],
+      selectedGalleryUrls: prPhotos.selectedUrls.slice(1),
+      reason: prPhotos.downloaded
+        ? "Descargadas vía Google Place Photos (New)."
+        : input.dryRun
+          ? "Dry-run: rutas proyectadas para Place Photos (sin escritura)."
+          : prPhotos.errors[0] ?? "Place Photos no produjo un hero descargable.",
+    };
+    if (prPhotos.heroPublicPath) {
+      draft.hero = prPhotos.heroPublicPath;
+      draft.gallery = prPhotos.galleryPublicPaths;
+      imagesFromPlaces = true;
+    }
+  }
+
+  if (!imagesFromPlaces) {
+    if (apiKey && photoNames.length) {
+      console.log("  Place Photos sin hero utilizable → fallback Maps/Instagram.");
+    }
+    console.log("- etapa 2.1: imagen hero (candidatas Maps/IG)");
+    heroResult = await resolveHeroImageCandidate(
+      draft.slug,
+      candidates.imageCandidateOrigins ??
+        (report.heroImageCandidateUrl
+          ? [{ url: report.heroImageCandidateUrl, source: report.heroImageCandidateSource ?? "unknown" }]
+          : []),
+      input.dryRun,
+    );
+    if (heroResult.heroPublicPath) {
+      draft.hero = heroResult.heroPublicPath;
+    }
+    draft.gallery = heroResult.galleryPublicPaths;
   }
   report.heroImageDownloaded = heroResult.downloaded;
   report.heroImageLocalPath = heroResult.heroPublicPath;
   report.heroImageReason = heroResult.reason;
+  report.imageCandidatesFound = heroResult.candidatesFound;
+  report.galleryImagesDownloaded = heroResult.galleryPublicPaths.length;
+  report.galleryLocalPaths = heroResult.galleryPublicPaths;
+  report.imageDiscarded = heroResult.discarded;
+  report.selectedHeroUrl = heroResult.selectedHeroUrl;
+  report.selectedGalleryUrls = heroResult.selectedGalleryUrls;
+  report.imageCandidatesDetected = candidates.imageCandidateOrigins ?? [];
+  report.imageSourceCounts = (candidates.imageCandidateOrigins ?? []).reduce<Record<string, number>>((acc, c) => {
+    acc[c.source] = (acc[c.source] ?? 0) + 1;
+    return acc;
+  }, {});
+  report.galleryReason =
+    heroResult.galleryPublicPaths.length > 0
+      ? `Se descargaron ${heroResult.galleryPublicPaths.length} imágenes para galería.`
+      : "Gallery quedó vacía porque no hubo más candidatas utilizables.";
+  if (placesPhotoDownloadLog.length) {
+    report.placesPhotoDownloadLog = placesPhotoDownloadLog;
+  }
 
   console.log("- etapa 3: persistencia draft");
   const persisted = await persistDraft(draft, input.dryRun);
@@ -315,7 +411,11 @@ async function main(): Promise<void> {
   console.log(`- por confirmar: ${report.pending.join(", ") || "ninguno"}`);
   console.log(`- maps elegido: ${draft.mapsUrl ?? "no encontrado"}`);
   if (report.mapsSourcePriority) {
-    console.log(`- maps fuente (prioridad): ${report.mapsSourcePriority} (cli > nominatim > ddg > fallback)`);
+    const priNote =
+      report.mapsSourcePriority === "google_places"
+        ? "google_places (Place Details / googleMapsUri)"
+        : `${report.mapsSourcePriority} (cli > nominatim > ddg > fallback)`;
+    console.log(`- maps fuente (prioridad): ${priNote}`);
   }
   if (report.mapsConfidence) {
     console.log(`- maps confianza: ${report.mapsConfidence}`);
@@ -326,6 +426,19 @@ async function main(): Promise<void> {
   }
   console.log(`- instagram elegido: ${draft.instagramUrl ?? "no encontrado"}`);
   console.log(`- instagram razon: ${report.instagramChoiceReason ?? "sin match razonable"}`);
+  console.log(`- ratings: promedio ${draft.ratings.average}, reseñas ${draft.ratings.reviewsCount}`);
+  if (report.placesIntakeMessages?.length) {
+    console.log("- Google Places (log):");
+    report.placesIntakeMessages.forEach((m) => console.log(`    ${m}`));
+  }
+  if (report.placesIntakeErrors?.length) {
+    console.log("- Google Places (errores):");
+    report.placesIntakeErrors.forEach((m) => console.log(`    ${m}`));
+  }
+  if (report.placesPhotoDownloadLog?.length) {
+    console.log("- Google Place Photos (log):");
+    report.placesPhotoDownloadLog.forEach((m) => console.log(`    ${m}`));
+  }
   console.log(
     `- campos llenados desde Maps: ${[
       draft.mapsUrl ? "mapsUrl" : "",
@@ -351,6 +464,28 @@ async function main(): Promise<void> {
     console.log(`- imagen hero descarga: ${report.heroImageDownloaded ? "OK" : "no descargada"}`);
     console.log(`- imagen hero ruta local: ${report.heroImageLocalPath ?? "(sin ruta local)"}`);
     console.log(`- imagen hero detalle: ${report.heroImageReason ?? "(sin detalle)"}`);
+    console.log(`- imágenes candidatas detectadas: ${report.imageCandidatesFound ?? 0}`);
+    if (report.imageCandidatesDetected?.length) {
+      console.log(`- candidatas por fuente: ${Object.entries(report.imageSourceCounts ?? {}).map(([k, v]) => `${k}=${v}`).join(", ") || "(sin fuentes)"}`);
+      console.log("- URLs candidatas detectadas:");
+      report.imageCandidatesDetected.forEach((c, i) => {
+        console.log(`  ${i + 1}. [${c.source}] ${c.url}`);
+      });
+    }
+    console.log(`- imágenes de galería descargadas: ${report.galleryImagesDownloaded ?? 0}`);
+    console.log(`- URL seleccionada hero: ${report.selectedHeroUrl ?? "(ninguna)"}`);
+    console.log(`- URLs seleccionadas gallery: ${(report.selectedGalleryUrls ?? []).join(", ") || "(ninguna)"}`);
+    console.log(`- rutas gallery usadas: ${(report.galleryLocalPaths ?? []).join(", ") || "(ninguna)"}`);
+    console.log(`- gallery detalle: ${report.galleryReason ?? "(sin detalle)"}`);
+    if (!report.heroImageLocalPath && !report.galleryLocalPaths?.length) {
+      console.log("- placeholder aplicado: sí (calidad/fuentes insuficientes para imágenes del negocio)");
+    }
+    if (report.imageDiscarded?.length) {
+      console.log("- imágenes descartadas:");
+      report.imageDiscarded.forEach((d, i) => {
+        console.log(`  ${i + 1}. ${d.url} -> ${d.reason}`);
+      });
+    }
   }
   printIntakeProvenance(report.intakeProvenance);
   console.log(`- consultas maps: ${report.mapsCandidates.length}`);

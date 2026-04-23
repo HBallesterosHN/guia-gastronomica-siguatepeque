@@ -198,6 +198,31 @@ function sanitizeInstagramDescription(raw: string | undefined): string {
   return t;
 }
 
+function dedupeUrls(urls: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of urls) {
+    const u = raw?.trim();
+    if (!u || seen.has(u)) continue;
+    seen.add(u);
+    out.push(u);
+  }
+  return out;
+}
+
+function pushImageOrigin(
+  bucket: Array<{ url: string; source: string }>,
+  seen: Set<string>,
+  url: string | undefined,
+  source: string,
+): void {
+  if (!url?.trim()) return;
+  const u = url.trim();
+  if (seen.has(`${u}::${source}`)) return;
+  seen.add(`${u}::${source}`);
+  bucket.push({ url: u, source });
+}
+
 function directCliExtraction(url: string): CandidateDebug["extraction"] {
   let host = "";
   try {
@@ -615,6 +640,29 @@ export async function gatherSourceCandidates(
   if (!candidates.heroImageCandidateUrl && instaH?.ogImage) {
     candidates.heroImageCandidateUrl = instaH.ogImage;
     candidates.heroImageCandidateSource = "instagram_og_image";
+  }
+  const imageCandidates = dedupeUrls([
+    ...(mapsH?.imageCandidates ?? []),
+    candidates.heroImageCandidateUrl ?? "",
+    ...(instaH?.imageCandidates ?? []),
+  ]);
+  if (imageCandidates.length) {
+    candidates.imageCandidateUrls = imageCandidates;
+  }
+  const imageCandidateOrigins: Array<{ url: string; source: string }> = [];
+  const seenOrigins = new Set<string>();
+  pushImageOrigin(imageCandidateOrigins, seenOrigins, mapsH?.ogImage, "maps:og:image");
+  for (const u of mapsH?.imageCandidates ?? []) {
+    const src = u === mapsH?.ogImage ? "maps:og:image" : "maps:html:image";
+    pushImageOrigin(imageCandidateOrigins, seenOrigins, u, src);
+  }
+  pushImageOrigin(imageCandidateOrigins, seenOrigins, instaH?.ogImage, "instagram:og:image");
+  for (const u of instaH?.imageCandidates ?? []) {
+    const src = u === instaH?.ogImage ? "instagram:og:image" : "instagram:html:image";
+    pushImageOrigin(imageCandidateOrigins, seenOrigins, u, src);
+  }
+  if (imageCandidateOrigins.length) {
+    candidates.imageCandidateOrigins = imageCandidateOrigins;
   }
 
   if (!phone && (mapsFromCli || instaFromCli)) {

@@ -222,7 +222,7 @@ export function normalizeIntake(
   nameNorm: NameNormalization,
   candidates: SourceCandidates,
 ): { draft: NormalizedDraft; report: IntakeReport } {
-  const name = nameNorm.displayName;
+  const name = clean(candidates.officialPlacesName ?? nameNorm.displayName);
   const slug = slugify(nameNorm.slugBase);
   const mapsUrl = safeUrl(candidates.mapsUrl);
   const instagramUrl = safeUrl(candidates.instagramUrl);
@@ -231,14 +231,19 @@ export function normalizeIntake(
   const phone = candidates.phone ? clean(candidates.phone) : "Por confirmar";
   const whatsapp = candidates.whatsappHint ? clean(candidates.whatsappHint) : phone;
   const hours = candidates.hours ? clean(candidates.hours) : "Horario por confirmar.";
+  const hoursStructured = candidates.hoursStructured?.length ? candidates.hoursStructured : undefined;
   const summaryDraft = candidates.summaryDraft?.trim() ?? "";
-  const categoryPick = inferCategoryFromSignals(input.category, input.categoryProvided, [
-    nameNorm.displayName,
-    nameNorm.searchName,
-    candidates.preferredName ?? "",
-    candidates.instagramHandle ?? "",
-    summaryDraft,
-  ]);
+  const categoryPick =
+    !input.categoryProvided && candidates.inferredCategory && candidates.inferredCategoryReason
+      ? { category: candidates.inferredCategory, reason: candidates.inferredCategoryReason }
+      : inferCategoryFromSignals(input.category, input.categoryProvided, [
+          nameNorm.displayName,
+          nameNorm.searchName,
+          candidates.preferredName ?? "",
+          candidates.instagramHandle ?? "",
+          summaryDraft,
+          ...(candidates.googlePlacesTypes ?? []),
+        ]);
   const summary = buildEditorialSummary(
     name,
     categoryPick.category,
@@ -267,10 +272,21 @@ export function normalizeIntake(
     phone,
     whatsapp,
     hours,
+    hoursStructured,
     summary,
     hero: "/restaurants/placeholders/hero-placeholder.svg",
+    gallery: [],
     notes: `Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar.${mapsNote}`,
     references: candidates.references,
+    ratings: {
+      average: typeof candidates.ratingsAverage === "number" && Number.isFinite(candidates.ratingsAverage)
+        ? candidates.ratingsAverage
+        : 0,
+      reviewsCount:
+        typeof candidates.ratingsReviewsCount === "number" && Number.isFinite(candidates.ratingsReviewsCount)
+          ? candidates.ratingsReviewsCount
+          : 0,
+    },
   };
 
   const found: string[] = [];
@@ -283,6 +299,7 @@ export function normalizeIntake(
     ["phone", phone !== "Por confirmar"],
     ["hours", hours !== "Horario por confirmar."],
     ["summary", summaryDraft.length >= 8],
+    ["ratings", draft.ratings.average > 0 || draft.ratings.reviewsCount > 0],
   ];
   checks.forEach(([label, ok]) => (ok ? found.push(label) : pending.push(label)));
 
@@ -314,7 +331,7 @@ export function normalizeIntake(
       pending,
       confidence,
       searchName: nameNorm.searchName,
-      displayName: nameNorm.displayName,
+      displayName: name,
       category: categoryPick.category,
       categoryReason: candidates.inferredCategoryReason ?? categoryPick.reason,
       mapsChoiceReason: candidates.mapsChoiceReason,
@@ -332,6 +349,7 @@ export function normalizeIntake(
       coordinatesSource: candidates.coordinatesSource,
       heroImageCandidateUrl: candidates.heroImageCandidateUrl,
       heroImageCandidateSource: candidates.heroImageCandidateSource,
+      imageCandidatesFound: candidates.imageCandidateUrls?.length ?? 0,
       nameSource: candidates.preferredNameSource,
     },
   };

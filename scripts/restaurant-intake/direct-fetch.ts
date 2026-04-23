@@ -23,6 +23,7 @@ export type DirectMapsHints = {
   placeTitle?: string;
   phonesFromHtml?: string[];
   ogImage?: string;
+  imageCandidates?: string[];
   fieldsFrom: string[];
   notes: string[];
 };
@@ -33,6 +34,7 @@ export type DirectInstagramHints = {
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
+  imageCandidates?: string[];
   externalWebsite?: string;
   suggestedDisplayName?: string;
   fieldsFrom: string[];
@@ -42,6 +44,7 @@ export type DirectInstagramHints = {
 const META_CONTENT = /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']*)["']/i;
 const META_DESC = /<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']*)["']/i;
 const META_IMAGE = /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']*)["']/i;
+const META_IMAGE_ALL = /<meta[^>]+property=["']og:image(?::\w+)?["'][^>]+content=["']([^"']+)["']/gi;
 const META_CONTENT_REVERSE = /<meta[^>]+content=["']([^"']*)["'][^>]+property=["']og:title["']/i;
 
 function clip(s: string, max: number): string {
@@ -151,6 +154,33 @@ function firstHttpUrl(text: string): string | undefined {
   }
 }
 
+function normalizeHttpUrl(raw: string): string | undefined {
+  try {
+    const u = new URL(decodeHtmlEntities(raw.trim()));
+    if (!["http:", "https:"].includes(u.protocol)) return undefined;
+    return u.toString();
+  } catch {
+    return undefined;
+  }
+}
+
+function extractImageCandidates(html: string, max = 10): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const push = (raw: string) => {
+    const u = normalizeHttpUrl(raw);
+    if (!u || seen.has(u)) return;
+    seen.add(u);
+    out.push(u);
+  };
+  let m: RegExpExecArray | null;
+  const ogAll = new RegExp(META_IMAGE_ALL);
+  while ((m = ogAll.exec(html)) !== null) push(m[1]);
+  const imgSrc = /<img[^>]+src=["']([^"']+)["']/gi;
+  while ((m = imgSrc.exec(html)) !== null) push(m[1]);
+  return out.slice(0, max);
+}
+
 function decodeHtmlEntities(s: string): string {
   return s
     .replace(/&amp;/g, "&")
@@ -237,10 +267,12 @@ export async function fetchDirectInstagramHints(rawUrl: string): Promise<DirectI
     const ogTitle = parseOgTitle(html);
     const ogDescription = parseOgDescription(html);
     const ogImage = parseOgImage(html);
+    const imageCandidates = extractImageCandidates(html, 10);
     const externalWebsite = ogDescription ? firstHttpUrl(ogDescription) : undefined;
     if (ogTitle) fieldsFrom.push("instagram_html_og:title");
     if (ogDescription) fieldsFrom.push("instagram_html_og:description");
     if (ogImage) fieldsFrom.push("instagram_html_og:image");
+    if (imageCandidates.length) fieldsFrom.push("instagram_html_image_candidates");
     if (externalWebsite) fieldsFrom.push("instagram_og_description_link");
     const suggested = ogTitle ? suggestedNameFromInstagramOgTitle(ogTitle) : undefined;
     const looksLikeLoginWall =
@@ -259,6 +291,7 @@ export async function fetchDirectInstagramHints(rawUrl: string): Promise<DirectI
       ogTitle,
       ogDescription,
       ogImage,
+      imageCandidates,
       externalWebsite,
       suggestedDisplayName: suggested,
       fieldsFrom,
@@ -291,6 +324,7 @@ export async function fetchDirectMapsHints(rawUrl: string): Promise<DirectMapsHi
   let placeTitle: string | undefined;
   let phonesFromHtml: string[] | undefined;
   let ogImage: string | undefined;
+  let imageCandidates: string[] | undefined;
   try {
     const res = await fetch(canonicalUrl, {
       headers: DUCKDUCKGO_FETCH_HEADERS,
@@ -316,6 +350,7 @@ export async function fetchDirectMapsHints(rawUrl: string): Promise<DirectMapsHi
         placeTitle,
         phonesFromHtml,
         ogImage,
+        imageCandidates,
         fieldsFrom,
         notes,
       };
@@ -326,7 +361,9 @@ export async function fetchDirectMapsHints(rawUrl: string): Promise<DirectMapsHi
       fieldsFrom.push("maps_html_tel_candidates");
     }
     ogImage = parseOgImage(html);
+    imageCandidates = extractImageCandidates(html, 8);
     if (ogImage) fieldsFrom.push("maps_html_og:image");
+    if (imageCandidates.length) fieldsFrom.push("maps_html_image_candidates");
     const og = parseOgTitle(html);
     if (og) {
       const stripped = og.replace(/\s*-\s*Google\s+Maps\s*$/i, "").trim();
@@ -362,6 +399,7 @@ export async function fetchDirectMapsHints(rawUrl: string): Promise<DirectMapsHi
       placeTitle,
       phonesFromHtml,
       ogImage,
+      imageCandidates,
       fieldsFrom,
       notes,
     };
@@ -377,6 +415,7 @@ export async function fetchDirectMapsHints(rawUrl: string): Promise<DirectMapsHi
     placeTitle,
     phonesFromHtml,
     ogImage,
+    imageCandidates,
     fieldsFrom,
     notes,
   };

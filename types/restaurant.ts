@@ -66,11 +66,24 @@ export interface Restaurant {
   hours: {
     /** Horario en texto libre (ej. "Lun–Dom 8:00–20:00") */
     scheduleLabel: string;
+    /** Horario estructurado para UI legible por día. */
+    structured?: Array<{
+      day: string;
+      open: string;
+      close: string;
+    }>;
   };
   media: {
     hero: RestaurantPublicImagePath;
-    /** Rutas bajo /public/restaurants/... (vacío si no hay galería) */
-    gallery: RestaurantPublicImagePath[];
+    /** Platos destacados (2-3 fotos idealmente). */
+    featured?: RestaurantPublicImagePath[];
+    /** Fotos del ambiente/local. */
+    place?: RestaurantPublicImagePath[];
+    /**
+     * Compatibilidad con entradas antiguas.
+     * @deprecated Usar `featured` y `place`.
+     */
+    gallery?: RestaurantPublicImagePath[];
   };
   ratings: {
     /** Promedio 0–5 */

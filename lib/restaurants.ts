@@ -50,18 +50,34 @@ function detectGalleryFromPublic(slug: string): RestaurantPublicImagePath[] {
 
 function withDetectedGallery(restaurant: Restaurant): Restaurant {
   const detectedGallery = detectGalleryFromPublic(restaurant.identity.slug);
-  const fallbackGallery = restaurant.media.gallery.map((imagePath) =>
+  const legacyGallery = restaurant.media.gallery ?? [];
+  const fallbackFeatured = [
+    ...(restaurant.media.featured ?? []),
+    ...legacyGallery,
+  ].map((imagePath) => withAutoVersion(imagePath));
+  const fallbackPlace = (restaurant.media.place ?? []).map((imagePath) =>
     withAutoVersion(imagePath),
   );
 
-  const gallery = detectedGallery.length > 0 ? detectedGallery : fallbackGallery;
+  const detectedFeatured = detectedGallery.slice(0, 3);
+  const detectedPlace = detectedGallery.slice(3);
+  const featured =
+    detectedGallery.length > 0
+      ? detectedFeatured
+      : Array.from(new Set(fallbackFeatured));
+  const place =
+    detectedGallery.length > 0
+      ? detectedPlace
+      : Array.from(new Set(fallbackPlace));
 
   return {
     ...restaurant,
     media: {
       ...restaurant.media,
       hero: withAutoVersion(restaurant.media.hero),
-      gallery,
+      featured,
+      place,
+      gallery: legacyGallery.map((imagePath) => withAutoVersion(imagePath)),
     },
   };
 }

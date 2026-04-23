@@ -19,7 +19,7 @@ export type ChannelProvenance = {
 };
 
 /** Fuente que definió la URL final de Google Maps (prioridad: cli > nominatim > ddg > fallback). */
-export type MapsSourcePriority = "cli" | "nominatim" | "ddg" | "fallback";
+export type MapsSourcePriority = "cli" | "nominatim" | "ddg" | "fallback" | "google_places";
 
 export type MapsConfidence = "alta" | "media" | "baja";
 
@@ -107,26 +107,43 @@ export type SourceCandidates = {
   whatsappHint?: string;
   /** Nombre comercial preferido según fuentes directas. */
   preferredName?: string;
-  preferredNameSource?: "maps" | "instagram" | "input" | "inferred";
+  preferredNameSource?: "maps" | "instagram" | "input" | "inferred" | "google_places";
   /** Username de Instagram cuando se pudo leer. */
   instagramHandle?: string;
   /** Categoría inferida y explicación (si no se forzó --category). */
   inferredCategory?: RestaurantCategory;
   inferredCategoryReason?: string;
   /** Fuente exacta de coordenadas elegidas. */
-  coordinatesSource?: "maps_url_3d4d" | "maps_url_at" | "maps_query_ll" | "maps_html_heuristic" | "nominatim";
+  coordinatesSource?:
+    | "maps_url_3d4d"
+    | "maps_url_at"
+    | "maps_query_ll"
+    | "maps_html_heuristic"
+    | "nominatim"
+    | "google_places";
   /** Imagen pública candidata (si aparece en metadatos). */
   heroImageCandidateUrl?: string;
   heroImageCandidateSource?: "maps_og_image" | "instagram_og_image";
+  imageCandidateUrls?: string[];
+  imageCandidateOrigins?: Array<{ url: string; source: string }>;
   mapsUrl?: string;
   instagramUrl?: string;
   address?: string;
   coordinates?: { lat: number; lng: number };
   phone?: string;
   hours?: string;
+  hoursStructured?: Array<{ day: string; open: string; close: string }>;
   references: string[];
   mapsChoiceReason?: string;
   instagramChoiceReason?: string;
+  /** Nombre oficial desde Place Details (displayName). */
+  officialPlacesName?: string;
+  googlePlacesTypes?: string[];
+  placesResourceName?: string;
+  ratingsAverage?: number;
+  ratingsReviewsCount?: number;
+  /** Recursos `places/.../photos/...` para Place Photos API. */
+  placesPhotoResources?: string[];
   /** Top candidatos tras deduplicar y ordenar por score (típicamente 3). */
   mapsScoredTop: ScoredCandidate[];
   instagramScoredTop: ScoredCandidate[];
@@ -150,12 +167,16 @@ export type NormalizedDraft = {
   phone: string;
   whatsapp: string;
   hours: string;
+  hoursStructured?: Array<{ day: string; open: string; close: string }>;
   /** Resumen corto para la ficha (copy.summary). */
   summary: string;
   /** Hero local en /public (placeholder o descargado). */
   hero: string;
+  /** Gallery local (0..4 rutas). */
+  gallery: string[];
   notes: string;
   references: string[];
+  ratings: { average: number; reviewsCount: number };
 };
 
 export type IntakeReport = {
@@ -184,5 +205,18 @@ export type IntakeReport = {
   heroImageDownloaded?: boolean;
   heroImageLocalPath?: string;
   heroImageReason?: string;
+  imageCandidatesFound?: number;
+  galleryImagesDownloaded?: number;
+  galleryLocalPaths?: string[];
+  galleryReason?: string;
+  imageCandidatesDetected?: Array<{ url: string; source: string }>;
+  imageSourceCounts?: Record<string, number>;
+  imageDiscarded?: Array<{ url: string; reason: string }>;
+  selectedHeroUrl?: string;
+  selectedGalleryUrls?: string[];
   nameSource?: SourceCandidates["preferredNameSource"];
+  /** Registro operativo de Google Places (API New). */
+  placesIntakeMessages?: string[];
+  placesIntakeErrors?: string[];
+  placesPhotoDownloadLog?: string[];
 };

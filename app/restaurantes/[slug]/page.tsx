@@ -47,6 +47,24 @@ export default async function RestaurantDetailPage({
 
   const { identity, classification, copy, location, hours, media, ratings, services } =
     restaurant;
+  const featuredImages =
+    (media.featured?.length ?? 0) > 0 ? media.featured ?? [] : (media.gallery ?? []);
+  const placeImages = media.place ?? [];
+  const structuredHours = hours.structured ?? [];
+  const currentDayEnglish = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    timeZone: "America/Tegucigalpa",
+  }).format(new Date());
+  const dayMap: Record<string, string> = {
+    Monday: "Lunes",
+    Tuesday: "Martes",
+    Wednesday: "Miercoles",
+    Thursday: "Jueves",
+    Friday: "Viernes",
+    Saturday: "Sabado",
+    Sunday: "Domingo",
+  };
+  const todayEs = dayMap[currentDayEnglish] ?? "";
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-10 px-4 py-10 sm:px-6">
@@ -122,18 +140,15 @@ export default async function RestaurantDetailPage({
               </div>
             </div>
 
-            <section className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold text-zinc-900">Galería</h2>
-                <p className="text-sm text-zinc-500">
-                  {media.gallery.length > 0
-                    ? `${media.gallery.length} fotos`
-                    : "Sin fotos adicionales"}
-                </p>
-              </div>
-              {media.gallery.length > 0 ? (
+            {featuredImages.length > 0 ? (
+              <section className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-2xl font-semibold text-zinc-900">
+                    Platos destacados
+                  </h2>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {media.gallery.map((image) => (
+                  {featuredImages.map((image) => (
                     <div key={image} className="relative h-56 w-full overflow-hidden rounded-2xl ring-1 ring-zinc-200">
                       <Image
                         src={image}
@@ -145,12 +160,31 @@ export default async function RestaurantDetailPage({
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-6 text-sm text-zinc-600">
-                  Este perfil todavía no tiene galería adicional.
+              </section>
+            ) : null}
+
+            {placeImages.length > 0 ? (
+              <section className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-2xl font-semibold text-zinc-900">
+                    El lugar
+                  </h2>
                 </div>
-              )}
-            </section>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {placeImages.map((image) => (
+                    <div key={image} className="relative h-56 w-full overflow-hidden rounded-2xl ring-1 ring-zinc-200">
+                      <Image
+                        src={image}
+                        alt={`Foto del lugar: ${identity.name}`}
+                        fill
+                        className="object-cover transition duration-500 hover:scale-[1.02]"
+                        sizes="(max-width: 640px) 100vw, 50vw"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             <section className="space-y-4">
               <div className="flex items-center justify-between gap-3">
@@ -219,7 +253,26 @@ export default async function RestaurantDetailPage({
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Horario
                 </p>
-                <p className="mt-2 leading-6 text-zinc-900">{hours.scheduleLabel}</p>
+                {structuredHours.length > 0 ? (
+                  <div className="mt-2 space-y-2">
+                    {structuredHours.map((item) => {
+                      const isToday = item.day === todayEs;
+                      return (
+                        <div
+                          key={`${item.day}-${item.open}-${item.close}`}
+                          className={`flex items-center justify-between gap-3 rounded-lg px-2 py-1 ${
+                            isToday ? "bg-emerald-50 text-emerald-800" : "text-zinc-900"
+                          }`}
+                        >
+                          <span className="font-medium">{item.day}</span>
+                          <span className="text-right">{item.open} - {item.close}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="mt-2 leading-6 text-zinc-900">{hours.scheduleLabel}</p>
+                )}
               </div>
               <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">

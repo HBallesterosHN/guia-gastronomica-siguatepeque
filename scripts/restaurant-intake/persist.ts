@@ -26,6 +26,8 @@ function toPascalCase(input: string): string {
 function buildEntrySource(draft: NormalizedDraft): string {
   const variableName = `restaurant${toPascalCase(draft.slug)}`;
   const today = new Date().toISOString().slice(0, 10);
+  const featured = draft.gallery.slice(0, 3);
+  const place = draft.gallery.slice(3);
 
   return `import type { Restaurant } from "@/types/restaurant";
 
@@ -61,14 +63,16 @@ export const ${variableName}: Restaurant = {
   },
   hours: {
     scheduleLabel: ${JSON.stringify(draft.hours)},
+    structured: ${JSON.stringify(draft.hoursStructured ?? [])},
   },
   media: {
     hero: ${JSON.stringify(draft.hero)},
-    gallery: [],
+    featured: ${JSON.stringify(featured)},
+    place: ${JSON.stringify(place)},
   },
   ratings: {
-    average: 0,
-    reviewsCount: 0,
+    average: ${Number(draft.ratings.average) || 0},
+    reviewsCount: ${Math.max(0, Math.round(Number(draft.ratings.reviewsCount) || 0))},
   },
   services: {
     offersDelivery: false,
