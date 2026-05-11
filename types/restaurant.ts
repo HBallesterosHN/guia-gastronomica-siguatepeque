@@ -35,6 +35,9 @@ export interface RestaurantReview {
   date: string;
 }
 
+/** Origen de la ficha y revisión editorial (extensible a perfiles reclamados sin backend aún). */
+export type RestaurantProfileSource = "auto" | "manual" | "owner_submitted";
+
 /**
  * Un restaurante completo. Pensado para editarse a mano en data/restaurants/entries/*.ts
  * sin base de datos.
@@ -91,13 +94,33 @@ export interface Restaurant {
   ratings: {
     /** Promedio 0–5 */
     average: number;
-    /** Total de reseñas (puede ser mayor que reviews.length si solo muestras algunas) */
+    /** Total de valoraciones en fuentes públicas (p. ej. Google), no comentarios de esta guía. */
     reviewsCount: number;
   };
   services: {
     offersDelivery: boolean;
     acceptsReservations: boolean;
   };
-  /** Reseñas mostradas en el perfil (subset o todas) */
+  /**
+   * Enlace opcional a menú hospedado fuera del sitio (Linktree, ola.click, PDF, catálogo WhatsApp, etc.).
+   */
+  menu?: {
+    url: string;
+    label?: string;
+  };
+  /**
+   * Estado editorial del perfil (p. ej. intake automático vs revisión humana).
+   * Opcional en entradas antiguas; el intake nuevo lo rellena con valores por defecto.
+   */
+  profileStatus?: {
+    source: RestaurantProfileSource;
+    verified: boolean;
+    /** Fecha ISO YYYY-MM-DD (texto) de última revisión editorial. */
+    lastReviewed?: string;
+  };
+  /**
+   * Opiniones editoriales verificadas (opcional). Dejar vacío si no hay comentarios reales;
+   * la UI no muestra plantillas ni texto generado.
+   */
   reviews: RestaurantReview[];
 }

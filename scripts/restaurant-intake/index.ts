@@ -1,6 +1,7 @@
 import process from "node:process";
 import dotenv from "dotenv";
 import { RESTAURANT_CATEGORIES, type RestaurantCategory } from "../../types/restaurant";
+import { getRestaurantBySlug } from "../../lib/restaurants";
 
 dotenv.config({ path: ".env.local" });
 dotenv.config({ path: ".env" });
@@ -174,11 +175,16 @@ function printLinkPipelineSummary(report: IntakeReport): void {
 function parseArgs(argv: string[]): IntakeInput {
   const map = new Map<string, string>();
   let dryRun = false;
+  let textOnly = false;
 
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (token === "--dry-run") {
       dryRun = true;
+      continue;
+    }
+    if (token === "--text-only") {
+      textOnly = true;
       continue;
     }
     if (!token.startsWith("--")) continue;
@@ -193,6 +199,8 @@ function parseArgs(argv: string[]): IntakeInput {
   const name = map.get("name")?.trim() || undefined;
   const mapsUrlCli = map.get("maps")?.trim() || undefined;
   const instagramUrlCli = map.get("instagram")?.trim() || undefined;
+  const menuUrlCli = map.get("menu")?.trim() || undefined;
+  const menuLabelCli = map.get("menu-label")?.trim() || undefined;
   const categoryToken = map.get("category")?.trim();
   const imagesScopeRaw = map.get("images-scope")?.trim().toLowerCase() as
     | ImageDownloadScope
@@ -209,7 +217,7 @@ function parseArgs(argv: string[]): IntakeInput {
     throw new Error(
       'Indica al menos uno entre --name, --maps y --instagram (los tres son opcionales salvo que debas elegir al menos una fuente). ' +
         'Ej.: solo nombre: --name "Restaurante". Solo Instagram: --instagram "https://...". Solo Maps: --maps "https://...". ' +
-        "Combinar: npm run restaurant:intake -- --name \"...\" [--maps URL] [--instagram URL] [--slug mi-restaurante] [--category familiar] [--images-scope all|hero|gallery] [--dry-run] [--verbose-search]",
+        "Combinar: npm run restaurant:intake -- --name \"...\" [--maps URL] [--instagram URL] [--menu URL] [--menu-label Texto] [--slug mi-restaurante] [--category familiar] [--images-scope all|hero|gallery] [--text-only] [--dry-run] [--verbose-search]",
     );
   }
   if (!RESTAURANT_CATEGORIES.includes(rawCategory)) {
@@ -226,17 +234,34 @@ function parseArgs(argv: string[]): IntakeInput {
   if (slug && !/^[a-z0-9-]+$/.test(slug)) {
     throw new Error(`Slug inválido: ${slug}. Usa minúsculas, números y guiones.`);
   }
+  if (menuLabelCli && !menuUrlCli) {
+    throw new Error("Si usas --menu-label debes enviar también --menu con la URL.");
+  }
+  if (textOnly && !slug) {
+    throw new Error('Cuando usas --text-only debes enviar --slug para actualizar un restaurante existente.');
+  }
+  if (textOnly && imagesScope !== "all") {
+    throw new Error('Con --text-only usa --images-scope all (el texto ignora scopes parciales de imágenes).');
+  }
 
   return {
     name,
     category: rawCategory,
     categoryProvided,
     dryRun,
+    textOnly,
     imagesScope,
     slug,
     mapsUrlCli,
     instagramUrlCli,
+    menuUrlCli,
+    menuLabelCli,
   };
+}
+
+function stripVersionFromMediaPath(pathWithVersion: string): string {
+  const idx = pathWithVersion.indexOf("?");
+  return idx === -1 ? pathWithVersion : pathWithVersion.slice(0, idx);
 }
 
 async function main(): Promise<void> {
@@ -283,11 +308,14 @@ async function main(): Promise<void> {
   if (input.name?.trim()) console.log(`- --name explícito: ${input.name.trim()}`);
   if (input.mapsUrlCli) console.log(`- --maps: ${input.mapsUrlCli}`);
   if (input.instagramUrlCli) console.log(`- --instagram: ${input.instagramUrlCli}`);
+  if (input.menuUrlCli) console.log(`- --menu: ${input.menuUrlCli}`);
+  if (input.menuLabelCli) console.log(`- --menu-label: ${input.menuLabelCli}`);
   console.log(`- nombre busqueda: ${nameNorm.searchName}`);
   console.log(`- nombre comercial: ${nameNorm.displayName}`);
   console.log(`- slug sugerido: ${nameNorm.slugBase}`);
   if (input.slug) console.log(`- --slug destino: ${input.slug}`);
   console.log(`- images scope: ${input.imagesScope}`);
+  if (input.textOnly) console.log("- modo: text-only (sin descarga/escritura de imágenes)");
   if (verboseSearch) {
     console.log("- flag: --verbose-search (HTML preview largo por consulta)");
   }
@@ -329,6 +357,23 @@ async function main(): Promise<void> {
   if (input.slug) {
     draft.slug = input.slug;
   }
+  const existingBeforePersist = getRestaurantBySlug(draft.slug);
+  if (input.textOnly && input.slug) {
+    const existing = getRestaurantBySlug(input.slug);
+    if (!existing) {
+      throw new Error(`No existe restaurante con slug "${input.slug}" para --text-only.`);
+    }
+    draft.hero = stripVersionFromMediaPath(existing.media.hero);
+    draft.gallery = (existing.media.gallery ?? []).map(stripVersionFromMediaPath);
+  }
+  if (existingBeforePersist?.menu && !draft.menu) {
+    draft.menu = existingBeforePersist.menu;
+  }
+  if (existingBeforePersist?.profileStatus) {
+    draft.profileStatus = existingBeforePersist.profileStatus;
+  } else {
+    draft.profileStatus = { source: "auto", verified: false };
+  }
   report.placesIntakeMessages = placesIntakeMessages;
   report.placesIntakeErrors = placesIntakeErrors;
 
@@ -344,7 +389,7 @@ async function main(): Promise<void> {
   };
   let imagesFromPlaces = false;
 
-  if (apiKey && photoNames.length) {
+  if (!input.textOnly && apiKey && photoNames.length) {
     console.log("- etapa 2.1: imágenes (prioridad: Place Photos API)");
     const prPhotos = await saveRestaurantImagesFromPlacePhotos(
       draft.slug,
@@ -437,7 +482,7 @@ async function main(): Promise<void> {
     );
   }
 
-  if (!imagesFromPlaces) {
+  if (!input.textOnly && !imagesFromPlaces) {
     if (apiKey && photoNames.length) {
       console.log("  Place Photos sin hero utilizable → fallback Maps/Instagram.");
     }
@@ -481,11 +526,16 @@ async function main(): Promise<void> {
   if (placesPhotoDownloadLog.length) {
     report.placesPhotoDownloadLog = placesPhotoDownloadLog;
   }
+  if (input.textOnly) {
+    report.heroImageReason = "Omitido por --text-only.";
+    report.galleryReason = "Omitido por --text-only; se conserva media existente.";
+  }
 
   const imagesOnlyMode = input.imagesScope !== "all";
   let persisted: Awaited<ReturnType<typeof persistDraft>> = {
     slug: draft.slug,
     variableName: "(sin persistencia)",
+    entryExistedBefore: false,
   };
   if (imagesOnlyMode) {
     console.log("- etapa 3: persistencia draft omitida (modo solo imágenes)");
@@ -500,7 +550,12 @@ async function main(): Promise<void> {
         "  (--dry-run: no se creó ningún archivo ni se modificó data/restaurants/index.ts; solo simulación.)",
       );
       console.log(
-        `  Rutas que se usarían sin --dry-run: data/restaurants/entries/${persisted.slug}.ts + entrada en data/restaurants/index.ts`,
+        `  Rutas que se usarían sin --dry-run: data/restaurants/entries/${persisted.slug}.ts + entrada en data/restaurants/index.ts` +
+          (persisted.entryExistedBefore ? " (el entry ya existe → se sobrescribiría)." : " (entry nuevo)."),
+      );
+    } else if (persisted.entryExistedBefore) {
+      console.log(
+        `  OK: actualizado data/restaurants/entries/${persisted.slug}.ts y sincronizado data/restaurants/index.ts (${persisted.variableName}).`,
       );
     } else {
       console.log(
@@ -549,6 +604,7 @@ async function main(): Promise<void> {
   console.log(`- instagram elegido: ${draft.instagramUrl ?? "no encontrado"}`);
   console.log(`- instagram razon: ${report.instagramChoiceReason ?? "sin match razonable"}`);
   console.log(`- ratings: promedio ${draft.ratings.average}, reseñas ${draft.ratings.reviewsCount}`);
+  console.log(`- menú externo: ${draft.menu?.url ?? "(ninguno)"}${draft.menu?.label ? ` (${draft.menu.label})` : ""}`);
   if (report.placesIntakeMessages?.length) {
     console.log("- Google Places (log):");
     report.placesIntakeMessages.forEach((m) => console.log(`    ${m}`));

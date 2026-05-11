@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  INSTAGRAM_HANDLE,
+  INSTAGRAM_PROFILE_URL,
+  SITE_BRAND_NAME,
+  SITE_PAGE_TITLE_SUFFIX,
+} from "@/lib/site-brand";
 
 export const metadata: Metadata = {
-  title: "Sobre esta guía | Guía Gastronómica de Siguatepeque",
+  title: `Sobre el proyecto ${SITE_PAGE_TITLE_SUFFIX}`,
   description:
-    "Conoce qué es esta guía local y curada de Siguatepeque, para quién está hecha y cómo puedes recomendarnos nuevos lugares.",
+    "Contexto de la guía local Me Voy a Sigua: criterio editorial, guías temáticas y cómo enviar recomendaciones.",
 };
 
 const themes = ["Mejores sopas", "Desayunos", "Cafés", "Comida típica", "Parrilladas"];
@@ -14,13 +20,16 @@ export default function SobreEstaGuiaPage() {
     <main className="mx-auto w-full max-w-6xl space-y-8 px-4 py-10 sm:px-6">
       <header className="space-y-3">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          Identidad del proyecto
+          {SITE_BRAND_NAME}
         </p>
-        <h1 className="text-3xl font-bold text-zinc-900 sm:text-4xl">Sobre esta guía</h1>
+        <h1 className="text-3xl font-bold text-zinc-900 sm:text-4xl">Sobre el proyecto</h1>
         <p className="max-w-3xl text-zinc-600">
-          Esta es una guía gastronómica de Siguatepeque, creada para ayudarte a elegir mejor
-          dónde comer. No buscamos listar por listar: queremos recomendar lugares útiles, reales
-          y fáciles de aprovechar, tanto si vives aquí como si andas de visita.
+          Contenido principal actualizado en{" "}
+          <Link href="/sobre" className="font-semibold text-emerald-700 hover:text-emerald-800">
+            /sobre
+          </Link>
+          . Esta página resume el espíritu del sitio: guía local, criterio editorial y cero relleno
+          con reseñas falsas.
         </p>
       </header>
 
@@ -72,12 +81,12 @@ export default function SobreEstaGuiaPage() {
         </p>
         <p className="mt-3 text-sm">
           <a
-            href="https://www.instagram.com/mevoyasigua/"
+            href={INSTAGRAM_PROFILE_URL}
             className="font-semibold text-emerald-700 hover:text-emerald-800"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Enviar recomendación por Instagram @mevoyasigua
+            Enviar recomendación por Instagram @{INSTAGRAM_HANDLE}
           </a>
         </p>
       </section>

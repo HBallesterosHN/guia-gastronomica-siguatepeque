@@ -1,13 +1,16 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getRestaurantBySlug } from "@/lib/restaurants";
+import { guidePageMetadata } from "@/lib/guide-page-metadata";
+import { INSTAGRAM_HANDLE, INSTAGRAM_PROFILE_URL } from "@/lib/site-brand";
 
-export const metadata: Metadata = {
-  title: "Mejores desayunos en Siguatepeque para arrancar bien el día | Guía",
+export const metadata = guidePageMetadata({
+  canonicalPath: "/guias/mejores-desayunos-en-siguatepeque",
+  titleShort: "Mejores desayunos en Siguatepeque",
   description:
-    "Una guía editorial de desayunos recomendados en Siguatepeque, con Villa Verde como opción destacada.",
-};
+    "Dónde desayunar bien en Siguatepeque: guía editorial con Villa Verde y criterio local.",
+  previewSlug: "restaurante-villa-verde",
+});
 
 const guideEntries = [
   {
@@ -16,7 +19,7 @@ const guideEntries = [
     dishName: "Desayuno completo",
     placeName: "Restaurante Villa Verde",
     description:
-      "Para nosotros, Villa Verde abre este ranking porque en su propia ficha se define para desayuno, almuerzo y cena, y eso se nota en la costumbre local de llegar temprano sobre la CA-5. • Lo recomendamos cuando quieres empezar el día con ambiente campestre y sin correr. • Es de esos lugares que funcionan tanto para desayuno familiar como para parada de viaje.",
+      "Villa Verde abre esta guía porque en la práctica es de esos lugares donde la gente ya llega temprano por la CA-5: mesa campestre, desayuno sin estrés y espacio para ir en familia. • Cuando quieres empezar el día con aire de campo y café caliente, aquí encaja. • También sirve de parada si vienes de camino y necesitas algo sólido antes de seguir.",
   },
 ];
 
@@ -119,12 +122,12 @@ export default function MejoresDesayunosEnSiguatepequePage() {
           disponibilidad del restaurante. ¿Nos faltó algún desayuno que, para ti, sí debería estar
           aquí? Escríbenos en Instagram{" "}
           <a
-            href="https://www.instagram.com/mevoyasigua/"
+            href={INSTAGRAM_PROFILE_URL}
             className="font-semibold text-emerald-700 hover:text-emerald-800"
             target="_blank"
             rel="noopener noreferrer"
           >
-            @mevoyasigua
+            @{INSTAGRAM_HANDLE}
           </a>
           .
         </p>

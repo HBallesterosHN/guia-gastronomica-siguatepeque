@@ -5,7 +5,7 @@ const slug = "golden-grill" as const;
 /**
  * BORRADOR GENERADO POR restaurant:intake.
  * Google Maps: "https://maps.google.com/?cid=1735311195002468895&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
- * Instagram: "Por confirmar"
+ * Instagram: "https://www.instagram.com/goldengrillhn/"
  * Referencias: ["https://www.google.com/maps/place/Golden+Grill+Buffet/@14.5914697,-87.8616192,17z/data=!3m1!4b1!4m6!3m5!1s0x8f65be28bb355033:0x1815105678e17a1f!8m2!3d14.5914645!4d-87.8590443!16s%2Fg%2F11f2wmfhps?entry=tts&g_ep=EgoyMDI2MDQyMC4wIPu8ASoASAFQAw%3D%3D&skid=7570369a-dae8-4f0b-8918-0913b9f73f1a","https://nominatim.openstreetmap.org/reverse","Google Places API (New)"]
  * Notas: "Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar. Maps[google_places, confianza alta]: https://maps.google.com/?cid=1735311195002468895&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
  */

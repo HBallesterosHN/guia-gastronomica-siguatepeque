@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Restaurant } from "@/types/restaurant";
+import { PhoneIcon, WhatsAppIcon } from "@/components/icons/ContactIcons";
 import { StarRating } from "@/components/restaurants/StarRating";
 import { categoryLabels } from "@/lib/category";
 
@@ -44,24 +45,31 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
           {categoryLabels[classification.category]}
         </p>
         <p className="min-h-12 text-sm leading-6 text-zinc-600">{copy.summary}</p>
-        <StarRating
-          rating={ratings.average}
-          reviewCount={ratings.reviewsCount}
-        />
+        {ratings.reviewsCount > 0 ? (
+          <StarRating rating={ratings.average} reviewCount={ratings.reviewsCount} />
+        ) : ratings.average > 0 ? (
+          <p className="text-sm text-zinc-600">
+            ~{ratings.average.toFixed(1)}/5 público (sin conteo en ficha; ver Maps)
+          </p>
+        ) : (
+          <p className="text-sm text-zinc-500">Valoración pública: pendiente</p>
+        )}
         <p className="line-clamp-2 text-sm text-zinc-500">{location.address}</p>
         <div className="grid gap-2 sm:grid-cols-3">
           <a
             href={`tel:${contact.phone}`}
-            className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700"
           >
+            <PhoneIcon className="h-4 w-4 shrink-0" />
             Llamar
           </a>
           <a
             href={`https://wa.me/${whatsappNumber}`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
           >
+            <WhatsAppIcon className="h-4 w-4 shrink-0" />
             WhatsApp
           </a>
           <a

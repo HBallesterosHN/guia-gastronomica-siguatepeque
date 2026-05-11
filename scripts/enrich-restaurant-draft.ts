@@ -75,56 +75,7 @@ function buildSummary(name: string, category: RestaurantCategory): string {
   return `${name} en Siguatepeque, recomendado para ${experience}.`;
 }
 
-function buildReviewsBlock(slug: string): string {
-  const today = new Date();
-  const dates = [0, 3, 7].map((daysAgo) => {
-    const copy = new Date(today);
-    copy.setDate(today.getDate() - daysAgo);
-    return copy.toISOString().slice(0, 10);
-  });
-
-  const reviews = [
-    {
-      id: `${slug}-seed-1`,
-      author: "Reseña inicial",
-      rating: 4,
-      comment: "Primera impresión positiva; vale la pena validar menú y horarios en sitio.",
-      date: dates[0],
-    },
-    {
-      id: `${slug}-seed-2`,
-      author: "Reseña inicial",
-      rating: 4,
-      comment: "Ambiente cómodo según señales públicas; recomendable confirmar disponibilidad en hora pico.",
-      date: dates[1],
-    },
-    {
-      id: `${slug}-seed-3`,
-      author: "Reseña inicial",
-      rating: 4,
-      comment: "Experiencia consistente para compartir en familia o con amigos.",
-      date: dates[2],
-    },
-  ];
-
-  const lines = [
-    "  reviews: [",
-    ...reviews.flatMap((review) => [
-      "    {",
-      `      id: ${JSON.stringify(review.id)},`,
-      `      author: ${JSON.stringify(review.author)},`,
-      `      rating: ${review.rating},`,
-      `      comment: ${JSON.stringify(review.comment)},`,
-      `      date: ${JSON.stringify(review.date)},`,
-      "    },",
-    ]),
-    "  ],",
-  ];
-
-  return lines.join("\n");
-}
-
-function enrichSource(source: string, slug: string): string {
+function enrichSource(source: string): string {
   const name = extractMatch(source, /name:\s*"([^"]+)"/, "name");
   const rawCategory = extractMatch(source, /category:\s*"([^"]+)"/, "category");
 
@@ -134,7 +85,6 @@ function enrichSource(source: string, slug: string): string {
   const category = rawCategory as RestaurantCategory;
   const summary = buildSummary(name, category);
   const summaryRegex = /summary:\s*"[^"]*",/;
-  const reviewsRegex = /  reviews:\s*\[[\s\S]*?\],/;
 
   let output = source;
   if (!summaryRegex.test(output)) {
@@ -148,11 +98,6 @@ function enrichSource(source: string, slug: string): string {
     output = output.replace(summaryRegex, `summary: ${JSON.stringify(summary)},`);
   }
 
-  if (!reviewsRegex.test(output)) {
-    throw new Error("No se encontro el bloque reviews para enriquecer.");
-  }
-  output = output.replace(reviewsRegex, buildReviewsBlock(slug));
-
   return output;
 }
 
@@ -164,12 +109,12 @@ async function main(): Promise<void> {
 export async function enrichDraftBySlug(slug: string, dryRun = false): Promise<void> {
   const targetFile = path.join(ENTRIES_DIR, `${slug}.ts`);
   const source = await readFile(targetFile, "utf8");
-  const enriched = enrichSource(source, slug);
+  const enriched = enrichSource(source);
 
   if (dryRun) {
     console.log("DRY RUN");
     console.log(`- Archivo: data/restaurants/entries/${slug}.ts`);
-    console.log("- Cambios: summary + reviews");
+    console.log("- Cambios: summary (reviews no se modifican)");
     console.log("- No se escribio ningun archivo.");
     return;
   }
@@ -177,7 +122,7 @@ export async function enrichDraftBySlug(slug: string, dryRun = false): Promise<v
   await writeFile(targetFile, enriched, "utf8");
   console.log("Draft enriquecido correctamente.");
   console.log(`- Archivo: data/restaurants/entries/${slug}.ts`);
-  console.log("- Campos actualizados: copy.summary, reviews");
+  console.log("- Campos actualizados: copy.summary");
 }
 
 const isDirectRun = process.argv[1]

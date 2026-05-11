@@ -5,7 +5,7 @@ const slug = "china-weng" as const;
 /**
  * BORRADOR GENERADO POR restaurant:intake.
  * Google Maps: "https://maps.google.com/?cid=12378404984455088546&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
- * Instagram: "Por confirmar"
+ * Instagram: "https://www.instagram.com/restaurantechinaweng/"
  * Referencias: ["https://www.google.com/maps/place/Restaurante+China+Weng/@14.5915155,-87.8796439,14z/data=!4m7!3m6!1s0x8f65954409887fc7:0xabc8edbff05ec9a2!8m2!3d14.5863704!4d-87.8507766!15sCgpjaGluYSB3YW5nWgwiCmNoaW5hIHdhbmeSARJjaGluZXNlX3Jlc3RhdXJhbnSaASRDaGREU1VoTk1HOW5TMFZKUTBGblNVTjRjSEJ1ZGpGM1JSQULgAQD6AQQIABAp!16s%2Fg%2F11rhqjxh4w?entry=tts&g_ep=EgoyMDI2MDQyMC4wIPu8ASoASAFQAw%3D%3D&skid=cd7c4408-de0b-410e-b27c-9db93fc917fe","https://nominatim.openstreetmap.org/reverse","Google Places API (New)"]
  * Notas: "Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar. Maps[google_places, confianza alta]: https://maps.google.com/?cid=12378404984455088546&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
  */

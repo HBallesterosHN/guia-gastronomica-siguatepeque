@@ -7,11 +7,7 @@ interface ReviewListProps {
 
 export function ReviewList({ reviews }: ReviewListProps) {
   if (!reviews.length) {
-    return (
-      <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-600">
-        Aún no hay reseñas. Sé la primera persona en comentar este restaurante.
-      </div>
-    );
+    return null;
   }
 
   return (

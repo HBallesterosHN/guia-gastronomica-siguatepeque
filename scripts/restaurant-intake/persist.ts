@@ -23,6 +23,30 @@ function toPascalCase(input: string): string {
     .join("");
 }
 
+function formatProfileStatusField(
+  status: NonNullable<NormalizedDraft["profileStatus"]>,
+): string {
+  const lastLine = status.lastReviewed
+    ? `    lastReviewed: ${JSON.stringify(status.lastReviewed)},\n`
+    : "";
+  return `  profileStatus: {
+    source: ${JSON.stringify(status.source)},
+    verified: ${Boolean(status.verified)},
+${lastLine}  },
+`;
+}
+
+function formatMenuField(menu: NormalizedDraft["menu"]): string {
+  if (!menu?.url) return "";
+  const labelLine = menu.label
+    ? `    label: ${JSON.stringify(menu.label)},\n`
+    : "";
+  return `  menu: {
+    url: ${JSON.stringify(menu.url)},
+${labelLine}  },
+`;
+}
+
 function buildEntrySource(draft: NormalizedDraft): string {
   const variableName = `restaurant${toPascalCase(draft.slug)}`;
   const today = new Date().toISOString().slice(0, 10);
@@ -75,15 +99,8 @@ export const ${variableName}: Restaurant = {
     offersDelivery: false,
     acceptsReservations: false,
   },
-  reviews: [
-    {
-      id: "${draft.slug}-1",
-      author: "Pendiente",
-      rating: 0,
-      comment: "Completar reseña inicial.",
-      date: "${today}",
-    },
-  ],
+${formatMenuField(draft.menu)}${draft.profileStatus ? formatProfileStatusField(draft.profileStatus) : ""}
+  reviews: [],
 };
 `;
 }
@@ -120,16 +137,16 @@ function updateIndexSource(source: string, slug: string, variableName: string): 
   return source.replace(/export const restaurants:\s*Restaurant\[\]\s*=\s*\[[\s\S]*?\];/, rebuilt);
 }
 
-export async function persistDraft(draft: NormalizedDraft, dryRun: boolean): Promise<{ slug: string; variableName: string }> {
+export async function persistDraft(
+  draft: NormalizedDraft,
+  dryRun: boolean,
+): Promise<{ slug: string; variableName: string; entryExistedBefore: boolean }> {
   const variableName = `restaurant${toPascalCase(draft.slug)}`;
   const entryFile = path.join(ENTRIES_DIR, `${draft.slug}.ts`);
+  const entryExistedBefore = await fileExists(entryFile);
 
   if (dryRun) {
-    return { slug: draft.slug, variableName };
-  }
-
-  if (await fileExists(entryFile)) {
-    throw new Error(`Ya existe un archivo para este slug: data/restaurants/entries/${draft.slug}.ts`);
+    return { slug: draft.slug, variableName, entryExistedBefore };
   }
 
   const entrySource = buildEntrySource(draft);
@@ -139,5 +156,5 @@ export async function persistDraft(draft: NormalizedDraft, dryRun: boolean): Pro
   await writeFile(entryFile, entrySource, "utf8");
   await writeFile(INDEX_FILE, updatedIndex, "utf8");
 
-  return { slug: draft.slug, variableName };
+  return { slug: draft.slug, variableName, entryExistedBefore };
 }

@@ -5,7 +5,7 @@ import type {
   RestaurantCategory,
   RestaurantPublicImagePath,
 } from "@/types/restaurant";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 const MAX_GALLERY_IMAGES = 10;
@@ -100,7 +100,7 @@ function getRestaurantsWithDetectedGallery(): Restaurant[] {
   return restaurants.map(withDetectedGallery);
 }
 
-export function getFeaturedRestaurants(limit = 3): Restaurant[] {
+export function getFeaturedRestaurants(limit = 6): Restaurant[] {
   return getRestaurantsWithDetectedGallery()
     .filter((restaurant) => restaurant.classification.featured)
     .slice(0, limit);
@@ -114,6 +114,23 @@ export function getRestaurantBySlug(slug: string): Restaurant | undefined {
   return getRestaurantsWithDetectedGallery().find(
     (restaurant) => restaurant.identity.slug === slug,
   );
+}
+
+export function getRestaurantInstagramUrlBySlug(slug: string): string | undefined {
+  const entryFile = path.join(process.cwd(), "data", "restaurants", "entries", `${slug}.ts`);
+  if (!existsSync(entryFile)) return undefined;
+  try {
+    const source = readFileSync(entryFile, "utf8");
+    const byComment = source.match(/^\s*\*\s*Instagram:\s*"([^"]+)"/m)?.[1]?.trim();
+    if (byComment && /^https?:\/\/(www\.)?instagram\.com\//i.test(byComment)) {
+      return byComment;
+    }
+    const byReference = source.match(/https?:\/\/(?:www\.)?instagram\.com\/[A-Za-z0-9._/-]+/i)?.[0]?.trim();
+    if (byReference) return byReference;
+  } catch {
+    // no-op: si falla lectura/parsing, simplemente no mostramos el bloque de Instagram
+  }
+  return undefined;
 }
 
 export function filterRestaurantsByCategory(

@@ -5,7 +5,7 @@ const slug = "camping-el-ovejo" as const;
 /**
  * BORRADOR GENERADO POR restaurant:intake.
  * Google Maps: "https://maps.google.com/?cid=17731582110262307700&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
- * Instagram: "Por confirmar"
+ * Instagram: "https://www.instagram.com/haciendaelovejo/"
  * Referencias: ["https://www.google.com/maps/place/Camping+El+Ovejo/@14.5465797,-87.8315856,17z/data=!3m1!4b1!4m6!3m5!1s0x8f6597352e86d471:0xf6133bfbbbdb2b74!8m2!3d14.5465745!4d-87.8290107!16s%2Fg%2F11p5fr00g7?entry=tts&g_ep=EgoyMDI2MDQxMy4wIPu8ASoASAFQAw%3D%3D&skid=c34e27e9-38d5-4a79-8884-f27783a361f5","https://nominatim.openstreetmap.org/reverse","Google Places API (New)"]
  * Notas: "Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar. Maps[google_places, confianza alta]: https://maps.google.com/?cid=17731582110262307700&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
  */

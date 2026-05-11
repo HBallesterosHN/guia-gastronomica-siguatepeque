@@ -1,10 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getFeaturedRestaurants } from "@/lib/restaurants";
+import { ogPublicImagePath } from "@/lib/og-metadata";
+import { SITE_BRAND_NAME } from "@/lib/site-brand";
+
+const GUIAS_TITLE = `Guías gastronómicas en Siguatepeque | ${SITE_BRAND_NAME}`;
+const GUIAS_DESCRIPTION =
+  "Sopas, desayunos y cafés en Siguatepeque: listas cortas y locales para decidir sin dar tantas vueltas.";
+
+const preview = getFeaturedRestaurants(1)[0];
+const guiasOgImages =
+  preview?.media.hero != null
+    ? [{ url: ogPublicImagePath(preview.media.hero), alt: preview.identity.name }]
+    : undefined;
 
 export const metadata: Metadata = {
-  title: "Guías gastronómicas en Siguatepeque | Guía Gastronómica",
-  description:
-    "Explora nuestras recomendaciones locales sobre dónde comer en Siguatepeque: sopas, desayunos, cafés y más.",
+  title: GUIAS_TITLE,
+  description: GUIAS_DESCRIPTION,
+  alternates: { canonical: "/guias" },
+  openGraph: {
+    type: "website",
+    locale: "es_HN",
+    siteName: SITE_BRAND_NAME,
+    title: GUIAS_TITLE,
+    description: GUIAS_DESCRIPTION,
+    url: "/guias",
+    images: guiasOgImages,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: GUIAS_TITLE,
+    description: GUIAS_DESCRIPTION,
+    images: guiasOgImages?.map((img) => img.url),
+  },
 };
 
 const guides = [
@@ -39,8 +67,8 @@ export default function GuiasPage() {
           Guías gastronómicas en Siguatepeque
         </h1>
         <p className="max-w-3xl text-zinc-600">
-          Si no sabes por dónde empezar, aquí tienes nuestras recomendaciones locales para comer
-          bien en Siguatepeque: sopas, desayunos, cafés y más.
+          Cada guía es una conversación de mesa: pocos lugares, criterio claro y cero relleno. Si
+          te falta un tema, nos escribes y lo vamos sumando.
         </p>
       </header>
 

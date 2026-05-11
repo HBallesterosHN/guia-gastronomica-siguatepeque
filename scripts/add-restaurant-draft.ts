@@ -253,15 +253,7 @@ export const ${variableName}: Restaurant = {
     offersDelivery: false,
     acceptsReservations: false,
   },
-  reviews: [
-    {
-      id: "${slug}-1",
-      author: "Pendiente",
-      rating: 0,
-      comment: "Reseña por completar.",
-      date: "${today}",
-    },
-  ],
+  reviews: [],
 };
 `;
 }

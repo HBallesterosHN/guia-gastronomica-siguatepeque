@@ -1,4 +1,4 @@
-import type { RestaurantCategory } from "../../types/restaurant";
+import type { Restaurant, RestaurantCategory } from "../../types/restaurant";
 
 export type ImageDownloadScope = "all" | "hero" | "gallery";
 
@@ -8,12 +8,18 @@ export type IntakeInput = {
   category: RestaurantCategory;
   categoryProvided?: boolean;
   dryRun: boolean;
+  /** Si es true, actualiza solo contenido textual y conserva media actual. */
+  textOnly: boolean;
   /** Controla qué grupos de imágenes se descargan/escriben. */
   imagesScope: ImageDownloadScope;
   /** Fuerza el slug destino para actualizar imágenes del restaurante correcto. */
   slug?: string;
   mapsUrlCli?: string;
   instagramUrlCli?: string;
+  /** URL del menú externo (http/https). */
+  menuUrlCli?: string;
+  /** Texto del botón; por defecto en persist/UI se usa "Ver menú". */
+  menuLabelCli?: string;
 };
 
 export type IntakeMode = "search_only" | "direct_cli";
@@ -183,6 +189,8 @@ export type NormalizedDraft = {
   notes: string;
   references: string[];
   ratings: { average: number; reviewsCount: number };
+  menu?: { url: string; label?: string };
+  profileStatus?: Restaurant["profileStatus"];
 };
 
 export type IntakeReport = {

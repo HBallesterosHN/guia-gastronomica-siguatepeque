@@ -1,7 +1,42 @@
+import type { Metadata } from "next";
 import { RestaurantFilters } from "@/components/restaurants/RestaurantFilters";
 import { RestaurantCard } from "@/components/restaurants/RestaurantCard";
 import { filterRestaurants } from "@/lib/restaurants";
+import { getFeaturedRestaurants } from "@/lib/restaurants";
+import { ogPublicImagePath } from "@/lib/og-metadata";
+import { SITE_BRAND_NAME, SITE_PAGE_TITLE_SUFFIX } from "@/lib/site-brand";
 import type { PriceRange, RestaurantCategory } from "@/types/restaurant";
+
+const RESTAURANTES_TITLE = `Restaurantes en Siguatepeque ${SITE_PAGE_TITLE_SUFFIX}`;
+const RESTAURANTES_DESCRIPTION =
+  "Listado curado con filtros por categoría, precio, delivery y valoración pública. Guía local Me Voy a Sigua.";
+
+const listPreview = getFeaturedRestaurants(1)[0];
+const listOgImages =
+  listPreview?.media.hero != null
+    ? [{ url: ogPublicImagePath(listPreview.media.hero), alt: listPreview.identity.name }]
+    : undefined;
+
+export const metadata: Metadata = {
+  title: RESTAURANTES_TITLE,
+  description: RESTAURANTES_DESCRIPTION,
+  alternates: { canonical: "/restaurantes" },
+  openGraph: {
+    type: "website",
+    locale: "es_HN",
+    siteName: SITE_BRAND_NAME,
+    title: RESTAURANTES_TITLE,
+    description: RESTAURANTES_DESCRIPTION,
+    url: "/restaurantes",
+    images: listOgImages,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: RESTAURANTES_TITLE,
+    description: RESTAURANTES_DESCRIPTION,
+    images: listOgImages?.map((img) => img.url),
+  },
+};
 
 interface RestaurantsPageProps {
   searchParams: Promise<{
@@ -70,12 +105,13 @@ export default async function RestaurantsPage({
     <main className="mx-auto w-full max-w-6xl space-y-8 px-4 py-10 sm:px-6">
       <header className="space-y-3">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          Guía Gastronómica de Siguatepeque
+          {SITE_BRAND_NAME}
         </p>
-        <h1 className="text-3xl font-bold text-zinc-900">Todos los restaurantes</h1>
+        <h1 className="text-3xl font-bold text-zinc-900">Restaurantes en Siguatepeque</h1>
         <p className="max-w-2xl text-zinc-600">
-          Filtra por categoría, precio, delivery, reservas y rating para encontrar
-          rápido el lugar ideal para tu visita en Siguatepeque.
+          Filtra por categoría, precio, si llevan a domicilio o si aceptan reservas, y por la
+          valoración pública cuando la tenemos. Cada ficha es para salir con el teléfono y la
+          dirección claros.
         </p>
       </header>
 

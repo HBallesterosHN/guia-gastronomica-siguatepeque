@@ -10,9 +10,7 @@ import { restaurantCasaPinar } from "@/data/restaurants/entries/casa-pinar";
 import { restaurantElToritoSteakHouse } from "@/data/restaurants/entries/el-torito-steak-house";
 import { restaurantHabanaMex } from "@/data/restaurants/entries/habana-mex";
 import { restaurantLaPastela } from "@/data/restaurants/entries/la-pastela";
-import { restaurantRosquillasPaola } from "@/data/restaurants/entries/restaurante-rosquillas-paola";
 import { restaurantTipicosGuancasco } from "@/data/restaurants/entries/tipicos-guancasco";
-import { restaurantVillaVerde } from "@/data/restaurants/entries/restaurante-villa-verde";
 
 import { restaurantElDeArriba } from "@/data/restaurants/entries/el-de-arriba";
 import { restaurantSavoyCafeX301 } from "@/data/restaurants/entries/savoy-cafe-x301";
@@ -23,14 +21,19 @@ import { restaurantCafeElGranizo } from "@/data/restaurants/entries/cafe-el-gran
 import { restaurantGoldenGrill } from "@/data/restaurants/entries/golden-grill";
 import { restaurantChinaWeng } from "@/data/restaurants/entries/china-weng";
 import { restaurantCafeJuanCruz } from "@/data/restaurants/entries/cafe-juan-cruz";
+import { restaurantSiguaCoffee } from "@/data/restaurants/entries/sigua-coffee";
+import { restaurantRestauranteRosquillasPaola } from "@/data/restaurants/entries/restaurante-rosquillas-paola";
+import { restaurantRestauranteVillaVerde } from "@/data/restaurants/entries/restaurante-villa-verde";
+import { restaurantBouquetCoffeeBistro } from "@/data/restaurants/entries/bouquet-coffee-bistro";
+import { restaurantLosJarrosCafeRestaurante } from "@/data/restaurants/entries/los-jarros-cafe-restaurante";
+import { restaurantSavoySanJuan } from "@/data/restaurants/entries/savoy-san-juan";
+import { restaurantRestauranteDelCorral } from "@/data/restaurants/entries/restaurante-del-corral";
 import type { Restaurant } from "@/types/restaurant";
 
 export const restaurants: Restaurant[] = [
   restaurantLaPastela,
   restaurantTipicosGuancasco,
   restaurantCasaPinar,
-  restaurantRosquillasPaola,
-  restaurantVillaVerde,
   restaurantHabanaMex,
   restaurantElToritoSteakHouse,
   restaurantElDeArriba,
@@ -42,4 +45,11 @@ export const restaurants: Restaurant[] = [
   restaurantGoldenGrill,
   restaurantChinaWeng,
   restaurantCafeJuanCruz,
+  restaurantSiguaCoffee,
+  restaurantRestauranteRosquillasPaola,
+  restaurantRestauranteVillaVerde,
+  restaurantBouquetCoffeeBistro,
+  restaurantLosJarrosCafeRestaurante,
+  restaurantSavoySanJuan,
+  restaurantRestauranteDelCorral,
 ];

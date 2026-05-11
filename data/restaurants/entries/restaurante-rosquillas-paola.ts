@@ -2,54 +2,49 @@ import type { Restaurant } from "@/types/restaurant";
 
 const slug = "restaurante-rosquillas-paola" as const;
 
-export const restaurantRosquillasPaola: Restaurant = {
+/**
+ * BORRADOR GENERADO POR restaurant:intake.
+ * Google Maps: "https://maps.google.com/?cid=13585134709104298453&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
+ * Instagram: "https://www.instagram.com/restaurantepaola/"
+ * Referencias: ["https://www.google.com/maps/place/Restaurante+y+rosquilleria+Paola/@14.6204408,-87.9056001,17z/data=!3m1!4b1!4m6!3m5!1s0x8f65bf0c26d99645:0xbc88180a71fdc9d5!8m2!3d14.6204357!4d-87.9007292!16s%2Fg%2F11fx7wtdtd?entry=tts&g_ep=EgoyMDI2MDQyMS4wIPu8ASoASAFQAw%3D%3D&skid=9a4c9155-fba0-47b4-ab3a-5865c339c142","https://nominatim.openstreetmap.org/reverse","Google Places API (New)"]
+ * Notas: "Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar. Maps[google_places, confianza alta]: https://maps.google.com/?cid=13585134709104298453&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
+ */
+export const restaurantRestauranteRosquillasPaola: Restaurant = {
   identity: {
-    name: "Restaurante Rosquillas Paola",
+    name: "Restaurante y rosquilleria Paola",
     slug,
   },
   classification: {
-    category: "comida-tipica",
+    category: "familiar",
     priceRange: "$$",
-    featured: true,
+    featured: false,
   },
   copy: {
-    summary:
-      "Restaurante y rosquilleria sobre la CA-5 con sabor tradicional, parrilladas y productos para llevar.",
+    summary: "Restaurante y rosquilleria Paola en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones.",
   },
   location: {
-    address:
-      "Restaurante y Rosquilleria Paola, Siguatepeque, Comayagua, Honduras.",
+    address: "J3CX+5PC, El Socorro, Comayagua, Honduras",
     coordinates: { lat: 14.6204357, lng: -87.9007292 },
   },
   contact: {
-    phone: "+504 9557-7301",
-    whatsapp: "+504 9557-7301",
+    phone: "+504 9576-9360",
+    whatsapp: "+504 9576-9360",
   },
   hours: {
-    scheduleLabel: "Todos los dias (confirmar horario por WhatsApp).",
+    scheduleLabel: "Monday: 7:00 AM – 5:30 PM · Tuesday: 7:00 AM – 5:30 PM · Wednesday: 7:00 AM – 5:30 PM · Thursday: 7:00 AM – 5:30 PM · Friday: 7:00 AM – 5:30 PM · Saturday: 7:00 AM – 5:30 PM · Sunday: 7:00 AM – 5:30 PM",
+    structured: [{"day":"Lunes","open":"7:00 AM","close":"5:30 PM"},{"day":"Martes","open":"7:00 AM","close":"5:30 PM"},{"day":"Miercoles","open":"7:00 AM","close":"5:30 PM"},{"day":"Jueves","open":"7:00 AM","close":"5:30 PM"},{"day":"Viernes","open":"7:00 AM","close":"5:30 PM"},{"day":"Sabado","open":"7:00 AM","close":"5:30 PM"},{"day":"Domingo","open":"7:00 AM","close":"5:30 PM"}],
   },
   media: {
     hero: "/restaurants/restaurante-rosquillas-paola/hero.jpg",
-    gallery: [
-      "/restaurants/restaurante-rosquillas-paola/gallery-1.jpg",
-      "/restaurants/restaurante-rosquillas-paola/gallery-2.jpg",
-    ],
+    gallery: ["/restaurants/restaurante-rosquillas-paola/gallery-1.jpg","/restaurants/restaurante-rosquillas-paola/gallery-2.jpg","/restaurants/restaurante-rosquillas-paola/gallery-3.jpg","/restaurants/restaurante-rosquillas-paola/gallery-4.jpg","/restaurants/restaurante-rosquillas-paola/gallery-5.jpg","/restaurants/restaurante-rosquillas-paola/gallery-6.jpg","/restaurants/restaurante-rosquillas-paola/gallery-7.jpg","/restaurants/restaurante-rosquillas-paola/gallery-8.jpg","/restaurants/restaurante-rosquillas-paola/gallery-9.jpg","/restaurants/restaurante-rosquillas-paola/gallery-10.jpg"],
   },
   ratings: {
-    average: 4.6,
-    reviewsCount: 64,
+    average: 4.5,
+    reviewsCount: 266,
   },
   services: {
-    offersDelivery: true,
+    offersDelivery: false,
     acceptsReservations: false,
   },
-  reviews: [
-    {
-      id: "rp-1",
-      author: "Cliente frecuente",
-      rating: 5,
-      comment: "Las rosquillas son de las mejores de la zona central.",
-      date: "2026-04-08",
-    },
-  ],
+  reviews: [],
 };

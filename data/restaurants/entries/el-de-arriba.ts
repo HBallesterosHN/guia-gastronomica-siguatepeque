@@ -17,7 +17,7 @@ export const restaurantElDeArriba: Restaurant = {
   classification: {
     category: "familiar",
     priceRange: "$$",
-    featured: false,
+    featured: true,
   },
   copy: {
     summary: "El de Arriba en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones. Ideal para disfrutar una visita en Siguatepeque.",

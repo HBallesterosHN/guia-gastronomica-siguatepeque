@@ -289,6 +289,15 @@ export function normalizeIntake(
     },
   };
 
+  const menuUrl = safeUrl(input.menuUrlCli?.trim());
+  if (input.menuUrlCli?.trim()) {
+    if (!menuUrl) {
+      throw new Error('--menu debe ser una URL válida con esquema http o https (ej. "https://...").');
+    }
+    const labelRaw = input.menuLabelCli?.trim();
+    draft.menu = labelRaw ? { url: menuUrl, label: clean(labelRaw) } : { url: menuUrl };
+  }
+
   const found: string[] = [];
   const pending: string[] = [];
   const checks: Array<[string, boolean]> = [

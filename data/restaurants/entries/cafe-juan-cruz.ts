@@ -5,7 +5,7 @@ const slug = "cafe-juan-cruz" as const;
 /**
  * BORRADOR GENERADO POR restaurant:intake.
  * Google Maps: "https://maps.google.com/?cid=3675960341566051098&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
- * Instagram: "Por confirmar"
+ * Instagram: "https://www.instagram.com/juancruzcafe/"
  * Referencias: ["https://www.google.com/maps/place/Juan+Cruz+Caf%C3%A9/@14.5779925,-87.8410337,17z/data=!3m1!4b1!4m6!3m5!1s0x8f6595eaba11c539:0x3303a2745f77d31a!8m2!3d14.5779874!4d-87.8361628!16s%2Fg%2F11fy4lp31s?entry=tts&g_ep=EgoyMDI2MDQyMC4wIPu8ASoASAFQAw%3D%3D&skid=9ceba5d2-c2f7-4eaa-9aba-28ae94ffa648","https://nominatim.openstreetmap.org/reverse","Google Places API (New)"]
  * Notas: "Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar. Maps[google_places, confianza alta]: https://maps.google.com/?cid=3675960341566051098&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
  */

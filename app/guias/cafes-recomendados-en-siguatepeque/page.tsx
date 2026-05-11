@@ -1,13 +1,16 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getRestaurantBySlug } from "@/lib/restaurants";
+import { guidePageMetadata } from "@/lib/guide-page-metadata";
+import { INSTAGRAM_HANDLE, INSTAGRAM_PROFILE_URL } from "@/lib/site-brand";
 
-export const metadata: Metadata = {
-  title: "Cafés recomendados en Siguatepeque | Guía",
+export const metadata = guidePageMetadata({
+  canonicalPath: "/guias/cafes-recomendados-en-siguatepeque",
+  titleShort: "Cafés recomendados en Siguatepeque",
   description:
-    "Guía editorial de cafés recomendados en Siguatepeque para una pausa, reunión o tarde tranquila.",
-};
+    "Dónde tomar café en Siguatepeque con calma: guía editorial con recomendaciones concretas.",
+  previewSlug: "la-pastela",
+});
 
 const guideEntries = [
   {
@@ -16,7 +19,7 @@ const guideEntries = [
     dishName: "Café y repostería",
     placeName: "La Pastela",
     description:
-      "Incluimos a La Pastela como recomendación principal porque en el sistema está clasificado como café y abre desde temprano, lo cual encaja perfecto para una pausa en la mañana o en la tarde. • Es nuestra sugerencia cuando quieres conversar tranquilo con algo dulce. • También funciona bien si buscas un lugar cómodo para una reunión corta.",
+      "La Pastela es nuestra primera recomendación en esta guía: abre temprano, el ambiente invita a quedarse y sirve bien para una mañana de café y repostería o una tarde de plática sin prisa. • Cuando alguien nos pide un café tranquilo en el centro, es de los nombres que salen. • También funciona si necesitas un espacio cómodo para una reunión corta o un café antes de seguir el día.",
   },
 ];
 
@@ -31,8 +34,8 @@ export default function CafesRecomendadosEnSiguatepequePage() {
           ☕ Cafés recomendados en Siguatepeque
         </h1>
         <p className="max-w-2xl text-lg leading-relaxed text-zinc-600">
-          Una selección para cuando quieres una pausa con buen café, plática tranquila y ambiente
-          agradable en Siguatepeque.
+          En Siguatepeque el café se toma en serio: aquí van los lugares que hoy sí sugerimos para
+          una pausa con buena taza, conversación tranquila y ambiente agradable.
         </p>
       </header>
 
@@ -117,12 +120,12 @@ export default function CafesRecomendadosEnSiguatepequePage() {
           Esta guía crecerá con más cafés conforme ampliemos la curaduría local. ¿Nos faltó uno
           que te guste? Escríbenos en Instagram{" "}
           <a
-            href="https://www.instagram.com/mevoyasigua/"
+            href={INSTAGRAM_PROFILE_URL}
             className="font-semibold text-emerald-700 hover:text-emerald-800"
             target="_blank"
             rel="noopener noreferrer"
           >
-            @mevoyasigua
+            @{INSTAGRAM_HANDLE}
           </a>
           .
         </p>

@@ -29,7 +29,9 @@ export function StarRating({ rating, reviewCount, className }: StarRatingProps) 
       </div>
       <p className="text-sm text-zinc-600">
         {rating.toFixed(1)}
-        {reviewCount ? ` (${reviewCount} reseñas)` : ""}
+        {typeof reviewCount === "number" && reviewCount > 0
+          ? ` · ${reviewCount.toLocaleString("es-HN")} valoraciones públicas`
+          : ""}
       </p>
     </div>
   );

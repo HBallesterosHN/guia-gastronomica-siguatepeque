@@ -5,7 +5,7 @@ const slug = "cafe-el-granizo" as const;
 /**
  * BORRADOR GENERADO POR restaurant:intake.
  * Google Maps: "https://maps.google.com/?cid=4885122439369978940&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
- * Instagram: "Por confirmar"
+ * Instagram: "https://www.instagram.com/dycfincaelgranizo/"
  * Referencias: ["https://www.google.com/maps/place/D%26C+Coffee+Roasters/@14.5967618,-87.8316326,17z/data=!4m6!3m5!1s0x8f6595ba0ba2d3e1:0x43cb70f9e2eff43c!8m2!3d14.5972521!4d-87.8281555!16s%2Fg%2F11fcqlbj10?entry=tts&g_ep=EgoyMDI2MDQyMC4wIPu8ASoASAFQAw%3D%3D&skid=f44b3e13-d560-42e2-b6e1-0031e2d64976","https://nominatim.openstreetmap.org/reverse","Google Places API (New)"]
  * Notas: "Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar. Maps[google_places, confianza alta]: https://maps.google.com/?cid=4885122439369978940&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
  */
@@ -17,7 +17,7 @@ export const restaurantCafeElGranizo: Restaurant = {
   classification: {
     category: "cafe",
     priceRange: "$$",
-    featured: false,
+    featured: true,
   },
   copy: {
     summary: "D&C Coffee Roasters en Siguatepeque, opción agradable para café y conversación tranquila; con datos de contacto u horario parcialmente verificados.",

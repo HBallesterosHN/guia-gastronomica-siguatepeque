@@ -5,7 +5,7 @@ const slug = "retro-cafe" as const;
 /**
  * BORRADOR GENERADO POR restaurant:intake.
  * Google Maps: "https://maps.google.com/?cid=608811554100346294&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
- * Instagram: "Por confirmar"
+ * Instagram: "https://www.instagram.com/retrocafehn/"
  * Referencias: ["https://www.google.com/maps/place/Retro+Cafe/@14.6024618,-87.8329951,17z/data=!3m1!4b1!4m6!3m5!1s0x8f659509ff56432d:0x872eee2014dfdb6!8m2!3d14.6024566!4d-87.8304202!16s%2Fg%2F11gbw5v_s4?entry=tts&g_ep=EgoyMDI2MDQyMC4wIPu8ASoASAFQAw%3D%3D&skid=ff4b7e8e-4e8a-49a2-8869-00d50f4fc277","https://nominatim.openstreetmap.org/reverse","Google Places API (New)"]
  * Notas: "Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar. Maps[google_places, confianza alta]: https://maps.google.com/?cid=608811554100346294&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
  */

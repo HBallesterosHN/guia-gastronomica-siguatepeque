@@ -1,13 +1,16 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getRestaurantBySlug } from "@/lib/restaurants";
+import { guidePageMetadata } from "@/lib/guide-page-metadata";
+import { INSTAGRAM_HANDLE, INSTAGRAM_PROFILE_URL } from "@/lib/site-brand";
 
-export const metadata: Metadata = {
-  title: "Sopas en Siguatepeque que vale la pena pedir cuando el frío pega | Guía",
+export const metadata = guidePageMetadata({
+  canonicalPath: "/guias/mejores-sopas-en-siguatepeque",
+  titleShort: "Sopas en Siguatepeque cuando pega el frío",
   description:
-    "Cuatro sopas que seguimos pidiendo en Siguatepeque —gallina india, marinera, sopa de res y mondongo— y el restaurante donde las encontramos.",
-};
+    "Gallina india, marinera, sopa de res y mondongo: cuatro sopas que seguimos pidiendo en Siguatepeque y dónde pedirlas.",
+  previewSlug: "tipicos-guancasco",
+});
 
 const guideEntries = [
   {
@@ -24,7 +27,7 @@ const guideEntries = [
     dishName: "Marinera",
     placeName: "El Torito Steak House",
     description:
-      "La dejamos en segundo lugar porque cuando ya comimos mucha sopa de tierra, en El Torito la marinera nos cambia el chip: caldo de pescado y mariscos, en un lugar en la CA-5 frente a Uniplaza que en el sitio figura como referencia en parrilladas, mariscos y sopas. • Sirve para el antojo de mar sin complicarse. • Si quieres algo caliente pero distinto al caldo de siempre, esta es nuestra apuesta.",
+      "La dejamos en segundo lugar porque cuando ya vienes de mucha sopa de tierra, en El Torito la marinera cambia el chip: caldo de pescado y mariscos, en la CA-5 frente a Uniplaza, en un local donde también se pide parrilla y mariscos. • Sirve para el antojo de mar sin complicarse. • Si quieres algo caliente pero distinto al caldo de siempre, esta es nuestra apuesta.",
   },
   {
     slug: "restaurante-rosquillas-paola" as const,
@@ -40,7 +43,7 @@ const guideEntries = [
     dishName: "Mondongo",
     placeName: "Habana Mex",
     description:
-      "La cerramos en cuarto no porque falte sabor, sino porque el ranking va de lo más típico de almuerzo hondureño hacia un perfil con influencia mexicana; en la ficha de Habana Mex la sopa de mondongo aparece como especialidad de la casa. • Si te late el mondongo bien cocido y con sazón, aquí lo pedimos sin pena. • Es el cierre que pedimos cuando ya dimos la vuelta a las otras y queremos un caldo distinto pero igual de llenador.",
+      "La cerramos en cuarto no porque falte sabor, sino porque el ranking va de lo más típico de almuerzo hondureño hacia un perfil con sazón mexicana; en Habana Mex el mondongo es de los platos que la gente pide seguido. • Si te gusta el mondongo bien cocido y con sazón, aquí lo pedimos sin pena. • Es el cierre cuando ya recorriste las otras y quieres un caldo distinto pero igual de llenador.",
   },
 ];
 
@@ -146,12 +149,12 @@ export default function MejoresSopasEnSiguatepequePage() {
           teléfono o WhatsApp si la sopa sigue disponible. ¿Nos faltó alguna sopa que, para ti,
           debería estar aquí? Escríbenos en Instagram{" "}
           <a
-            href="https://www.instagram.com/mevoyasigua/"
+            href={INSTAGRAM_PROFILE_URL}
             className="font-semibold text-emerald-700 hover:text-emerald-800"
             target="_blank"
             rel="noopener noreferrer"
           >
-            @mevoyasigua
+            @{INSTAGRAM_HANDLE}
           </a>
           .
         </p>
