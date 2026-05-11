@@ -211,6 +211,8 @@ export default async function RestaurantDetailPage({
               </div>
             </div>
 
+            <OwnerProfileUpdateCta slug={identity.slug} variant="banner" />
+
             <GalleryLightbox images={galleryImages} restaurantName={identity.name} />
             {instagramUrl ? (
               <div className="pt-1">
@@ -377,8 +379,6 @@ export default async function RestaurantDetailPage({
                 )}
               </div>
             </div>
-
-            <OwnerProfileUpdateCta />
           </aside>
         </div>
       </section>
