@@ -24,7 +24,8 @@ export default async function AdminBootstrapPage({ searchParams }: PageProps) {
         <h1 className="mt-2 text-2xl font-bold text-zinc-900">Acceso</h1>
         <p className="mt-2 text-sm text-zinc-600">
           Entra con una cuenta Google marcada como <strong>admin</strong> en la base, o usa la clave
-          temporal <code className="rounded bg-zinc-200 px-1">ADMIN_SECRET</code> (cookie httpOnly).
+          temporal <code className="rounded bg-zinc-200 px-1">ADMIN_SECRET</code> (si no existe, se usa
+          <code className="ml-1 rounded bg-zinc-200 px-1">AUTH_SECRET</code>) con cookie httpOnly.
         </p>
       </div>
 

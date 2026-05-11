@@ -7,6 +7,7 @@ import {
   ADMIN_SESSION_COOKIE,
   createAdminSessionToken,
   getAdminCookieSetOptions,
+  getAdminSecret,
 } from "@/lib/admin-session";
 
 function safeEqualString(a: string, b: string): boolean {
@@ -17,7 +18,7 @@ function safeEqualString(a: string, b: string): boolean {
 }
 
 export async function loginAdminSecret(formData: FormData): Promise<void> {
-  const envSecret = process.env.ADMIN_SECRET?.trim();
+  const envSecret = getAdminSecret();
   const submitted = formData.get("secret");
   const submittedStr = typeof submitted === "string" ? submitted : "";
 
