@@ -124,6 +124,7 @@ export default async function RestaurantDetailPage({
             src={media.hero}
             alt={identity.name}
             fill
+            unoptimized={media.hero.startsWith("http://") || media.hero.startsWith("https://")}
             className="object-cover"
             sizes="100vw"
             priority

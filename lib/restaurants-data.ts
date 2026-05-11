@@ -49,12 +49,18 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
   let galleryPaths: RestaurantPublicImagePath[] = [];
   if (row.gallery != null && Array.isArray(row.gallery)) {
     galleryPaths = row.gallery
-      .filter((u): u is string => typeof u === "string" && u.startsWith("/"))
+      .filter(
+        (u): u is string =>
+          typeof u === "string" && (u.startsWith("/") || u.startsWith("https://")),
+      )
       .map((u) => u as RestaurantPublicImagePath);
   }
 
+  const heroRaw = row.heroUrl?.trim() ?? "";
   const hero = (
-    row.heroUrl?.trim().startsWith("/") ? row.heroUrl.trim() : "/restaurants/placeholders/hero-placeholder.svg"
+    heroRaw.startsWith("/") || heroRaw.startsWith("https://")
+      ? heroRaw
+      : "/restaurants/placeholders/hero-placeholder.svg"
   ) as RestaurantPublicImagePath;
 
   return {

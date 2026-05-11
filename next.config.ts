@@ -7,6 +7,13 @@ const nextConfig: NextConfig = {
         pathname: "/restaurants/**",
       },
     ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+    ],
   },
 };
 

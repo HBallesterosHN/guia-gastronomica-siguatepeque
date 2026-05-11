@@ -7,6 +7,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ——— Auth.js (NextAuth v5) ———
+
+enum UserRole {
+  user
+  admin
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  /// Proveedor OAuth usado en el último acceso (referencia UX).
+  provider      String?
+  role          UserRole  @default(user)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts            Account[]
+  sessions            Session[]
+  restaurantClaims    RestaurantClaim[]
+  restaurantOwnership RestaurantOwnership[]
+  changeRequests      RestaurantChangeRequest[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ——— Restaurantes y ownership ———
+
 model Restaurant {
   id            String   @id @default(cuid())
   slug          String   @unique
@@ -33,44 +102,80 @@ model Restaurant {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  updateRequests RestaurantUpdateRequest[]
-  claimRequests  ClaimRequest[]
+  claims         RestaurantClaim[]
+  ownerships     RestaurantOwnership[]
+  changeRequests RestaurantChangeRequest[]
 
   @@map("restaurants")
 }
 
-model RestaurantUpdateRequest {
-  id               String   @id @default(cuid())
+enum ClaimStatus {
+  pending
+  approved
+  rejected
+}
+
+model RestaurantClaim {
+  id               String      @id @default(cuid())
   restaurantId     String?
-  restaurantSlug   String?
+  restaurantSlug   String
+  userId           String
   ownerName        String
   ownerPhone       String?
   ownerEmail       String?
   message          String?
-  requestedChanges Json?
-  imageUrls        Json?
-  status           String   @default("pending")
-  createdAt        DateTime @default(now())
+  evidenceUrl      String?
+  status           ClaimStatus @default(pending)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   restaurant Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("restaurant_update_requests")
+  @@index([restaurantSlug])
+  @@index([status])
+  @@map("restaurant_claims")
 }
 
-model ClaimRequest {
-  id             String   @id @default(cuid())
-  restaurantId   String?
-  restaurantSlug String?
-  ownerName      String
-  ownerPhone     String?
-  ownerEmail     String?
-  message        String?
-  menuUrl        String?
-  instagramUrl   String?
-  status         String   @default("pending")
-  createdAt      DateTime @default(now())
+enum OwnershipRole {
+  owner
+  manager
+}
 
-  restaurant Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+model RestaurantOwnership {
+  id           String          @id @default(cuid())
+  restaurantId String
+  userId       String
+  role         OwnershipRole   @default(owner)
+  status       String          @default("active")
+  createdAt    DateTime        @default(now())
 
-  @@map("claim_requests")
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, userId])
+  @@map("restaurant_ownerships")
+}
+
+enum ChangeRequestStatus {
+  pending
+  approved
+  rejected
+}
+
+model RestaurantChangeRequest {
+  id           String                @id @default(cuid())
+  restaurantId String
+  userId       String
+  changes      Json
+  imageUrls    Json?
+  status       ChangeRequestStatus    @default(pending)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("restaurant_change_requests")
 }

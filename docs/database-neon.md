@@ -4,59 +4,87 @@ La app sigue sirviendo restaurantes desde `data/restaurants` si no hay base o si
 
 ## Variables de entorno
 
+### Base de datos
+
 | Variable | Uso |
 |----------|-----|
-| `DATABASE_URL` | Cadena de conexión PostgreSQL de Neon (pooler recomendado en serverless). Prisma la lee desde `prisma/schema.prisma`. |
+| `DATABASE_URL` | PostgreSQL (Neon). Usada por Prisma. |
 
-En Vercel: Project → Settings → Environment Variables → añade `DATABASE_URL` para Production (y Preview si quieres DB compartida o de staging).
+### Auth.js (NextAuth v5)
 
-En local, crea `.env` en la raíz del repo (no lo subas a git):
+| Variable | Uso |
+|----------|-----|
+| `AUTH_SECRET` | Secreto para firmar cookies/JWT. Genera uno largo y aleatorio; no lo compartas ni lo subas a git. |
+| `AUTH_GOOGLE_ID` | Client ID de Google OAuth. |
+| `AUTH_GOOGLE_SECRET` | Client secret de Google OAuth. |
+
+En Vercel: Settings → Environment Variables. En local: `.env` / `.env.local`.
+
+### Admin (bootstrap)
+
+| Variable | Uso |
+|----------|-----|
+| `ADMIN_SECRET` | Clave para cookie httpOnly en `/admin` cuando aún no usas cuenta Google con `role = admin` en la tabla `users`. |
+
+El primer usuario administrador puede crearse en Google y luego en Neon: `UPDATE users SET role = 'admin' WHERE email = 'tu@correo.com';`
+
+### Cloudinary (subidas desde el panel del dueño)
+
+| Variable | Uso |
+|----------|-----|
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Nombre de nube (público; se usa en el cliente para subir). |
+| `CLOUDINARY_API_KEY` | API key (solo servidor). |
+| `CLOUDINARY_API_SECRET` | Secreto para firmar uploads (solo servidor). |
+
+Ejemplo local:
 
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST/DB?sslmode=require"
+AUTH_SECRET="genera-un-string-largo-aleatorio"
+AUTH_GOOGLE_ID="..."
+AUTH_GOOGLE_SECRET="..."
+ADMIN_SECRET="clave-temporal-solo-para-bootstrap"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="tu-nube"
+CLOUDINARY_API_KEY="..."
+CLOUDINARY_API_SECRET="..."
 ```
-
-Neon suele ofrecer dos URLs; para Next.js en Vercel conviene la URL con **pooling** (p. ej. `-pooler` en el host) cuando la documentación de Neon lo indique.
 
 ## Comandos Prisma útiles
 
 ```bash
-# Regenerar el cliente (también se ejecuta en `npm install` vía postinstall)
 npm run db:generate
-
-# Aplicar el esquema sin historial de migraciones (rápido en prototipo)
 npm run db:push
-
-# Crear y aplicar migraciones en desarrollo (requiere DATABASE_URL)
 npm run db:migrate
-
-# Consola para inspeccionar datos
 npm run db:studio
 ```
 
 ## Migraciones
 
-1. Configura `DATABASE_URL` hacia tu base Neon (puede ser una rama de desarrollo).
-2. Tras cambiar `prisma/schema.prisma`, ejecuta:
+Tras cambiar `prisma/schema.prisma`:
 
-   ```bash
-   npx prisma migrate dev --name describe_tu_cambio
-   ```
+```bash
+npx prisma migrate dev --name describe_tu_cambio
+```
 
-   Esto crea la carpeta `prisma/migrations/` y aplica los cambios a esa base.
+En producción:
 
-3. En CI/producción (Vercel build o despliegue), aplica migraciones ya versionadas con:
+```bash
+npx prisma migrate deploy
+```
 
-   ```bash
-   npx prisma migrate deploy
-   ```
+> **Importante:** el esquema actual incluye Auth.js (`User`, `Account`, `Session`, `VerificationToken`), ownership (`RestaurantOwnership`), reclamos (`RestaurantClaim`) y solicitudes de cambio (`RestaurantChangeRequest`). Si venías de tablas antiguas (`restaurant_update_requests`, `claim_requests`), planifica migración de datos o arranca una base nueva.
 
-   Añade este paso al pipeline si quieres que cada deploy deje el esquema al día (o ejecuta `migrate deploy` manualmente tras el primer despliegue).
+## Rutas relacionadas con datos
 
-Si aún no usas migraciones versionadas, `prisma db push` alinea el esquema con Neon; es suficiente para pruebas, pero para producción a largo plazo es mejor `migrate dev` / `migrate deploy`.
+- **Público:** `/restaurantes/[slug]/reclamar` — reclamo de perfil (requiere login Google).
+- **Dueño:** `/dashboard` y `/dashboard/restaurants/[slug]/solicitar` — solicitudes de cambio (pendientes de aprobación).
+- **Admin:** `/admin` (acceso), `/admin/reclamos`, `/admin/cambios` — aprobación editorial.
 
 ## Código relacionado
 
-- `prisma/schema.prisma` — modelos `Restaurant`, `RestaurantUpdateRequest`, `ClaimRequest`.
-- `lib/prisma.ts` — instancia singleton de `PrismaClient`.
+- `prisma/schema.prisma` — modelos de negocio + Auth.js.
+- `lib/prisma.ts` — `PrismaClient` singleton.
 - `lib/restaurants-data.ts` — lectura híbrida DB + archivos.
+- `auth.ts` / `auth.config.ts` — Auth.js + adaptador Prisma.
+- `lib/restaurant-db-bootstrap.ts` — crear fila `Restaurant` en Neon desde la ficha TS.
+- `lib/apply-owner-changes.ts` — aplicar JSON de cambios aprobados sobre `Restaurant`.

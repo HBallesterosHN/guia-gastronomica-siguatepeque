@@ -7,6 +7,7 @@ import {
   SITE_BRAND_SHORT,
 } from "@/lib/site-brand";
 import { getSiteUrl } from "@/lib/site-url";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -62,6 +63,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900">
+        <Providers>
         <header className="border-b border-zinc-200 bg-white/90 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
             <Link href="/" className="min-w-0 shrink-0">
@@ -85,11 +87,15 @@ export default function RootLayout({
               <Link href="/sobre" className="hover:text-zinc-900">
                 Sobre
               </Link>
+              <Link href="/dashboard" className="hover:text-zinc-900">
+                Mi cuenta
+              </Link>
             </nav>
           </div>
         </header>
         <div className="flex-1">{children}</div>
         <SiteFooter />
+        </Providers>
       </body>
     </html>
   );

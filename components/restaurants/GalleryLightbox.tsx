@@ -8,6 +8,10 @@ interface GalleryLightboxProps {
   restaurantName: string;
 }
 
+function remoteImage(src: string): boolean {
+  return src.startsWith("http://") || src.startsWith("https://");
+}
+
 export function GalleryLightbox({ images, restaurantName }: GalleryLightboxProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -95,6 +99,7 @@ export function GalleryLightbox({ images, restaurantName }: GalleryLightboxProps
                 src={image}
                 alt={`Foto ${index + 1} de ${restaurantName}`}
                 fill
+                unoptimized={remoteImage(image)}
                 className="object-cover transition duration-500 group-hover:scale-[1.02]"
                 sizes="(max-width: 640px) 100vw, 50vw"
               />
@@ -137,6 +142,7 @@ export function GalleryLightbox({ images, restaurantName }: GalleryLightboxProps
                 src={images[openIndex]}
                 alt={`Foto ${openIndex + 1} de ${restaurantName}`}
                 fill
+                unoptimized={remoteImage(images[openIndex])}
                 className="object-contain"
                 sizes="100vw"
                 priority
@@ -185,6 +191,7 @@ export function GalleryLightbox({ images, restaurantName }: GalleryLightboxProps
                             src={thumb}
                             alt={`Miniatura ${index + 1} de ${restaurantName}`}
                             fill
+                            unoptimized={remoteImage(thumb)}
                             className="object-cover"
                             sizes="80px"
                           />
