@@ -20,7 +20,8 @@ export const restaurantRestauranteRosquillasPaola: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Restaurante y rosquilleria Paola en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones.",
+    summary:
+      "Restaurante y rosquillería Paola sobre la CA-5; caldos, carne y mesa de carretera con sabor a hogar.",
   },
   location: {
     address: "J3CX+5PC, El Socorro, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantRestauranteRosquillasPaola: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 7:00 AM – 5:30 PM · Tuesday: 7:00 AM – 5:30 PM · Wednesday: 7:00 AM – 5:30 PM · Thursday: 7:00 AM – 5:30 PM · Friday: 7:00 AM – 5:30 PM · Saturday: 7:00 AM – 5:30 PM · Sunday: 7:00 AM – 5:30 PM",
-    structured: [{"day":"Lunes","open":"7:00 AM","close":"5:30 PM"},{"day":"Martes","open":"7:00 AM","close":"5:30 PM"},{"day":"Miercoles","open":"7:00 AM","close":"5:30 PM"},{"day":"Jueves","open":"7:00 AM","close":"5:30 PM"},{"day":"Viernes","open":"7:00 AM","close":"5:30 PM"},{"day":"Sabado","open":"7:00 AM","close":"5:30 PM"},{"day":"Domingo","open":"7:00 AM","close":"5:30 PM"}],
+    structured: [{"day":"Lunes","open":"7:00 AM","close":"5:30 PM"},{"day":"Martes","open":"7:00 AM","close":"5:30 PM"},{"day":"Miércoles","open":"7:00 AM","close":"5:30 PM"},{"day":"Jueves","open":"7:00 AM","close":"5:30 PM"},{"day":"Viernes","open":"7:00 AM","close":"5:30 PM"},{"day":"Sábado","open":"7:00 AM","close":"5:30 PM"},{"day":"Domingo","open":"7:00 AM","close":"5:30 PM"}],
   },
   media: {
     hero: "/restaurants/restaurante-rosquillas-paola/hero.jpg",

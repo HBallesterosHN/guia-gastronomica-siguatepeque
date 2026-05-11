@@ -25,10 +25,10 @@ export type PlaceIntakeDetails = {
 const EN_TO_ES_DAY: Record<string, string> = {
   Monday: "Lunes",
   Tuesday: "Martes",
-  Wednesday: "Miercoles",
+  Wednesday: "Miércoles",
   Thursday: "Jueves",
   Friday: "Viernes",
-  Saturday: "Sabado",
+  Saturday: "Sábado",
   Sunday: "Domingo",
 };
 

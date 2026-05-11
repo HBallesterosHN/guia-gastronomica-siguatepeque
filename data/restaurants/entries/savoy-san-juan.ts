@@ -20,7 +20,8 @@ export const restaurantSavoySanJuan: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Plaza Savoy en Siguatepeque, opción cómoda para comer en plan familiar; con datos de contacto u horario parcialmente verificados.",
+    summary:
+      "Plaza Savoy en Siguatepeque; comedor amplio estilo salón, práctico para almuerzo de negocio o grupo grande.",
   },
   location: {
     address: "Cementerio San Juan, Blvd. Morazan, 12111 Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantSavoySanJuan: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 8:00 AM – 6:00 PM · Tuesday: 8:00 AM – 6:00 PM · Wednesday: 8:00 AM – 6:00 PM · Thursday: 8:00 AM – 6:00 PM · Friday: 8:00 AM – 6:00 PM · Saturday: 8:00 AM – 12:00 PM · Sunday: Closed",
-    structured: [{"day":"Lunes","open":"8:00 AM","close":"6:00 PM"},{"day":"Martes","open":"8:00 AM","close":"6:00 PM"},{"day":"Miercoles","open":"8:00 AM","close":"6:00 PM"},{"day":"Jueves","open":"8:00 AM","close":"6:00 PM"},{"day":"Viernes","open":"8:00 AM","close":"6:00 PM"},{"day":"Sabado","open":"8:00 AM","close":"12:00 PM"},{"day":"Domingo","open":"Closed","close":"Closed"}],
+    structured: [{"day":"Lunes","open":"8:00 AM","close":"6:00 PM"},{"day":"Martes","open":"8:00 AM","close":"6:00 PM"},{"day":"Miércoles","open":"8:00 AM","close":"6:00 PM"},{"day":"Jueves","open":"8:00 AM","close":"6:00 PM"},{"day":"Viernes","open":"8:00 AM","close":"6:00 PM"},{"day":"Sábado","open":"8:00 AM","close":"12:00 PM"},{"day":"Domingo","open":"Closed","close":"Closed"}],
   },
   media: {
     hero: "/restaurants/savoy-san-juan/hero.jpg",

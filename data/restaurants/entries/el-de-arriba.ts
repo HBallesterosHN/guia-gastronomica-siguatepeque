@@ -20,7 +20,8 @@ export const restaurantElDeArriba: Restaurant = {
     featured: true,
   },
   copy: {
-    summary: "El de Arriba en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones. Ideal para disfrutar una visita en Siguatepeque.",
+    summary:
+      "El De Arriba en Siguatepeque; comedor familiar para almuerzo o cena con menú variado y buen ritmo de mesa.",
   },
   location: {
     address: "Barrio abajo 3ra calle 1 avenida 2 nivel supermercados del corral, 12111 Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantElDeArriba: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 11:30 AM – 9:00 PM · Tuesday: 11:30 AM – 9:00 PM · Wednesday: 11:30 AM – 9:00 PM · Thursday: 11:30 AM – 9:00 PM · Friday: 11:30 AM – 10:00 PM · Saturday: 11:30 AM – 10:00 PM · Sunday: 11:30 AM – 9:00 PM",
-    structured: [{"day":"Lunes","open":"11:30 AM","close":"9:00 PM"},{"day":"Martes","open":"11:30 AM","close":"9:00 PM"},{"day":"Miercoles","open":"11:30 AM","close":"9:00 PM"},{"day":"Jueves","open":"11:30 AM","close":"9:00 PM"},{"day":"Viernes","open":"11:30 AM","close":"10:00 PM"},{"day":"Sabado","open":"11:30 AM","close":"10:00 PM"},{"day":"Domingo","open":"11:30 AM","close":"9:00 PM"}],
+    structured: [{"day":"Lunes","open":"11:30 AM","close":"9:00 PM"},{"day":"Martes","open":"11:30 AM","close":"9:00 PM"},{"day":"Miércoles","open":"11:30 AM","close":"9:00 PM"},{"day":"Jueves","open":"11:30 AM","close":"9:00 PM"},{"day":"Viernes","open":"11:30 AM","close":"10:00 PM"},{"day":"Sábado","open":"11:30 AM","close":"10:00 PM"},{"day":"Domingo","open":"11:30 AM","close":"9:00 PM"}],
   },
   media: {
     hero: "/restaurants/el-de-arriba/hero.jpg",

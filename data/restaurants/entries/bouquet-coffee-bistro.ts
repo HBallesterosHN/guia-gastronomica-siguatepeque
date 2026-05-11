@@ -20,7 +20,8 @@ export const restaurantBouquetCoffeeBistro: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Bouquet Coffee & Bistro · , , Bouquet Coffee & Bistro",
+    summary:
+      "Bouquet Coffee & Bistro en Siguatepeque; café, pastelería y pausa tranquila en un solo lugar.",
   },
   location: {
     address: "Carretera CA-5, contiguo, a El Torito, 12111 Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantBouquetCoffeeBistro: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 10:30 AM – 8:00 PM · Tuesday: 10:30 AM – 8:00 PM · Wednesday: 9:00 AM – 9:00 PM · Thursday: 9:00 AM – 9:00 PM · Friday: 9:00 AM – 9:00 PM · Saturday: 9:00 AM – 9:00 PM · Sunday: 9:00 AM – 9:00 PM",
-    structured: [{"day":"Lunes","open":"10:30 AM","close":"8:00 PM"},{"day":"Martes","open":"10:30 AM","close":"8:00 PM"},{"day":"Miercoles","open":"9:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"9:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"9:00 AM","close":"9:00 PM"},{"day":"Sabado","open":"9:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"9:00 AM","close":"9:00 PM"}],
+    structured: [{"day":"Lunes","open":"10:30 AM","close":"8:00 PM"},{"day":"Martes","open":"10:30 AM","close":"8:00 PM"},{"day":"Miércoles","open":"9:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"9:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"9:00 AM","close":"9:00 PM"},{"day":"Sábado","open":"9:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"9:00 AM","close":"9:00 PM"}],
   },
   media: {
     hero: "/restaurants/bouquet-coffee-bistro/hero.jpg",

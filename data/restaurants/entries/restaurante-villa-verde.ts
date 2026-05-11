@@ -20,7 +20,8 @@ export const restaurantRestauranteVillaVerde: Restaurant = {
     featured: true,
   },
   copy: {
-    summary: "Restaurante Típico Villa Verde en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones.",
+    summary:
+      "Restaurante Villa Verde en Siguatepeque; clásico de la salida a la CA-5 para desayuno campestre o almuerzo largo.",
   },
   location: {
     address: "12111 El Socorro, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantRestauranteVillaVerde: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 6:00 AM – 4:00 PM · Tuesday: 6:00 AM – 4:00 PM · Wednesday: 6:00 AM – 4:00 PM · Thursday: 6:00 AM – 4:00 PM · Friday: 6:00 AM – 4:00 PM · Saturday: 6:00 AM – 4:00 PM · Sunday: 6:00 AM – 4:00 PM",
-    structured: [{"day":"Lunes","open":"6:00 AM","close":"4:00 PM"},{"day":"Martes","open":"6:00 AM","close":"4:00 PM"},{"day":"Miercoles","open":"6:00 AM","close":"4:00 PM"},{"day":"Jueves","open":"6:00 AM","close":"4:00 PM"},{"day":"Viernes","open":"6:00 AM","close":"4:00 PM"},{"day":"Sabado","open":"6:00 AM","close":"4:00 PM"},{"day":"Domingo","open":"6:00 AM","close":"4:00 PM"}],
+    structured: [{"day":"Lunes","open":"6:00 AM","close":"4:00 PM"},{"day":"Martes","open":"6:00 AM","close":"4:00 PM"},{"day":"Miércoles","open":"6:00 AM","close":"4:00 PM"},{"day":"Jueves","open":"6:00 AM","close":"4:00 PM"},{"day":"Viernes","open":"6:00 AM","close":"4:00 PM"},{"day":"Sábado","open":"6:00 AM","close":"4:00 PM"},{"day":"Domingo","open":"6:00 AM","close":"4:00 PM"}],
   },
   media: {
     hero: "/restaurants/restaurante-villa-verde/hero.jpg",

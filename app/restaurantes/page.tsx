@@ -11,32 +11,34 @@ const RESTAURANTES_TITLE = `Restaurantes en Siguatepeque ${SITE_PAGE_TITLE_SUFFI
 const RESTAURANTES_DESCRIPTION =
   "Listado curado con filtros por categoría, precio, delivery y valoración pública. Guía local Me Voy a Sigua.";
 
-const listPreview = getFeaturedRestaurants(1)[0];
-const listOgImages =
-  listPreview?.media.hero != null
-    ? [{ url: ogPublicImagePath(listPreview.media.hero), alt: listPreview.identity.name }]
-    : undefined;
+export async function generateMetadata(): Promise<Metadata> {
+  const listPreview = (await getFeaturedRestaurants(1))[0];
+  const listOgImages =
+    listPreview?.media.hero != null
+      ? [{ url: ogPublicImagePath(listPreview.media.hero), alt: listPreview.identity.name }]
+      : undefined;
 
-export const metadata: Metadata = {
-  title: RESTAURANTES_TITLE,
-  description: RESTAURANTES_DESCRIPTION,
-  alternates: { canonical: "/restaurantes" },
-  openGraph: {
-    type: "website",
-    locale: "es_HN",
-    siteName: SITE_BRAND_NAME,
+  return {
     title: RESTAURANTES_TITLE,
     description: RESTAURANTES_DESCRIPTION,
-    url: "/restaurantes",
-    images: listOgImages,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: RESTAURANTES_TITLE,
-    description: RESTAURANTES_DESCRIPTION,
-    images: listOgImages?.map((img) => img.url),
-  },
-};
+    alternates: { canonical: "/restaurantes" },
+    openGraph: {
+      type: "website",
+      locale: "es_HN",
+      siteName: SITE_BRAND_NAME,
+      title: RESTAURANTES_TITLE,
+      description: RESTAURANTES_DESCRIPTION,
+      url: "/restaurantes",
+      images: listOgImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: RESTAURANTES_TITLE,
+      description: RESTAURANTES_DESCRIPTION,
+      images: listOgImages?.map((img) => img.url),
+    },
+  };
+}
 
 interface RestaurantsPageProps {
   searchParams: Promise<{
@@ -93,7 +95,7 @@ export default async function RestaurantsPage({
   const selectedReservations = isYesNo(params.reservas) ? params.reservas : undefined;
   const selectedMinRating = parseMinRating(params.ratingMinimo);
 
-  const restaurants = filterRestaurants({
+  const restaurants = await filterRestaurants({
     category: selectedCategory,
     priceRange: selectedPrice,
     delivery: selectedDelivery,

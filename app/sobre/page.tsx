@@ -13,32 +13,34 @@ const SOBRE_TITLE = `Sobre esta guía | ${SITE_BRAND_NAME}`;
 const SOBRE_DESCRIPTION =
   "Qué es Me Voy a Sigua, cómo armamos las fichas y por qué no publicamos reseñas inventadas. Guía gastronómica local de Siguatepeque.";
 
-const sobrePreview = getFeaturedRestaurants(1)[0];
-const sobreOgImages =
-  sobrePreview?.media.hero != null
-    ? [{ url: ogPublicImagePath(sobrePreview.media.hero), alt: sobrePreview.identity.name }]
-    : undefined;
+export async function generateMetadata(): Promise<Metadata> {
+  const sobrePreview = (await getFeaturedRestaurants(1))[0];
+  const sobreOgImages =
+    sobrePreview?.media.hero != null
+      ? [{ url: ogPublicImagePath(sobrePreview.media.hero), alt: sobrePreview.identity.name }]
+      : undefined;
 
-export const metadata: Metadata = {
-  title: SOBRE_TITLE,
-  description: SOBRE_DESCRIPTION,
-  alternates: { canonical: "/sobre" },
-  openGraph: {
-    type: "website",
-    locale: "es_HN",
-    siteName: SITE_BRAND_NAME,
+  return {
     title: SOBRE_TITLE,
     description: SOBRE_DESCRIPTION,
-    url: "/sobre",
-    images: sobreOgImages,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SOBRE_TITLE,
-    description: SOBRE_DESCRIPTION,
-    images: sobreOgImages?.map((img) => img.url),
-  },
-};
+    alternates: { canonical: "/sobre" },
+    openGraph: {
+      type: "website",
+      locale: "es_HN",
+      siteName: SITE_BRAND_NAME,
+      title: SOBRE_TITLE,
+      description: SOBRE_DESCRIPTION,
+      url: "/sobre",
+      images: sobreOgImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: SOBRE_TITLE,
+      description: SOBRE_DESCRIPTION,
+      images: sobreOgImages?.map((img) => img.url),
+    },
+  };
+}
 
 export default function SobrePage() {
   return (

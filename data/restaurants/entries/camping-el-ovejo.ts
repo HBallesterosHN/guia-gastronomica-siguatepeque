@@ -20,7 +20,8 @@ export const restaurantCampingElOvejo: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Camping El Ovejo en Siguatepeque, opción cómoda para comer en plan familiar; con datos de contacto u horario parcialmente verificados.",
+    summary:
+      "Camping El Ovejo en Siguatepeque; comida al aire libre y ambiente de finca; conviene llamar antes por horario.",
   },
   location: {
     address: "Aldea San Isidro, G5WC+J9H, Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantCampingElOvejo: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: Closed · Tuesday: 12:30 – 7:30 PM · Wednesday: 12:30 – 7:30 PM · Thursday: 8:00 AM – 7:30 PM · Friday: 8:00 AM – 7:30 PM · Saturday: 8:00 AM – 8:00 PM · Sunday: 8:00 AM – 8:00 PM",
-    structured: [{"day":"Lunes","open":"Closed","close":"Closed"},{"day":"Martes","open":"12:30","close":"7:30 PM"},{"day":"Miercoles","open":"12:30","close":"7:30 PM"},{"day":"Jueves","open":"8:00 AM","close":"7:30 PM"},{"day":"Viernes","open":"8:00 AM","close":"7:30 PM"},{"day":"Sabado","open":"8:00 AM","close":"8:00 PM"},{"day":"Domingo","open":"8:00 AM","close":"8:00 PM"}],
+    structured: [{"day":"Lunes","open":"Closed","close":"Closed"},{"day":"Martes","open":"12:30","close":"7:30 PM"},{"day":"Miércoles","open":"12:30","close":"7:30 PM"},{"day":"Jueves","open":"8:00 AM","close":"7:30 PM"},{"day":"Viernes","open":"8:00 AM","close":"7:30 PM"},{"day":"Sábado","open":"8:00 AM","close":"8:00 PM"},{"day":"Domingo","open":"8:00 AM","close":"8:00 PM"}],
   },
   media: {
     hero: "/restaurants/camping-el-ovejo/hero.jpg",

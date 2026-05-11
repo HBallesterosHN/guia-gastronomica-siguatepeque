@@ -20,7 +20,8 @@ export const restaurantRestauranteDelCorral: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "J&J Restaurante en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones.",
+    summary:
+      "J&J Restaurante Del Corral en Siguatepeque; comida mixta y lugar concurrido para almuerzo de entre semana cerca de la CA-5.",
   },
   location: {
     address: "H5V9+PGM Supermercados Del Corral, Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantRestauranteDelCorral: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 7:00 AM – 9:00 PM · Tuesday: 7:00 AM – 9:00 PM · Wednesday: 7:00 AM – 9:00 PM · Thursday: 7:00 AM – 9:00 PM · Friday: 7:00 AM – 9:00 PM · Saturday: 7:00 AM – 9:00 PM · Sunday: 7:00 AM – 9:00 PM",
-    structured: [{"day":"Lunes","open":"7:00 AM","close":"9:00 PM"},{"day":"Martes","open":"7:00 AM","close":"9:00 PM"},{"day":"Miercoles","open":"7:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"7:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"7:00 AM","close":"9:00 PM"},{"day":"Sabado","open":"7:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"7:00 AM","close":"9:00 PM"}],
+    structured: [{"day":"Lunes","open":"7:00 AM","close":"9:00 PM"},{"day":"Martes","open":"7:00 AM","close":"9:00 PM"},{"day":"Miércoles","open":"7:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"7:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"7:00 AM","close":"9:00 PM"},{"day":"Sábado","open":"7:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"7:00 AM","close":"9:00 PM"}],
   },
   media: {
     hero: "/restaurants/restaurante-del-corral/hero.jpg",

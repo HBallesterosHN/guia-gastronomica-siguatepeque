@@ -20,7 +20,8 @@ export const restaurantGoldenGrill: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Golden Grill Buffet en Siguatepeque, opción cómoda para comer en plan familiar; con datos de contacto u horario parcialmente verificados.",
+    summary:
+      "Golden Grill Buffet en Siguatepeque; opción de buffet y platos fuertes para almuerzo en grupo.",
   },
   location: {
     address: "H4RR+H9P, Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantGoldenGrill: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 6:00 AM – 9:00 PM · Tuesday: 6:00 AM – 9:00 PM · Wednesday: 6:00 AM – 9:00 PM · Thursday: 6:00 AM – 9:00 PM · Friday: 6:00 AM – 9:00 PM · Saturday: 6:00 AM – 9:00 PM · Sunday: 6:00 AM – 9:00 PM",
-    structured: [{"day":"Lunes","open":"6:00 AM","close":"9:00 PM"},{"day":"Martes","open":"6:00 AM","close":"9:00 PM"},{"day":"Miercoles","open":"6:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"6:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"6:00 AM","close":"9:00 PM"},{"day":"Sabado","open":"6:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"6:00 AM","close":"9:00 PM"}],
+    structured: [{"day":"Lunes","open":"6:00 AM","close":"9:00 PM"},{"day":"Martes","open":"6:00 AM","close":"9:00 PM"},{"day":"Miércoles","open":"6:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"6:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"6:00 AM","close":"9:00 PM"},{"day":"Sábado","open":"6:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"6:00 AM","close":"9:00 PM"}],
   },
   media: {
     hero: "/restaurants/golden-grill/hero.jpg",

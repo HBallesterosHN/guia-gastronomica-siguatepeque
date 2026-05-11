@@ -13,7 +13,7 @@ const STATIC_PATHS = [
   "/guias/cafes-recomendados-en-siguatepeque",
 ] as const;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
   const lastModified = new Date();
 
@@ -24,7 +24,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: path === "/" ? 1 : path === "/restaurantes" || path === "/guias" ? 0.9 : 0.7,
   }));
 
-  const restaurantEntries: MetadataRoute.Sitemap = getAllRestaurants().map(
+  const allRestaurants = await getAllRestaurants();
+  const restaurantEntries: MetadataRoute.Sitemap = allRestaurants.map(
     (r) => ({
       url: `${base}/restaurantes/${r.identity.slug}`,
       lastModified,

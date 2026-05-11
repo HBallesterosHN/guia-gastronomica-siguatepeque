@@ -1,16 +1,19 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getRestaurantBySlug } from "@/lib/restaurants";
 import { guidePageMetadata } from "@/lib/guide-page-metadata";
 import { INSTAGRAM_HANDLE, INSTAGRAM_PROFILE_URL } from "@/lib/site-brand";
 
-export const metadata = guidePageMetadata({
-  canonicalPath: "/guias/mejores-sopas-en-siguatepeque",
-  titleShort: "Sopas en Siguatepeque cuando pega el frío",
-  description:
-    "Gallina india, marinera, sopa de res y mondongo: cuatro sopas que seguimos pidiendo en Siguatepeque y dónde pedirlas.",
-  previewSlug: "tipicos-guancasco",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return guidePageMetadata({
+    canonicalPath: "/guias/mejores-sopas-en-siguatepeque",
+    titleShort: "Sopas en Siguatepeque cuando pega el frío",
+    description:
+      "Gallina india, marinera, sopa de res y mondongo: cuatro sopas que seguimos pidiendo en Siguatepeque y dónde pedirlas.",
+    previewSlug: "tipicos-guancasco",
+  });
+}
 
 const guideEntries = [
   {
@@ -47,7 +50,14 @@ const guideEntries = [
   },
 ];
 
-export default function MejoresSopasEnSiguatepequePage() {
+export default async function MejoresSopasEnSiguatepequePage() {
+  const rows = await Promise.all(
+    guideEntries.map(async (entry) => ({
+      entry,
+      restaurant: await getRestaurantBySlug(entry.slug),
+    })),
+  );
+
   return (
     <main className="mx-auto w-full max-w-6xl space-y-12 px-4 py-10 sm:px-6">
       <header className="space-y-4">
@@ -67,8 +77,7 @@ export default function MejoresSopasEnSiguatepequePage() {
       </header>
 
       <ol className="space-y-8">
-        {guideEntries.map((entry, index) => {
-          const restaurant = getRestaurantBySlug(entry.slug);
+        {rows.map(({ entry, restaurant }, index) => {
           if (!restaurant) {
             return null;
           }

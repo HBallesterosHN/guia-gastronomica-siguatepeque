@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { getRestaurantBySlug } from "@/lib/restaurants";
+import { getRestaurantBySlug } from "@/lib/restaurants-data";
 import { ogPublicImagePath } from "@/lib/og-metadata";
 import { SITE_BRAND_NAME } from "@/lib/site-brand";
 
-export function guidePageMetadata(input: {
+export async function guidePageMetadata(input: {
   canonicalPath: string;
   titleShort: string;
   description: string;
   /** Primer local listado en la guía (imagen OG si existe ficha). */
   previewSlug?: string;
-}): Metadata {
+}): Promise<Metadata> {
   const title = `${input.titleShort} | ${SITE_BRAND_NAME}`;
-  const preview = input.previewSlug ? getRestaurantBySlug(input.previewSlug) : undefined;
+  const preview = input.previewSlug ? await getRestaurantBySlug(input.previewSlug) : undefined;
   const hero = preview?.media.hero;
   const images =
     hero != null && preview

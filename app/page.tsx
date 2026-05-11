@@ -11,7 +11,7 @@ const HOME_DESCRIPTION =
   "Descubre restaurantes, cafés y comida típica en Siguatepeque con recomendaciones locales.";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const featured = getFeaturedRestaurants(1);
+  const featured = await getFeaturedRestaurants(1);
   const first = featured[0];
   const ogImage = first?.media.hero
     ? [{ url: ogPublicImagePath(first.media.hero), alt: first.identity.name }]
@@ -63,8 +63,8 @@ const featuredGuides = [
   },
 ];
 
-export default function Home() {
-  const featuredRestaurants = getFeaturedRestaurants();
+export default async function Home() {
+  const featuredRestaurants = await getFeaturedRestaurants();
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-10 sm:px-6">

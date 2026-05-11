@@ -8,32 +8,34 @@ const GUIAS_TITLE = `Guías gastronómicas en Siguatepeque | ${SITE_BRAND_NAME}`
 const GUIAS_DESCRIPTION =
   "Sopas, desayunos y cafés en Siguatepeque: listas cortas y locales para decidir sin dar tantas vueltas.";
 
-const preview = getFeaturedRestaurants(1)[0];
-const guiasOgImages =
-  preview?.media.hero != null
-    ? [{ url: ogPublicImagePath(preview.media.hero), alt: preview.identity.name }]
-    : undefined;
+export async function generateMetadata(): Promise<Metadata> {
+  const preview = (await getFeaturedRestaurants(1))[0];
+  const guiasOgImages =
+    preview?.media.hero != null
+      ? [{ url: ogPublicImagePath(preview.media.hero), alt: preview.identity.name }]
+      : undefined;
 
-export const metadata: Metadata = {
-  title: GUIAS_TITLE,
-  description: GUIAS_DESCRIPTION,
-  alternates: { canonical: "/guias" },
-  openGraph: {
-    type: "website",
-    locale: "es_HN",
-    siteName: SITE_BRAND_NAME,
+  return {
     title: GUIAS_TITLE,
     description: GUIAS_DESCRIPTION,
-    url: "/guias",
-    images: guiasOgImages,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: GUIAS_TITLE,
-    description: GUIAS_DESCRIPTION,
-    images: guiasOgImages?.map((img) => img.url),
-  },
-};
+    alternates: { canonical: "/guias" },
+    openGraph: {
+      type: "website",
+      locale: "es_HN",
+      siteName: SITE_BRAND_NAME,
+      title: GUIAS_TITLE,
+      description: GUIAS_DESCRIPTION,
+      url: "/guias",
+      images: guiasOgImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: GUIAS_TITLE,
+      description: GUIAS_DESCRIPTION,
+      images: guiasOgImages?.map((img) => img.url),
+    },
+  };
+}
 
 const guides = [
   {

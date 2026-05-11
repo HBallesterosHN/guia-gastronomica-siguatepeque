@@ -13,6 +13,7 @@ import {
   getRestaurantBySlug,
   getRestaurantInstagramUrlBySlug,
 } from "@/lib/restaurants";
+import { hasDialablePhone, hasWhatsAppLink } from "@/lib/contact-validation";
 import { ogPublicImagePath } from "@/lib/og-metadata";
 import { SITE_BRAND_NAME, SITE_PAGE_TITLE_SUFFIX } from "@/lib/site-brand";
 
@@ -21,7 +22,8 @@ interface RestaurantDetailPageProps {
 }
 
 export async function generateStaticParams() {
-  return getAllRestaurants().map((restaurant) => ({
+  const all = await getAllRestaurants();
+  return all.map((restaurant) => ({
     slug: restaurant.identity.slug,
   }));
 }
@@ -30,7 +32,7 @@ export async function generateMetadata({
   params,
 }: RestaurantDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const restaurant = getRestaurantBySlug(slug);
+  const restaurant = await getRestaurantBySlug(slug);
 
   if (!restaurant) {
     return {
@@ -70,7 +72,7 @@ export default async function RestaurantDetailPage({
   params,
 }: RestaurantDetailPageProps) {
   const { slug } = await params;
-  const restaurant = getRestaurantBySlug(slug);
+  const restaurant = await getRestaurantBySlug(slug);
 
   if (!restaurant) {
     notFound();
@@ -90,17 +92,19 @@ export default async function RestaurantDetailPage({
   const dayMap: Record<string, string> = {
     Monday: "Lunes",
     Tuesday: "Martes",
-    Wednesday: "Miercoles",
+    Wednesday: "Miércoles",
     Thursday: "Jueves",
     Friday: "Viernes",
-    Saturday: "Sabado",
+    Saturday: "Sábado",
     Sunday: "Domingo",
   };
   const todayEs = dayMap[currentDayEnglish] ?? "";
   const trustedReviews = getTrustedEditorialReviews(restaurant.reviews);
   const showEditorialReviews = trustedReviews.length > 0;
   const publicRatingCount = ratings.reviewsCount > 0;
-  const instagramUrl = getRestaurantInstagramUrlBySlug(identity.slug) ?? "";
+  const instagramUrl = (await getRestaurantInstagramUrlBySlug(identity.slug)) ?? "";
+  const showPhoneBlock = hasDialablePhone(restaurant.contact.phone);
+  const showWhatsappBlock = hasWhatsAppLink(restaurant.contact.whatsapp);
   const instagramHandle = (() => {
     if (!instagramUrl) return "";
     try {
@@ -312,22 +316,26 @@ export default async function RestaurantDetailPage({
                   <p className="mt-2 leading-6 text-zinc-900">{hours.scheduleLabel}</p>
                 )}
               </div>
-              <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
-                <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Teléfono
-                </p>
-                <p className="mt-2 font-semibold text-zinc-900">
-                  {restaurant.contact.phone}
-                </p>
-              </div>
-              <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
-                <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  WhatsApp
-                </p>
-                <p className="mt-2 font-semibold text-zinc-900">
-                  {restaurant.contact.whatsapp}
-                </p>
-              </div>
+              {showPhoneBlock ? (
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    Teléfono
+                  </p>
+                  <p className="mt-2 font-semibold text-zinc-900">
+                    {restaurant.contact.phone}
+                  </p>
+                </div>
+              ) : null}
+              {showWhatsappBlock ? (
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    WhatsApp
+                  </p>
+                  <p className="mt-2 font-semibold text-zinc-900">
+                    {restaurant.contact.whatsapp}
+                  </p>
+                </div>
+              ) : null}
               {instagramUrl ? (
                 <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
                   <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">

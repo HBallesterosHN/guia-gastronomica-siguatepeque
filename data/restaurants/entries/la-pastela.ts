@@ -20,7 +20,8 @@ export const restaurantLaPastela: Restaurant = {
     featured: true,
   },
   copy: {
-    summary: "La Pastela en Siguatepeque, opción agradable para café y conversación tranquila; con datos de contacto u horario parcialmente verificados.",
+    summary:
+      "Café y repostería en Siguatepeque; ambiente tranquilo para conversar o una pausa con algo dulce.",
   },
   location: {
     address: "J524+2GM, Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantLaPastela: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 8:30 AM – 6:30 PM · Tuesday: 8:30 AM – 6:30 PM · Wednesday: 8:30 AM – 6:30 PM · Thursday: 8:30 AM – 6:30 PM · Friday: 8:30 AM – 6:30 PM · Saturday: 8:30 AM – 6:30 PM · Sunday: 8:30 AM – 6:30 PM",
-    structured: [{"day":"Lunes","open":"8:30 AM","close":"6:30 PM"},{"day":"Martes","open":"8:30 AM","close":"6:30 PM"},{"day":"Miercoles","open":"8:30 AM","close":"6:30 PM"},{"day":"Jueves","open":"8:30 AM","close":"6:30 PM"},{"day":"Viernes","open":"8:30 AM","close":"6:30 PM"},{"day":"Sabado","open":"8:30 AM","close":"6:30 PM"},{"day":"Domingo","open":"8:30 AM","close":"6:30 PM"}],
+    structured: [{"day":"Lunes","open":"8:30 AM","close":"6:30 PM"},{"day":"Martes","open":"8:30 AM","close":"6:30 PM"},{"day":"Miércoles","open":"8:30 AM","close":"6:30 PM"},{"day":"Jueves","open":"8:30 AM","close":"6:30 PM"},{"day":"Viernes","open":"8:30 AM","close":"6:30 PM"},{"day":"Sábado","open":"8:30 AM","close":"6:30 PM"},{"day":"Domingo","open":"8:30 AM","close":"6:30 PM"}],
   },
   media: {
     hero: "/restaurants/la-pastela/hero.jpg",

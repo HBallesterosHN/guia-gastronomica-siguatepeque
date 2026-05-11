@@ -20,7 +20,8 @@ export const restaurantPupuseriaIrma: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Pupuseria Irma en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones. Ideal para disfrutar una visita en Siguatepeque.",
+    summary:
+      "Pupusería Irma en Siguatepeque; pupusas y platillos rápidos, prácticos para llevar o cenar sin complicación.",
   },
   location: {
     address: "esquina opuesta a, Supermercado Maxi Despensa, 12111 Boulevard Morazán, 12111 Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantPupuseriaIrma: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 8:00 AM – 10:00 PM · Tuesday: 8:00 AM – 10:00 PM · Wednesday: 8:00 AM – 10:00 PM · Thursday: 8:00 AM – 10:00 PM · Friday: 8:00 AM – 10:00 PM · Saturday: 8:00 AM – 10:00 PM · Sunday: 8:00 AM – 10:00 PM",
-    structured: [{"day":"Lunes","open":"8:00 AM","close":"10:00 PM"},{"day":"Martes","open":"8:00 AM","close":"10:00 PM"},{"day":"Miercoles","open":"8:00 AM","close":"10:00 PM"},{"day":"Jueves","open":"8:00 AM","close":"10:00 PM"},{"day":"Viernes","open":"8:00 AM","close":"10:00 PM"},{"day":"Sabado","open":"8:00 AM","close":"10:00 PM"},{"day":"Domingo","open":"8:00 AM","close":"10:00 PM"}],
+    structured: [{"day":"Lunes","open":"8:00 AM","close":"10:00 PM"},{"day":"Martes","open":"8:00 AM","close":"10:00 PM"},{"day":"Miércoles","open":"8:00 AM","close":"10:00 PM"},{"day":"Jueves","open":"8:00 AM","close":"10:00 PM"},{"day":"Viernes","open":"8:00 AM","close":"10:00 PM"},{"day":"Sábado","open":"8:00 AM","close":"10:00 PM"},{"day":"Domingo","open":"8:00 AM","close":"10:00 PM"}],
   },
   media: {
     hero: "/restaurants/pupuseria-irma/hero.jpg",

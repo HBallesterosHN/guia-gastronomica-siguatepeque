@@ -1,7 +1,7 @@
 import process from "node:process";
 import dotenv from "dotenv";
 import { RESTAURANT_CATEGORIES, type RestaurantCategory } from "../../types/restaurant";
-import { getRestaurantBySlug } from "../../lib/restaurants";
+import { getRestaurantBySlugFromFiles } from "../../lib/restaurants-file";
 
 dotenv.config({ path: ".env.local" });
 dotenv.config({ path: ".env" });
@@ -357,9 +357,9 @@ async function main(): Promise<void> {
   if (input.slug) {
     draft.slug = input.slug;
   }
-  const existingBeforePersist = getRestaurantBySlug(draft.slug);
+  const existingBeforePersist = getRestaurantBySlugFromFiles(draft.slug);
   if (input.textOnly && input.slug) {
-    const existing = getRestaurantBySlug(input.slug);
+    const existing = getRestaurantBySlugFromFiles(input.slug);
     if (!existing) {
       throw new Error(`No existe restaurante con slug "${input.slug}" para --text-only.`);
     }

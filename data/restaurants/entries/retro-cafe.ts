@@ -20,7 +20,8 @@ export const restaurantRetroCafe: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Retro Coffee en Siguatepeque, opción agradable para café y conversación tranquila; con datos de contacto u horario parcialmente verificados.",
+    summary:
+      "Retro Coffee en Siguatepeque; café y espacio cómodo para trabajo ligero o plática sin prisa.",
   },
   location: {
     address: "11001 Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantRetroCafe: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 7:00 AM – 8:00 PM · Tuesday: 7:00 AM – 8:00 PM · Wednesday: 7:00 AM – 8:00 PM · Thursday: 7:00 AM – 8:00 PM · Friday: 7:00 AM – 8:00 PM · Saturday: 7:00 AM – 8:00 PM · Sunday: 1:30 – 6:00 PM",
-    structured: [{"day":"Lunes","open":"7:00 AM","close":"8:00 PM"},{"day":"Martes","open":"7:00 AM","close":"8:00 PM"},{"day":"Miercoles","open":"7:00 AM","close":"8:00 PM"},{"day":"Jueves","open":"7:00 AM","close":"8:00 PM"},{"day":"Viernes","open":"7:00 AM","close":"8:00 PM"},{"day":"Sabado","open":"7:00 AM","close":"8:00 PM"},{"day":"Domingo","open":"1:30","close":"6:00 PM"}],
+    structured: [{"day":"Lunes","open":"7:00 AM","close":"8:00 PM"},{"day":"Martes","open":"7:00 AM","close":"8:00 PM"},{"day":"Miércoles","open":"7:00 AM","close":"8:00 PM"},{"day":"Jueves","open":"7:00 AM","close":"8:00 PM"},{"day":"Viernes","open":"7:00 AM","close":"8:00 PM"},{"day":"Sábado","open":"7:00 AM","close":"8:00 PM"},{"day":"Domingo","open":"1:30","close":"6:00 PM"}],
   },
   media: {
     hero: "/restaurants/retro-cafe/hero.jpg",

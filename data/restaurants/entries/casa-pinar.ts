@@ -20,7 +20,8 @@ export const restaurantCasaPinar: Restaurant = {
     featured: true,
   },
   copy: {
-    summary: "Restaurante Casa Pinar steak and grill en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones.",
+    summary:
+      "Casa Pinar (steak and grill) en Siguatepeque; parrilla y cortes en espacio amplio para grupo o familia.",
   },
   location: {
     address: "Carretera CA5 Una cuadra adelante de, mecanizaciones altiplano, Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantCasaPinar: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 11:00 AM – 9:00 PM · Tuesday: 11:00 AM – 9:00 PM · Wednesday: 11:00 AM – 9:00 PM · Thursday: 11:00 AM – 9:00 PM · Friday: 11:00 AM – 9:00 PM · Saturday: 11:00 AM – 9:00 PM · Sunday: 11:00 AM – 9:00 PM",
-    structured: [{"day":"Lunes","open":"11:00 AM","close":"9:00 PM"},{"day":"Martes","open":"11:00 AM","close":"9:00 PM"},{"day":"Miercoles","open":"11:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"11:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"11:00 AM","close":"9:00 PM"},{"day":"Sabado","open":"11:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"11:00 AM","close":"9:00 PM"}],
+    structured: [{"day":"Lunes","open":"11:00 AM","close":"9:00 PM"},{"day":"Martes","open":"11:00 AM","close":"9:00 PM"},{"day":"Miércoles","open":"11:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"11:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"11:00 AM","close":"9:00 PM"},{"day":"Sábado","open":"11:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"11:00 AM","close":"9:00 PM"}],
   },
   media: {
     hero: "/restaurants/casa-pinar/hero.jpg",

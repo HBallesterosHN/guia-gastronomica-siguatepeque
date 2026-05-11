@@ -20,7 +20,8 @@ export const restaurantChinaWeng: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Restaurante China Weng en Siguatepeque, opción cómoda para comer en plan familiar; con datos de contacto u horario parcialmente verificados.",
+    summary:
+      "Restaurante China Weng en Siguatepeque; carta china clásica de la ciudad, buena para compartir mesa.",
   },
   location: {
     address: "CA-5, 12111 Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantChinaWeng: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 9:00 AM – 9:00 PM · Tuesday: 9:00 AM – 9:00 PM · Wednesday: 9:00 AM – 9:00 PM · Thursday: 9:00 AM – 9:00 PM · Friday: 9:00 AM – 9:00 PM · Saturday: 9:00 AM – 9:00 PM · Sunday: 9:00 AM – 9:00 PM",
-    structured: [{"day":"Lunes","open":"9:00 AM","close":"9:00 PM"},{"day":"Martes","open":"9:00 AM","close":"9:00 PM"},{"day":"Miercoles","open":"9:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"9:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"9:00 AM","close":"9:00 PM"},{"day":"Sabado","open":"9:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"9:00 AM","close":"9:00 PM"}],
+    structured: [{"day":"Lunes","open":"9:00 AM","close":"9:00 PM"},{"day":"Martes","open":"9:00 AM","close":"9:00 PM"},{"day":"Miércoles","open":"9:00 AM","close":"9:00 PM"},{"day":"Jueves","open":"9:00 AM","close":"9:00 PM"},{"day":"Viernes","open":"9:00 AM","close":"9:00 PM"},{"day":"Sábado","open":"9:00 AM","close":"9:00 PM"},{"day":"Domingo","open":"9:00 AM","close":"9:00 PM"}],
   },
   media: {
     hero: "/restaurants/china-weng/hero.jpg",

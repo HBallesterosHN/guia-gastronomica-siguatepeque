@@ -20,7 +20,8 @@ export const restaurantElToritoSteakHouse: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "El Torito Steak House Siguatepeque en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones.",
+    summary:
+      "El Torito Steak House en Siguatepeque, sobre la CA-5: parrilladas, mariscos y sopas en formato familiar.",
   },
   location: {
     address: "Esquina opuesta a Wendy's, CA-5, 12111 Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantElToritoSteakHouse: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 11:30 AM – 9:00 PM · Tuesday: 11:30 AM – 9:00 PM · Wednesday: 11:30 AM – 9:00 PM · Thursday: 11:30 AM – 9:00 PM · Friday: 11:30 AM – 9:00 PM · Saturday: 11:30 AM – 9:00 PM · Sunday: 11:30 AM – 8:00 PM",
-    structured: [{"day":"Lunes","open":"11:30 AM","close":"9:00 PM"},{"day":"Martes","open":"11:30 AM","close":"9:00 PM"},{"day":"Miercoles","open":"11:30 AM","close":"9:00 PM"},{"day":"Jueves","open":"11:30 AM","close":"9:00 PM"},{"day":"Viernes","open":"11:30 AM","close":"9:00 PM"},{"day":"Sabado","open":"11:30 AM","close":"9:00 PM"},{"day":"Domingo","open":"11:30 AM","close":"8:00 PM"}],
+    structured: [{"day":"Lunes","open":"11:30 AM","close":"9:00 PM"},{"day":"Martes","open":"11:30 AM","close":"9:00 PM"},{"day":"Miércoles","open":"11:30 AM","close":"9:00 PM"},{"day":"Jueves","open":"11:30 AM","close":"9:00 PM"},{"day":"Viernes","open":"11:30 AM","close":"9:00 PM"},{"day":"Sábado","open":"11:30 AM","close":"9:00 PM"},{"day":"Domingo","open":"11:30 AM","close":"8:00 PM"}],
   },
   media: {
     hero: "/restaurants/el-torito-steak-house/hero.jpg",

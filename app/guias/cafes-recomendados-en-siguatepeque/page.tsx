@@ -1,16 +1,19 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getRestaurantBySlug } from "@/lib/restaurants";
 import { guidePageMetadata } from "@/lib/guide-page-metadata";
 import { INSTAGRAM_HANDLE, INSTAGRAM_PROFILE_URL } from "@/lib/site-brand";
 
-export const metadata = guidePageMetadata({
-  canonicalPath: "/guias/cafes-recomendados-en-siguatepeque",
-  titleShort: "Cafés recomendados en Siguatepeque",
-  description:
-    "Dónde tomar café en Siguatepeque con calma: guía editorial con recomendaciones concretas.",
-  previewSlug: "la-pastela",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return guidePageMetadata({
+    canonicalPath: "/guias/cafes-recomendados-en-siguatepeque",
+    titleShort: "Cafés recomendados en Siguatepeque",
+    description:
+      "Dónde tomar café en Siguatepeque con calma: guía editorial con recomendaciones concretas.",
+    previewSlug: "la-pastela",
+  });
+}
 
 const guideEntries = [
   {
@@ -23,7 +26,14 @@ const guideEntries = [
   },
 ];
 
-export default function CafesRecomendadosEnSiguatepequePage() {
+export default async function CafesRecomendadosEnSiguatepequePage() {
+  const rows = await Promise.all(
+    guideEntries.map(async (entry) => ({
+      entry,
+      restaurant: await getRestaurantBySlug(entry.slug),
+    })),
+  );
+
   return (
     <main className="mx-auto w-full max-w-6xl space-y-12 px-4 py-10 sm:px-6">
       <header className="space-y-4">
@@ -40,8 +50,7 @@ export default function CafesRecomendadosEnSiguatepequePage() {
       </header>
 
       <ol className="space-y-8">
-        {guideEntries.map((entry, index) => {
-          const restaurant = getRestaurantBySlug(entry.slug);
+        {rows.map(({ entry, restaurant }, index) => {
           if (!restaurant) {
             return null;
           }

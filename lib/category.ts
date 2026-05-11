@@ -1,11 +1,11 @@
 import type { RestaurantCategory } from "@/types/restaurant";
 
 export const categoryLabels: Record<RestaurantCategory, string> = {
-  desayuno: "Desayuno",
-  cafe: "Café",
+  desayuno: "Desayunos",
+  cafe: "Café y repostería",
   "comida-tipica": "Comida típica",
-  familiar: "Familiar",
-  romantico: "Romántico",
-  parrilla: "Parrilla",
-  mariscos: "Mariscos",
+  familiar: "Para toda la familia",
+  romantico: "Ambiente romántico",
+  parrilla: "Parrilla y asados",
+  mariscos: "Mariscos y pescado",
 };

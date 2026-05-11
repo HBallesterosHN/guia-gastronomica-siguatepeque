@@ -20,7 +20,8 @@ export const restaurantCafeElGranizo: Restaurant = {
     featured: true,
   },
   copy: {
-    summary: "D&C Coffee Roasters en Siguatepeque, opción agradable para café y conversación tranquila; con datos de contacto u horario parcialmente verificados.",
+    summary:
+      "D&C Coffee Roasters (Café El Granizo) en Siguatepeque; tueste local y café de especialidad para tomar con tiempo.",
   },
   location: {
     address: "Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantCafeElGranizo: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 8:00 AM – 7:00 PM · Tuesday: 8:00 AM – 7:00 PM · Wednesday: 8:00 AM – 7:00 PM · Thursday: 8:00 AM – 7:00 PM · Friday: 8:00 AM – 7:00 PM · Saturday: 9:00 AM – 7:00 PM · Sunday: Closed",
-    structured: [{"day":"Lunes","open":"8:00 AM","close":"7:00 PM"},{"day":"Martes","open":"8:00 AM","close":"7:00 PM"},{"day":"Miercoles","open":"8:00 AM","close":"7:00 PM"},{"day":"Jueves","open":"8:00 AM","close":"7:00 PM"},{"day":"Viernes","open":"8:00 AM","close":"7:00 PM"},{"day":"Sabado","open":"9:00 AM","close":"7:00 PM"},{"day":"Domingo","open":"Closed","close":"Closed"}],
+    structured: [{"day":"Lunes","open":"8:00 AM","close":"7:00 PM"},{"day":"Martes","open":"8:00 AM","close":"7:00 PM"},{"day":"Miércoles","open":"8:00 AM","close":"7:00 PM"},{"day":"Jueves","open":"8:00 AM","close":"7:00 PM"},{"day":"Viernes","open":"8:00 AM","close":"7:00 PM"},{"day":"Sábado","open":"9:00 AM","close":"7:00 PM"},{"day":"Domingo","open":"Closed","close":"Closed"}],
   },
   media: {
     hero: "/restaurants/cafe-el-granizo/hero.jpg",

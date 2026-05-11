@@ -20,7 +20,8 @@ export const restaurantTipicosGuancasco: Restaurant = {
     featured: true,
   },
   copy: {
-    summary: "Restaurante Tipico's Guancasco en Siguatepeque, recomendado para salidas familiares y almuerzos sin complicaciones.",
+    summary:
+      "Tipico's Guancasco en Siguatepeque; cocina casera hondureña fuerte en almuerzos, sopes y caldos.",
   },
   location: {
     address: "H3JW+73, El Porvenir, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantTipicosGuancasco: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 8:00 AM – 5:00 PM · Tuesday: 8:00 AM – 5:00 PM · Wednesday: 8:00 AM – 5:00 PM · Thursday: 8:00 AM – 5:00 PM · Friday: 8:00 AM – 5:00 PM · Saturday: 8:00 AM – 5:00 PM · Sunday: 8:00 AM – 5:00 PM",
-    structured: [{"day":"Lunes","open":"8:00 AM","close":"5:00 PM"},{"day":"Martes","open":"8:00 AM","close":"5:00 PM"},{"day":"Miercoles","open":"8:00 AM","close":"5:00 PM"},{"day":"Jueves","open":"8:00 AM","close":"5:00 PM"},{"day":"Viernes","open":"8:00 AM","close":"5:00 PM"},{"day":"Sabado","open":"8:00 AM","close":"5:00 PM"},{"day":"Domingo","open":"8:00 AM","close":"5:00 PM"}],
+    structured: [{"day":"Lunes","open":"8:00 AM","close":"5:00 PM"},{"day":"Martes","open":"8:00 AM","close":"5:00 PM"},{"day":"Miércoles","open":"8:00 AM","close":"5:00 PM"},{"day":"Jueves","open":"8:00 AM","close":"5:00 PM"},{"day":"Viernes","open":"8:00 AM","close":"5:00 PM"},{"day":"Sábado","open":"8:00 AM","close":"5:00 PM"},{"day":"Domingo","open":"8:00 AM","close":"5:00 PM"}],
   },
   media: {
     hero: "/restaurants/tipicos-guancasco/hero.jpg",

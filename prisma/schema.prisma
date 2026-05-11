@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  category      String
+  priceRange    String   @default("$$")
+  summary       String?
+  address       String?
+  lat           Float?
+  lng           Float?
+  phone         String?
+  whatsapp      String?
+  scheduleLabel String?
+  menuUrl       String?
+  instagramUrl  String?
+  googleMapsUrl String?
+  ratingAverage Float    @default(0)
+  reviewsCount  Int      @default(0)
+  heroUrl       String?
+  gallery       Json?
+  source        String   @default("auto")
+  verified      Boolean  @default(false)
+  status        String   @default("published")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  updateRequests RestaurantUpdateRequest[]
+  claimRequests  ClaimRequest[]
+
+  @@map("restaurants")
+}
+
+model RestaurantUpdateRequest {
+  id               String   @id @default(cuid())
+  restaurantId     String?
+  restaurantSlug   String?
+  ownerName        String
+  ownerPhone       String?
+  ownerEmail       String?
+  message          String?
+  requestedChanges Json?
+  imageUrls        Json?
+  status           String   @default("pending")
+  createdAt        DateTime @default(now())
+
+  restaurant Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+
+  @@map("restaurant_update_requests")
+}
+
+model ClaimRequest {
+  id             String   @id @default(cuid())
+  restaurantId   String?
+  restaurantSlug String?
+  ownerName      String
+  ownerPhone     String?
+  ownerEmail     String?
+  message        String?
+  menuUrl        String?
+  instagramUrl   String?
+  status         String   @default("pending")
+  createdAt      DateTime @default(now())
+
+  restaurant Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+
+  @@map("claim_requests")
+}

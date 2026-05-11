@@ -20,7 +20,8 @@ export const restaurantSavoyCafeX301: Restaurant = {
     featured: false,
   },
   copy: {
-    summary: "Savoy Cafe en Siguatepeque, recomendado para pausas de café, reuniones cortas o tardes relajadas. Ideal para disfrutar una visita en Siguatepeque.",
+    summary:
+      "Savoy Café (SPS 301) en Siguatepeque; desayunos extendidos y café para salir temprano o reunirse un rato.",
   },
   location: {
     address: "H4PX+PC3, CA-5, Siguatepeque, Comayagua, Honduras",
@@ -32,7 +33,7 @@ export const restaurantSavoyCafeX301: Restaurant = {
   },
   hours: {
     scheduleLabel: "Monday: 8:00 AM – 7:00 PM · Tuesday: 7:00 AM – 7:00 PM · Wednesday: 7:00 AM – 7:00 PM · Thursday: 7:00 AM – 7:00 PM · Friday: 7:00 AM – 7:00 PM · Saturday: 7:00 AM – 7:00 PM · Sunday: 7:00 AM – 7:00 PM",
-    structured: [{"day":"Lunes","open":"8:00 AM","close":"7:00 PM"},{"day":"Martes","open":"7:00 AM","close":"7:00 PM"},{"day":"Miercoles","open":"7:00 AM","close":"7:00 PM"},{"day":"Jueves","open":"7:00 AM","close":"7:00 PM"},{"day":"Viernes","open":"7:00 AM","close":"7:00 PM"},{"day":"Sabado","open":"7:00 AM","close":"7:00 PM"},{"day":"Domingo","open":"7:00 AM","close":"7:00 PM"}],
+    structured: [{"day":"Lunes","open":"8:00 AM","close":"7:00 PM"},{"day":"Martes","open":"7:00 AM","close":"7:00 PM"},{"day":"Miércoles","open":"7:00 AM","close":"7:00 PM"},{"day":"Jueves","open":"7:00 AM","close":"7:00 PM"},{"day":"Viernes","open":"7:00 AM","close":"7:00 PM"},{"day":"Sábado","open":"7:00 AM","close":"7:00 PM"},{"day":"Domingo","open":"7:00 AM","close":"7:00 PM"}],
   },
   media: {
     hero: "/restaurants/savoy-cafe-x301/hero.jpg",
