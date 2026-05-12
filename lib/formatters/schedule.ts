@@ -8,6 +8,11 @@ export type StructuredHourRow = {
   close: string;
 };
 
+/** Espacios tipográficos (p. ej. U+202F de Google Places) que suelen verse raros en la UI. */
+export function sanitizeScheduleDisplayToken(s: string): string {
+  return s.replace(/[\u202f\u00a0]/g, " ").trim();
+}
+
 const DAY_ORDER = [
   "Lunes",
   "Martes",
@@ -49,6 +54,73 @@ function sortStructured(rows: StructuredHourRow[]): StructuredHourRow[] {
   return [...rows].sort((a, b) => idx(a.day) - idx(b.day));
 }
 
+export function isStructuredScheduleUsable(rows: StructuredHourRow[] | undefined): boolean {
+  return Array.isArray(rows) && rows.length >= 2;
+}
+
+const EN_WEEKDAY_TO_ES: Record<string, string> = {
+  monday: "Lunes",
+  mon: "Lunes",
+  tuesday: "Martes",
+  tue: "Martes",
+  wednesday: "Miércoles",
+  wed: "Miércoles",
+  thursday: "Jueves",
+  thu: "Jueves",
+  friday: "Viernes",
+  fri: "Viernes",
+  saturday: "Sábado",
+  sat: "Sábado",
+  sunday: "Domingo",
+  sun: "Domingo",
+};
+
+/**
+ * Convierte token de día (inglés o español) a etiqueta canónica española (Lunes…).
+ */
+export function mapWeekdayTokenToSpanishDay(raw: string): string | null {
+  const key = sanitizeScheduleDisplayToken(raw)
+    .toLowerCase()
+    .replace(/[.:]/g, "")
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+  if (EN_WEEKDAY_TO_ES[key]) return EN_WEEKDAY_TO_ES[key];
+  return normalizeDayLabel(raw);
+}
+
+/**
+ * Interpreta una sola línea tipo:
+ * `Monday: 8:30 AM – 6:30 PM · Tuesday: 8:30 AM – 6:30 PM · …`
+ * (también `-` en lugar de `–`, espacios estrechos, etc.)
+ */
+export function inferStructuredHoursFromScheduleLabel(raw: string): StructuredHourRow[] | undefined {
+  const normalized = sanitizeScheduleDisplayToken(raw).replace(/\s+/g, " ").trim();
+  if (!normalized) return undefined;
+
+  const segments = normalized.split(/\s*[·•|]\s*/).map((s) => s.trim()).filter(Boolean);
+  const rows: StructuredHourRow[] = [];
+  const timePair =
+    /(\d{1,2}:\d{2}\s*(?:AM|PM))\s*[–\-]\s*(\d{1,2}:\d{2}\s*(?:AM|PM))/i;
+
+  for (const seg of segments) {
+    const m = seg.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s*:\s*(.+)$/i);
+    if (!m) continue;
+    const dayEs = mapWeekdayTokenToSpanishDay(m[1]);
+    if (!dayEs) continue;
+    const rest = sanitizeScheduleDisplayToken(m[2]);
+    const tm = rest.match(timePair);
+    if (!tm) continue;
+    rows.push({
+      day: dayEs,
+      open: sanitizeScheduleDisplayToken(tm[1]),
+      close: sanitizeScheduleDisplayToken(tm[2]),
+    });
+  }
+
+  if (!isStructuredScheduleUsable(rows)) return undefined;
+  return sortStructured(rows);
+}
+
 /**
  * Interpreta texto libre del dueño/editor.
  * Si detecta al menos 2 líneas con día + horas, devuelve `structured` ordenado.
@@ -83,9 +155,13 @@ export function parseScheduleManualInput(text: string): {
     };
   }
 
-  return { scheduleLabel: trimmed };
-}
+  const inferred = inferStructuredHoursFromScheduleLabel(trimmed);
+  if (isStructuredScheduleUsable(inferred)) {
+    return {
+      scheduleLabel: trimmed,
+      structured: inferred,
+    };
+  }
 
-export function isStructuredScheduleUsable(rows: StructuredHourRow[] | undefined): boolean {
-  return Array.isArray(rows) && rows.length >= 2;
+  return { scheduleLabel: trimmed };
 }

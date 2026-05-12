@@ -5,7 +5,13 @@
 import type { Restaurant as DbRestaurant } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatHondurasPhone } from "@/lib/formatters/phone";
-import { isStructuredScheduleUsable, type StructuredHourRow } from "@/lib/formatters/schedule";
+import {
+  isStructuredScheduleUsable,
+  parseScheduleManualInput,
+  sanitizeScheduleDisplayToken,
+  type StructuredHourRow,
+} from "@/lib/formatters/schedule";
+import { mergeRestaurantWithFileFallback } from "@/lib/restaurant-merge-file-fallback";
 import {
   filterRestaurantsList,
   getAllRestaurantsFromFiles,
@@ -43,6 +49,26 @@ function parseProfileSource(raw: string): RestaurantProfileSource {
   return "auto";
 }
 
+/** Normaliza espacios en horario (DB, archivos o cambios aprobados) para la ficha pública. */
+export function withSanitizedScheduleHours(restaurant: Restaurant): Restaurant {
+  const h = restaurant.hours;
+  const scheduleLabel = sanitizeScheduleDisplayToken(h.scheduleLabel);
+  const structuredRaw = h.structured?.map((row) => ({
+    day: sanitizeScheduleDisplayToken(row.day),
+    open: sanitizeScheduleDisplayToken(row.open),
+    close: sanitizeScheduleDisplayToken(row.close),
+  }));
+  const structured =
+    structuredRaw?.filter((row) => row.day && row.open && row.close) ?? undefined;
+  return {
+    ...restaurant,
+    hours: {
+      scheduleLabel,
+      ...(isStructuredScheduleUsable(structured) ? { structured } : {}),
+    },
+  };
+}
+
 export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
   const slug = row.slug;
   const category = parseCategory(row.category);
@@ -61,6 +87,13 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
       if (day && open && close) rows.push({ day, open, close });
     }
     if (isStructuredScheduleUsable(rows)) structuredFromDb = rows;
+  }
+
+  const scheduleLabelDb = row.scheduleLabel?.trim() || "Horario por confirmar.";
+  const parsedFromLabel = parseScheduleManualInput(scheduleLabelDb);
+  let hoursStructured = structuredFromDb;
+  if (!isStructuredScheduleUsable(hoursStructured) && isStructuredScheduleUsable(parsedFromLabel.structured)) {
+    hoursStructured = parsedFromLabel.structured;
   }
 
   let galleryPaths: RestaurantPublicImagePath[] = [];
@@ -85,9 +118,7 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
   const phoneDisplay = formatHondurasPhone(phoneRaw);
   const waDisplay = formatHondurasPhone(waRaw);
 
-  const scheduleLabelDb = row.scheduleLabel?.trim() || "Horario por confirmar.";
-
-  return {
+  return withSanitizedScheduleHours({
     identity: { name: row.name, slug },
     classification: {
       category,
@@ -110,7 +141,7 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
     },
     hours: {
       scheduleLabel: scheduleLabelDb,
-      ...(structuredFromDb ? { structured: structuredFromDb } : {}),
+      ...(isStructuredScheduleUsable(hoursStructured) ? { structured: hoursStructured } : {}),
     },
     media: {
       hero,
@@ -130,7 +161,7 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
       verified: row.verified,
     },
     reviews: [],
-  };
+  });
 }
 
 async function fetchPublishedRestaurantsFromDb(): Promise<Restaurant[]> {
@@ -140,7 +171,11 @@ async function fetchPublishedRestaurantsFromDb(): Promise<Restaurant[]> {
       where: { status: "published" },
       orderBy: { name: "asc" },
     });
-    return rows.map((row) => withDetectedGallery(mapPrismaRestaurantToRestaurant(row)));
+    return rows.map((row) => {
+      const mapped = mapPrismaRestaurantToRestaurant(row);
+      const file = getRestaurantBySlugFromFiles(row.slug);
+      return withDetectedGallery(mergeRestaurantWithFileFallback(mapped, file ?? undefined));
+    });
   } catch (err) {
     console.error("[restaurants-data] Neon/Prisma: no se pudieron leer restaurantes; solo archivos.", err);
     return [];
@@ -153,7 +188,7 @@ export async function getAllRestaurants(): Promise<Restaurant[]> {
   const bySlug = new Map<string, Restaurant>();
 
   for (const r of fromFiles) {
-    bySlug.set(r.identity.slug, r);
+    bySlug.set(r.identity.slug, withSanitizedScheduleHours(r));
   }
   for (const r of fromDb) {
     bySlug.set(r.identity.slug, r);
@@ -169,13 +204,17 @@ export async function getRestaurantBySlug(slug: string): Promise<Restaurant | un
         where: { slug, status: "published" },
       });
       if (row) {
-        return withDetectedGallery(mapPrismaRestaurantToRestaurant(row));
+        const mapped = mapPrismaRestaurantToRestaurant(row);
+        const file = getRestaurantBySlugFromFiles(slug);
+        return withDetectedGallery(mergeRestaurantWithFileFallback(mapped, file ?? undefined));
       }
     } catch (err) {
       console.error("[restaurants-data] getRestaurantBySlug DB error; se intenta archivo.", err);
     }
   }
-  return getRestaurantBySlugFromFiles(slug);
+  const file = getRestaurantBySlugFromFiles(slug);
+  if (!file) return undefined;
+  return withDetectedGallery(withSanitizedScheduleHours(file));
 }
 
 /** Destacados: mismas reglas que en archivos (`featured: true`), sobre lista ya fusionada. */

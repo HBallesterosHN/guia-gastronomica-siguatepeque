@@ -3,7 +3,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import type { ChangeRequestImageAsset, OwnerChangesJson } from "@/lib/change-request-types";
 import { normalizeHondurasPhone } from "@/lib/formatters/phone";
-import { isStructuredScheduleUsable } from "@/lib/formatters/schedule";
+import { isStructuredScheduleUsable, parseScheduleManualInput } from "@/lib/formatters/schedule";
 import { prisma } from "@/lib/prisma";
 
 export { parseImageAssetsJson, parseOwnerChangesJson } from "@/lib/change-request-types";
@@ -58,9 +58,16 @@ export async function applyApprovedChangesToRestaurant(
   if (changes.summary !== undefined) data.summary = changes.summary?.trim() || null;
 
   if (changes.scheduleLabel !== undefined) {
-    data.scheduleLabel = changes.scheduleLabel?.trim() || null;
-    if (isStructuredScheduleUsable(changes.scheduleStructured)) {
-      data.scheduleStructured = changes.scheduleStructured;
+    const label = changes.scheduleLabel?.trim() ?? "";
+    data.scheduleLabel = label || null;
+    let structured = isStructuredScheduleUsable(changes.scheduleStructured)
+      ? changes.scheduleStructured
+      : undefined;
+    if (!isStructuredScheduleUsable(structured)) {
+      structured = parseScheduleManualInput(label).structured;
+    }
+    if (isStructuredScheduleUsable(structured)) {
+      data.scheduleStructured = structured as Prisma.InputJsonValue;
     } else {
       data.scheduleStructured = Prisma.JsonNull;
     }

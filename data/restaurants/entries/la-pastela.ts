@@ -5,7 +5,7 @@ const slug = "la-pastela" as const;
 /**
  * BORRADOR GENERADO POR restaurant:intake.
  * Google Maps: "https://maps.google.com/?cid=3891544416499841830&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
- * Instagram: "https://www.instagram.com/lapastelahn/"
+ * Instagram: "Por confirmar"
  * Referencias: ["https://www.google.com/maps/place/La+Pastela/@14.6004895,-87.8465955,17z/data=!3m1!4b1!4m6!3m5!1s0x8f6595002e65d061:0x36018b074d20bb26!8m2!3d14.6004843!4d-87.8440206!16s%2Fg%2F11lth9qph8?entry=tts&g_ep=EgoyMDI2MDQyMC4wIPu8ASoASAFQAw%3D%3D&skid=f60b9780-7853-44ed-8e56-21987d3bcb29","https://nominatim.openstreetmap.org/reverse","Google Places API (New)"]
  * Notas: "Generado por restaurant:intake con fuentes publicas. Revisar antes de publicar. Maps[google_places, confianza alta]: https://maps.google.com/?cid=3891544416499841830&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAIYBCAA"
  */
@@ -17,11 +17,10 @@ export const restaurantLaPastela: Restaurant = {
   classification: {
     category: "cafe",
     priceRange: "$$",
-    featured: true,
+    featured: false,
   },
   copy: {
-    summary:
-      "Café y repostería en Siguatepeque; ambiente tranquilo para conversar o una pausa con algo dulce.",
+    summary: "La Pastela en Siguatepeque, opción agradable para café y conversación tranquila; con datos de contacto u horario parcialmente verificados.",
   },
   location: {
     address: "J524+2GM, Siguatepeque, Comayagua, Honduras",
@@ -41,11 +40,16 @@ export const restaurantLaPastela: Restaurant = {
   },
   ratings: {
     average: 4.6,
-    reviewsCount: 51,
+    reviewsCount: 52,
   },
   services: {
     offersDelivery: false,
     acceptsReservations: false,
   },
+  profileStatus: {
+    source: "auto",
+    verified: false,
+  },
+
   reviews: [],
 };

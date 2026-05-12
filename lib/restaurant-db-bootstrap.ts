@@ -2,7 +2,7 @@ import "server-only";
 
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { isStructuredScheduleUsable } from "@/lib/formatters/schedule";
+import { isStructuredScheduleUsable, parseScheduleManualInput } from "@/lib/formatters/schedule";
 import {
   getRestaurantBySlugFromFiles,
   getRestaurantInstagramUrlFromEntryFile,
@@ -14,6 +14,15 @@ export function mapFileRestaurantToPrismaCreate(file: Restaurant): Prisma.Restau
     file.media.gallery?.filter((p) => typeof p === "string" && (p.startsWith("/") || p.startsWith("https://"))) ??
     [];
   const instagramFromFile = getRestaurantInstagramUrlFromEntryFile(file.identity.slug);
+
+  const parsed = parseScheduleManualInput(file.hours.scheduleLabel || "");
+  const structured =
+    file.hours.structured && isStructuredScheduleUsable(file.hours.structured)
+      ? file.hours.structured
+      : parsed.structured;
+  const scheduleStructured = isStructuredScheduleUsable(structured)
+    ? { scheduleStructured: structured }
+    : {};
 
   return {
     slug: file.identity.slug,
@@ -27,9 +36,7 @@ export function mapFileRestaurantToPrismaCreate(file: Restaurant): Prisma.Restau
     phone: file.contact.phone,
     whatsapp: file.contact.whatsapp,
     scheduleLabel: file.hours.scheduleLabel,
-    ...(file.hours.structured && isStructuredScheduleUsable(file.hours.structured)
-      ? { scheduleStructured: file.hours.structured }
-      : {}),
+    ...scheduleStructured,
     menuUrl: file.menu?.url?.trim() || null,
     instagramUrl: instagramFromFile?.trim() || null,
     googleMapsUrl: null,
