@@ -103,6 +103,8 @@ model Restaurant {
   source        String   @default("auto")
   verified      Boolean  @default(false)
   status        String   @default("published")
+  /// Destacado en portada y listados (prioridad sobre el flag en archivos cuando hay fila en DB).
+  featured      Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

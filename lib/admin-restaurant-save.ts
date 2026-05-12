@@ -95,6 +95,7 @@ export async function saveAdminRestaurantUpdate(
     scheduleStructured,
     offersDelivery: p.offersDelivery,
     acceptsReservations: p.acceptsReservations,
+    featured: p.featured,
     ratingAverage: p.ratingAverage,
     reviewsCount: p.reviewsCount,
     heroUrl: p.heroUrl,

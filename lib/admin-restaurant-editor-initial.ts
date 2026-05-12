@@ -92,6 +92,7 @@ export type AdminRestaurantEditorInitial = {
   scheduleRows: AdminScheduleRowState[];
   offersDelivery: boolean;
   acceptsReservations: boolean;
+  featured: boolean;
   ratingAverage: number;
   reviewsCount: number;
   heroUrl: string;
@@ -122,6 +123,7 @@ export function prismaRowToAdminEditorInitial(row: DbRestaurant): AdminRestauran
     scheduleRows: buildScheduleRowStateFromRow(row),
     offersDelivery: Boolean(row.offersDelivery),
     acceptsReservations: Boolean(row.acceptsReservations),
+    featured: Boolean(row.featured),
     ratingAverage: row.ratingAverage,
     reviewsCount: row.reviewsCount,
     heroUrl: row.heroUrl?.trim() || "/restaurants/placeholders/hero-placeholder.svg",

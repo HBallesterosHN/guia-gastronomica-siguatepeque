@@ -53,6 +53,7 @@ export function mapFileRestaurantToPrismaCreate(file: Restaurant): Prisma.Restau
     ...(galleryPaths.length > 0 ? { gallery: galleryPaths } : {}),
     offersDelivery: file.services.offersDelivery,
     acceptsReservations: file.services.acceptsReservations,
+    featured: file.classification.featured,
     source: "owner_submitted",
     verified: file.profileStatus?.verified ?? false,
     status: "published",

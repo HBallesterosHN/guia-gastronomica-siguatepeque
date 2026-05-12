@@ -56,7 +56,7 @@ export function mergeRestaurantWithFileFallback(db: Restaurant, file: Restaurant
     ...db,
     classification: {
       ...db.classification,
-      featured: file.classification.featured,
+      featured: db.classification.featured,
     },
     hours,
     media,

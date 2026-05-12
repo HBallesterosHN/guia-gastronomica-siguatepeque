@@ -1,0 +1,1 @@
+ALTER TABLE "restaurants" ADD COLUMN IF NOT EXISTS "featured" BOOLEAN NOT NULL DEFAULT false;

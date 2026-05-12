@@ -32,6 +32,7 @@ export default async function AdminRestaurantsListPage({ searchParams }: PagePro
       category: true,
       status: true,
       verified: true,
+      featured: true,
       ratingAverage: true,
       updatedAt: true,
     },
@@ -91,6 +92,7 @@ export default async function AdminRestaurantsListPage({ searchParams }: PagePro
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Categoría</th>
               <th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3">Destacado</th>
               <th className="px-4 py-3">Verif.</th>
               <th className="px-4 py-3">Rating</th>
               <th className="px-4 py-3">Actualizado</th>
@@ -104,6 +106,20 @@ export default async function AdminRestaurantsListPage({ searchParams }: PagePro
                 <td className="px-4 py-3 font-mono text-xs text-zinc-700">{r.slug}</td>
                 <td className="px-4 py-3 text-zinc-700">{r.category}</td>
                 <td className="px-4 py-3 capitalize text-zinc-700">{r.status}</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-zinc-700">{r.featured ? "Sí" : "No"}</span>
+                    <span
+                      className={`inline-flex w-fit rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                        r.featured
+                          ? "bg-amber-100 text-amber-900 ring-1 ring-amber-200"
+                          : "bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200"
+                      }`}
+                    >
+                      {r.featured ? "Destacado" : "Normal"}
+                    </span>
+                  </div>
+                </td>
                 <td className="px-4 py-3">{r.verified ? "Sí" : "No"}</td>
                 <td className="px-4 py-3">{r.ratingAverage.toFixed(1)}</td>
                 <td className="px-4 py-3 text-xs text-zinc-600">

@@ -161,6 +161,7 @@ function draftToRestaurantData(
     source: "auto",
     verified: false,
     status: "published",
+    featured: false,
   };
 }
 

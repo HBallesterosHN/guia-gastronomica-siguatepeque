@@ -72,6 +72,7 @@ export const adminRestaurantUpdateSchema = z.object({
   structured: z.array(structuredRowSchema).max(14).optional(),
   offersDelivery: z.boolean(),
   acceptsReservations: z.boolean(),
+  featured: z.boolean(),
   ratingAverage: z.number().min(0).max(5),
   reviewsCount: z.number().int().min(0).max(10_000_000),
   heroUrl: heroSchema,

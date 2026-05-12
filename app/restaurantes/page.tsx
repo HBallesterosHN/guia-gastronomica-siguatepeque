@@ -42,12 +42,19 @@ export async function generateMetadata(): Promise<Metadata> {
 
 interface RestaurantsPageProps {
   searchParams: Promise<{
+    nombre?: string;
     categoria?: string;
     precio?: string;
     delivery?: string;
     reservas?: string;
     ratingMinimo?: string;
   }>;
+}
+
+function parseNameQuery(value?: string): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const t = value.trim().slice(0, 120);
+  return t.length ? t : undefined;
 }
 
 function isCategory(value?: string): value is RestaurantCategory {
@@ -87,6 +94,7 @@ export default async function RestaurantsPage({
   searchParams,
 }: RestaurantsPageProps) {
   const params = await searchParams;
+  const selectedNameQuery = parseNameQuery(params.nombre);
   const selectedCategory = isCategory(params.categoria)
     ? params.categoria
     : undefined;
@@ -96,6 +104,7 @@ export default async function RestaurantsPage({
   const selectedMinRating = parseMinRating(params.ratingMinimo);
 
   const restaurants = await filterRestaurants({
+    nameQuery: selectedNameQuery,
     category: selectedCategory,
     priceRange: selectedPrice,
     delivery: selectedDelivery,
@@ -111,13 +120,13 @@ export default async function RestaurantsPage({
         </p>
         <h1 className="text-3xl font-bold text-zinc-900">Restaurantes en Siguatepeque</h1>
         <p className="max-w-2xl text-zinc-600">
-          Filtra por categoría, precio, si llevan a domicilio o si aceptan reservas, y por la
-          valoración pública cuando la tenemos. Cada ficha es para salir con el teléfono y la
-          dirección claros.
+          Busca por nombre o combina categoría, precio, delivery, reservas y calificación. Cada
+          ficha es para salir con el teléfono y la dirección claros.
         </p>
       </header>
 
       <RestaurantFilters
+        selectedNameQuery={selectedNameQuery}
         selectedCategory={selectedCategory}
         selectedPrice={selectedPrice}
         selectedDelivery={selectedDelivery}
@@ -142,7 +151,7 @@ export default async function RestaurantsPage({
             No hay resultados con esos filtros
           </h2>
           <p className="mt-2 text-sm text-zinc-600">
-            Prueba cambiando el rango de precio o bajando la calificación mínima.
+            Prueba otro nombre, cambia el rango de precio o baja la calificación mínima.
           </p>
         </section>
       )}

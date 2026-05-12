@@ -161,12 +161,25 @@ export interface RestaurantFilters {
   delivery?: YesNoFilter;
   reservations?: YesNoFilter;
   minRating?: number;
+  /** Texto libre: coincide si el nombre del restaurante lo contiene (parcial, sin distinguir mayúsculas ni acentos). */
+  nameQuery?: string;
+}
+
+function normalizeNameForSearch(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
+    .trim();
 }
 
 export function filterRestaurantsList(
   list: Restaurant[],
   filters: RestaurantFilters,
 ): Restaurant[] {
+  const nameNeedleRaw = filters.nameQuery?.trim() ?? "";
+  const nameNeedle = nameNeedleRaw ? normalizeNameForSearch(nameNeedleRaw) : "";
+
   return list.filter((restaurant) => {
     const matchesCategory =
       !filters.category || restaurant.classification.category === filters.category;
@@ -184,13 +197,17 @@ export function filterRestaurantsList(
         : !restaurant.services.acceptsReservations);
     const matchesMinRating =
       !filters.minRating || restaurant.ratings.average >= filters.minRating;
+    const matchesName =
+      !nameNeedle ||
+      normalizeNameForSearch(restaurant.identity.name).includes(nameNeedle);
 
     return (
       matchesCategory &&
       matchesPrice &&
       matchesDelivery &&
       matchesReservations &&
-      matchesMinRating
+      matchesMinRating &&
+      matchesName
     );
   });
 }

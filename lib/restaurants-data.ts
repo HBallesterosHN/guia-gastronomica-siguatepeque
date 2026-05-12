@@ -123,7 +123,7 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
     classification: {
       category,
       priceRange,
-      featured: false,
+      featured: Boolean(row.featured),
     },
     copy: {
       summary: row.summary?.trim() || `${row.name} en Siguatepeque.`,
@@ -232,7 +232,20 @@ export function getFeaturedRestaurantsFromFilesOnly(limit = 6): Restaurant[] {
 
 export async function filterRestaurants(filters: RestaurantFilters): Promise<Restaurant[]> {
   const merged = await getAllRestaurants();
-  return filterRestaurantsList(merged, filters);
+  const filtered = filterRestaurantsList(merged, filters);
+  return sortRestaurantsForListing(filtered);
+}
+
+function sortRestaurantsForListing(list: Restaurant[]): Restaurant[] {
+  return [...list].sort((a, b) => {
+    const fa = a.classification.featured ? 1 : 0;
+    const fb = b.classification.featured ? 1 : 0;
+    if (fa !== fb) return fb - fa;
+    const ra = a.ratings.average;
+    const rb = b.ratings.average;
+    if (ra !== rb) return rb - ra;
+    return a.identity.name.localeCompare(b.identity.name, "es");
+  });
 }
 
 export async function filterRestaurantsByCategory(

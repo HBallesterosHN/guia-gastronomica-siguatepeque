@@ -74,6 +74,7 @@ export function AdminRestaurantEditForm({ initial }: { initial: AdminRestaurantE
   const [menuUrl, setMenuUrl] = useState(initial.menuUrl);
   const [scheduleLabel, setScheduleLabel] = useState(initial.scheduleLabel);
   const [scheduleRows, setScheduleRows] = useState<AdminScheduleRowState[]>(initial.scheduleRows);
+  const [featured, setFeatured] = useState(initial.featured);
   const [offersDelivery, setOffersDelivery] = useState(initial.offersDelivery);
   const [acceptsReservations, setAcceptsReservations] = useState(initial.acceptsReservations);
   const [ratingAverage, setRatingAverage] = useState(String(initial.ratingAverage));
@@ -190,6 +191,7 @@ export function AdminRestaurantEditForm({ initial }: { initial: AdminRestaurantE
       menuUrl: menuUrl.trim() || null,
       scheduleLabel: scheduleLabel.trim() || null,
       structured: isStructuredScheduleUsable(structured) ? structured : undefined,
+      featured,
       offersDelivery,
       acceptsReservations,
       ratingAverage: ra,
@@ -309,6 +311,24 @@ export function AdminRestaurantEditForm({ initial }: { initial: AdminRestaurantE
             </select>
           </label>
         </div>
+      </section>
+
+      <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Visibilidad / Destacado</h2>
+        <label className="mt-4 flex items-start gap-3 text-sm">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={featured}
+            onChange={(e) => setFeatured(e.target.checked)}
+          />
+          <span>
+            <span className="font-medium text-zinc-800">Mostrar como restaurante destacado</span>
+            <span className="mt-1 block text-xs font-normal text-zinc-500">
+              Los restaurantes destacados aparecen priorizados en portada y listados especiales.
+            </span>
+          </span>
+        </label>
       </section>
 
       <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
