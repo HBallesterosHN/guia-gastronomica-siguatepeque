@@ -1,7 +1,9 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
+import { HoursDisplay } from "@/components/restaurants/hours-display";
+import { parseScheduleManualInput } from "@/lib/formatters/schedule";
 import { submitOwnerInfoChangeRequest, type ChangeRequestActionState } from "./actions";
 
 const initial: ChangeRequestActionState = { ok: false };
@@ -15,6 +17,9 @@ export function OwnerRestaurantEditForm({
 }) {
   const bound = submitOwnerInfoChangeRequest.bind(null, slug);
   const [state, formAction, pending] = useActionState(bound, initial);
+  const [scheduleDraft, setScheduleDraft] = useState("");
+
+  const schedulePreview = parseScheduleManualInput(scheduleDraft);
 
   useEffect(() => {
     if (state.ok === true) {
@@ -72,6 +77,8 @@ export function OwnerRestaurantEditForm({
         <textarea
           name="scheduleLabel"
           rows={5}
+          value={scheduleDraft}
+          onChange={(e) => setScheduleDraft(e.target.value)}
           placeholder={`Una línea por día, por ejemplo:\nLunes 8:00 - 20:00\nMartes 8:00 - 20:00`}
           className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
         />
@@ -79,6 +86,13 @@ export function OwnerRestaurantEditForm({
           Si escribes varios días con hora, intentamos mostrar tabla en la ficha tras aprobación. Si es texto
           libre, se mostrará en un bloque legible.
         </p>
+        <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Vista previa en ficha</p>
+          <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Horario</p>
+            <HoursDisplay hours={{ scheduleLabel: schedulePreview.scheduleLabel, structured: schedulePreview.structured }} />
+          </div>
+        </div>
       </div>
 
       <div>

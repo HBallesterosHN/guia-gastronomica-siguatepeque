@@ -152,8 +152,8 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
       reviewsCount: row.reviewsCount,
     },
     services: {
-      offersDelivery: false,
-      acceptsReservations: false,
+      offersDelivery: Boolean(row.offersDelivery),
+      acceptsReservations: Boolean(row.acceptsReservations),
     },
     menu: row.menuUrl?.trim() ? { url: row.menuUrl.trim() } : undefined,
     profileStatus: {

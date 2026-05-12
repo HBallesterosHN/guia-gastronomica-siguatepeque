@@ -2,8 +2,10 @@ import "server-only";
 
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { normalizeHondurasPhone } from "@/lib/formatters/phone";
 import { isStructuredScheduleUsable, parseScheduleManualInput } from "@/lib/formatters/schedule";
 import {
+  getGoogleMapsUrlFromEntryFile,
   getRestaurantBySlugFromFiles,
   getRestaurantInstagramUrlFromEntryFile,
 } from "@/lib/restaurants-file";
@@ -33,17 +35,24 @@ export function mapFileRestaurantToPrismaCreate(file: Restaurant): Prisma.Restau
     address: file.location.address,
     lat: file.location.coordinates.lat,
     lng: file.location.coordinates.lng,
-    phone: file.contact.phone,
-    whatsapp: file.contact.whatsapp,
+    phone:
+      normalizeHondurasPhone(file.contact.phone) ??
+      (/por\s*confirmar/i.test(file.contact.phone) ? null : file.contact.phone?.trim() || null),
+    whatsapp:
+      normalizeHondurasPhone(file.contact.whatsapp) ??
+      normalizeHondurasPhone(file.contact.phone) ??
+      (/por\s*confirmar/i.test(file.contact.whatsapp) ? null : file.contact.whatsapp?.trim() || null),
     scheduleLabel: file.hours.scheduleLabel,
     ...scheduleStructured,
     menuUrl: file.menu?.url?.trim() || null,
     instagramUrl: instagramFromFile?.trim() || null,
-    googleMapsUrl: null,
+    googleMapsUrl: getGoogleMapsUrlFromEntryFile(file.identity.slug)?.trim() || null,
     ratingAverage: file.ratings.average,
     reviewsCount: file.ratings.reviewsCount,
     heroUrl: file.media.hero,
     ...(galleryPaths.length > 0 ? { gallery: galleryPaths } : {}),
+    offersDelivery: file.services.offersDelivery,
+    acceptsReservations: file.services.acceptsReservations,
     source: "owner_submitted",
     verified: file.profileStatus?.verified ?? false,
     status: "published",

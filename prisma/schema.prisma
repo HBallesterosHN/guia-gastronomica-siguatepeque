@@ -98,6 +98,8 @@ model Restaurant {
   reviewsCount  Int      @default(0)
   heroUrl       String?
   gallery       Json?
+  offersDelivery       Boolean @default(false)
+  acceptsReservations  Boolean @default(false)
   source        String   @default("auto")
   verified      Boolean  @default(false)
   status        String   @default("published")

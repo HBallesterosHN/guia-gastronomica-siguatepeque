@@ -119,6 +119,23 @@ export function getFeaturedRestaurantsFromFiles(limit = 6): Restaurant[] {
     .slice(0, limit);
 }
 
+/** URL de Google Maps desde comentario o cuerpo del entry TS (intake). */
+export function getGoogleMapsUrlFromEntryFile(slug: string): string | undefined {
+  const entryFile = path.join(process.cwd(), "data", "restaurants", "entries", `${slug}.ts`);
+  if (!existsSync(entryFile)) return undefined;
+  try {
+    const source = readFileSync(entryFile, "utf8");
+    const byComment = source.match(/^\s*\*\s*Google Maps:\s*"([^"]+)"/m)?.[1]?.trim();
+    if (byComment && /^https?:\/\//i.test(byComment)) return byComment;
+    const byUrl = source.match(
+      /https?:\/\/(?:maps\.google\.com|www\.google\.com\/maps|maps\.app\.goo\.gl)[^\s"'`]+/i,
+    );
+    return byUrl?.[0]?.trim();
+  } catch {
+    return undefined;
+  }
+}
+
 export function getRestaurantInstagramUrlFromEntryFile(slug: string): string | undefined {
   const entryFile = path.join(process.cwd(), "data", "restaurants", "entries", `${slug}.ts`);
   if (!existsSync(entryFile)) return undefined;

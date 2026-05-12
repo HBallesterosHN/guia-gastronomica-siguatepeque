@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo } from "react";
+import { HoursDisplay } from "@/components/restaurants/hours-display";
 import {
   generateIntakePreviewAction,
   type IntakeGenerateState,
@@ -125,7 +126,14 @@ export function IntakeClient() {
               </div>
               <div className="sm:col-span-2">
                 <dt className="text-zinc-500">Horario</dt>
-                <dd className="whitespace-pre-wrap text-zinc-900">{genState.draft.hours || "—"}</dd>
+                <dd className="text-zinc-900">
+                  <HoursDisplay
+                    hours={{
+                      scheduleLabel: genState.draft.hours,
+                      structured: genState.draft.hoursStructured,
+                    }}
+                  />
+                </dd>
               </div>
               <div>
                 <dt className="text-zinc-500">Rating</dt>

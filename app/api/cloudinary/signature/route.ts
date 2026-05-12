@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { userOwnsRestaurantSlug } from "@/lib/assert-ownership";
+import { isPlatformAdmin } from "@/lib/require-admin";
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 
@@ -7,8 +8,12 @@ const CLOUDINARY_ROOT = "mevoyasigua/restaurants";
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  const admin = await isPlatformAdmin();
+
+  if (!admin) {
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
   }
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -30,9 +35,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "slug requerido" }, { status: 400 });
   }
 
-  const own = await userOwnsRestaurantSlug(session.user.id, slug);
-  if (!own) {
-    return NextResponse.json({ error: "Sin permiso para este restaurante" }, { status: 403 });
+  if (!admin) {
+    const own = await userOwnsRestaurantSlug(session!.user!.id, slug);
+    if (!own) {
+      return NextResponse.json({ error: "Sin permiso para este restaurante" }, { status: 403 });
+    }
   }
 
   const folder = `${CLOUDINARY_ROOT}/${slug}`;

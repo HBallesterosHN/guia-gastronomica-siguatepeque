@@ -7,7 +7,7 @@ import { GalleryLightbox } from "@/components/restaurants/GalleryLightbox";
 import { ReviewList } from "@/components/restaurants/ReviewList";
 import { StarRating } from "@/components/restaurants/StarRating";
 import { categoryLabels } from "@/lib/category";
-import { isStructuredScheduleUsable } from "@/lib/formatters/schedule";
+import { HoursDisplay } from "@/components/restaurants/hours-display";
 import { getTrustedEditorialReviews } from "@/lib/review-trust";
 import {
   getAllRestaurants,
@@ -85,22 +85,6 @@ export default async function RestaurantDetailPage({
     (media.gallery?.length ?? 0) > 0
       ? media.gallery ?? []
       : [...(media.featured ?? []), ...(media.place ?? [])];
-  const structuredHours = hours.structured ?? [];
-  const useStructuredHoursTable = isStructuredScheduleUsable(structuredHours);
-  const currentDayEnglish = new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    timeZone: "America/Tegucigalpa",
-  }).format(new Date());
-  const dayMap: Record<string, string> = {
-    Monday: "Lunes",
-    Tuesday: "Martes",
-    Wednesday: "Miércoles",
-    Thursday: "Jueves",
-    Friday: "Viernes",
-    Saturday: "Sábado",
-    Sunday: "Domingo",
-  };
-  const todayEs = dayMap[currentDayEnglish] ?? "";
   const trustedReviews = getTrustedEditorialReviews(restaurant.reviews);
   const showEditorialReviews = trustedReviews.length > 0;
   const publicRatingCount = ratings.reviewsCount > 0;
@@ -300,32 +284,7 @@ export default async function RestaurantDetailPage({
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Horario
                 </p>
-                {useStructuredHoursTable ? (
-                  <div className="mt-2 space-y-2">
-                    {structuredHours.map((item) => {
-                      const isToday = item.day === todayEs;
-                      return (
-                        <div
-                          key={`${item.day}-${item.open}-${item.close}`}
-                          className={`flex items-center justify-between gap-3 rounded-lg px-2 py-1 ${
-                            isToday ? "bg-emerald-50 text-emerald-800" : "text-zinc-900"
-                          }`}
-                        >
-                          <span className="font-medium">{item.day}</span>
-                          <span className="text-right">
-                            {item.open} - {item.close}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="mt-2">
-                    <p className="whitespace-pre-line leading-6 text-zinc-900">
-                      {hours.scheduleLabel?.trim() || "Horario por confirmar."}
-                    </p>
-                  </div>
-                )}
+                <HoursDisplay hours={{ scheduleLabel: hours.scheduleLabel, structured: hours.structured }} />
               </div>
               {showPhoneBlock ? (
                 <div className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
