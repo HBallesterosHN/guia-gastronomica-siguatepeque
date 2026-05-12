@@ -25,6 +25,7 @@ En Vercel: Settings → Environment Variables. En local: `.env` / `.env.local`.
 | Variable | Uso |
 |----------|-----|
 | `ADMIN_SECRET` | Clave para cookie httpOnly en `/admin` cuando aún no usas cuenta Google con `role = admin` en la tabla `users`. |
+| `ADMIN_EMAILS` | Lista separada por comas de correos que pueden entrar a `/admin` (además de `role = admin` y `ADMIN_SECRET`). |
 
 El primer usuario administrador puede crearse en Google y luego en Neon: `UPDATE users SET role = 'admin' WHERE email = 'tu@correo.com';`
 
@@ -44,6 +45,7 @@ AUTH_SECRET="genera-un-string-largo-aleatorio"
 AUTH_GOOGLE_ID="..."
 AUTH_GOOGLE_SECRET="..."
 ADMIN_SECRET="clave-temporal-solo-para-bootstrap"
+ADMIN_EMAILS="editor1@dominio.com,editor2@dominio.com"
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="tu-nube"
 CLOUDINARY_API_KEY="..."
 CLOUDINARY_API_SECRET="..."
@@ -72,12 +74,14 @@ En producción:
 npx prisma migrate deploy
 ```
 
+> **Titularidad:** un restaurante puede tener **varios** `RestaurantOwnership` activos (dueños, gerentes, editores). El índice único es `(userId, restaurantId)`: el mismo usuario no se duplica en la misma ficha. Los reclamos pendientes están limitados a **uno por usuario y slug** (índice parcial en SQL + validación en app).
+
 > **Importante:** el esquema actual incluye Auth.js (`User`, `Account`, `Session`, `VerificationToken`), ownership (`RestaurantOwnership`), reclamos (`RestaurantClaim`) y solicitudes de cambio (`RestaurantChangeRequest`). Si venías de tablas antiguas (`restaurant_update_requests`, `claim_requests`), planifica migración de datos o arranca una base nueva.
 
 ## Rutas relacionadas con datos
 
 - **Público:** `/restaurantes/[slug]/reclamar` — reclamo de perfil (requiere login Google).
-- **Dueño:** `/dashboard` y `/dashboard/restaurants/[slug]/solicitar` — solicitudes de cambio (pendientes de aprobación).
+- **Dueño:** `/dashboard` — listado de perfiles aprobados; `/dashboard/restaurantes/[slug]` — solicitud de cambios de datos; `/dashboard/restaurantes/[slug]/fotos` — fotos con firma Cloudinary (pendientes de aprobación).
 - **Admin:** `/admin` (acceso), `/admin/reclamos`, `/admin/cambios` — aprobación editorial.
 
 ## Código relacionado

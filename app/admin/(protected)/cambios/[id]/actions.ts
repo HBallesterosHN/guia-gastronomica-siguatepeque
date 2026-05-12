@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   applyApprovedChangesToRestaurant,
-  parseImageUrlsJson,
+  parseImageAssetsJson,
   parseOwnerChangesJson,
 } from "@/lib/apply-owner-changes";
 import { prisma } from "@/lib/prisma";
@@ -20,14 +20,14 @@ export async function approveChangeRequestAction(requestId: string, _formData: F
   }
 
   const changes = parseOwnerChangesJson(row.changes);
-  const imageUrls = parseImageUrlsJson(row.imageUrls);
+  const images = parseImageAssetsJson(row.imageUrls);
 
   const rest = await prisma.restaurant.findUnique({
     where: { id: row.restaurantId },
     select: { slug: true },
   });
 
-  await applyApprovedChangesToRestaurant(row.restaurantId, changes, imageUrls);
+  await applyApprovedChangesToRestaurant(row.restaurantId, changes, images);
   await prisma.restaurantChangeRequest.update({
     where: { id: requestId },
     data: { status: "approved" },
@@ -36,6 +36,9 @@ export async function approveChangeRequestAction(requestId: string, _formData: F
   if (rest?.slug) {
     revalidatePath(`/restaurantes/${rest.slug}`);
     revalidatePath("/restaurantes");
+    revalidatePath("/dashboard");
+    revalidatePath(`/dashboard/restaurantes/${rest.slug}`);
+    revalidatePath(`/dashboard/restaurantes/${rest.slug}/fotos`);
   }
 
   redirect(`/admin/cambios/${requestId}?ok=approved`);

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { OwnershipStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function userOwnsRestaurantSlug(
@@ -9,7 +10,7 @@ export async function userOwnsRestaurantSlug(
   const row = await prisma.restaurantOwnership.findFirst({
     where: {
       userId,
-      status: "active",
+      status: OwnershipStatus.active,
       restaurant: { slug },
     },
     select: { restaurantId: true },

@@ -7,6 +7,7 @@ import { GalleryLightbox } from "@/components/restaurants/GalleryLightbox";
 import { ReviewList } from "@/components/restaurants/ReviewList";
 import { StarRating } from "@/components/restaurants/StarRating";
 import { categoryLabels } from "@/lib/category";
+import { isStructuredScheduleUsable } from "@/lib/formatters/schedule";
 import { getTrustedEditorialReviews } from "@/lib/review-trust";
 import {
   getAllRestaurants,
@@ -85,6 +86,7 @@ export default async function RestaurantDetailPage({
       ? media.gallery ?? []
       : [...(media.featured ?? []), ...(media.place ?? [])];
   const structuredHours = hours.structured ?? [];
+  const useStructuredHoursTable = isStructuredScheduleUsable(structuredHours);
   const currentDayEnglish = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     timeZone: "America/Tegucigalpa",
@@ -298,7 +300,7 @@ export default async function RestaurantDetailPage({
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Horario
                 </p>
-                {structuredHours.length > 0 ? (
+                {useStructuredHoursTable ? (
                   <div className="mt-2 space-y-2">
                     {structuredHours.map((item) => {
                       const isToday = item.day === todayEs;
@@ -310,13 +312,19 @@ export default async function RestaurantDetailPage({
                           }`}
                         >
                           <span className="font-medium">{item.day}</span>
-                          <span className="text-right">{item.open} - {item.close}</span>
+                          <span className="text-right">
+                            {item.open} - {item.close}
+                          </span>
                         </div>
                       );
                     })}
                   </div>
                 ) : (
-                  <p className="mt-2 leading-6 text-zinc-900">{hours.scheduleLabel}</p>
+                  <div className="mt-2">
+                    <p className="whitespace-pre-line leading-6 text-zinc-900">
+                      {hours.scheduleLabel?.trim() || "Horario por confirmar."}
+                    </p>
+                  </div>
                 )}
               </div>
               {showPhoneBlock ? (

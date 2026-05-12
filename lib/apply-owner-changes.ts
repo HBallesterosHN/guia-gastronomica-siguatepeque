@@ -1,69 +1,44 @@
 import "server-only";
 
 import { Prisma } from "@prisma/client";
+import type { ChangeRequestImageAsset, OwnerChangesJson } from "@/lib/change-request-types";
+import { normalizeHondurasPhone } from "@/lib/formatters/phone";
+import { isStructuredScheduleUsable } from "@/lib/formatters/schedule";
 import { prisma } from "@/lib/prisma";
 
-export type OwnerChangesJson = {
-  phone?: string;
-  whatsapp?: string;
-  scheduleLabel?: string;
-  menuUrl?: string;
-  instagramUrl?: string;
-  summary?: string;
-  heroUrl?: string;
-  gallery?: string[];
-};
-
-export function parseOwnerChangesJson(raw: unknown): OwnerChangesJson {
-  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return {};
-  const o = raw as Record<string, unknown>;
-  const str = (k: string) => (typeof o[k] === "string" ? (o[k] as string).trim() : undefined);
-  const out: OwnerChangesJson = {};
-  const phone = str("phone");
-  const whatsapp = str("whatsapp");
-  const scheduleLabel = str("scheduleLabel");
-  const menuUrl = str("menuUrl");
-  const instagramUrl = str("instagramUrl");
-  const summary = str("summary");
-  const heroUrl = str("heroUrl");
-  if (phone !== undefined) out.phone = phone;
-  if (whatsapp !== undefined) out.whatsapp = whatsapp;
-  if (scheduleLabel !== undefined) out.scheduleLabel = scheduleLabel;
-  if (menuUrl !== undefined) out.menuUrl = menuUrl;
-  if (instagramUrl !== undefined) out.instagramUrl = instagramUrl;
-  if (summary !== undefined) out.summary = summary;
-  if (heroUrl !== undefined) out.heroUrl = heroUrl;
-  if (Array.isArray(o.gallery)) {
-    const urls = o.gallery.filter((u): u is string => typeof u === "string" && u.trim().length > 0);
-    if (urls.length) out.gallery = urls;
-  }
-  return out;
-}
+export { parseImageAssetsJson, parseOwnerChangesJson } from "@/lib/change-request-types";
 
 function toGalleryArray(value: unknown): string[] {
   if (value == null) return [];
   if (Array.isArray(value)) {
-    return value.filter((u): u is string => typeof u === "string" && u.trim().length > 0);
+    return value
+      .map((u) => {
+        if (typeof u === "string") return u.trim();
+        if (u && typeof u === "object" && typeof (u as { url?: string }).url === "string") {
+          return (u as { url: string }).url.trim();
+        }
+        return "";
+      })
+      .filter(Boolean);
   }
   return [];
 }
 
-export function parseImageUrlsJson(raw: unknown): string[] {
-  if (raw == null) return [];
-  if (Array.isArray(raw)) {
-    return raw.filter((u): u is string => typeof u === "string" && u.trim().length > 0);
-  }
-  return [];
+function normalizeContactForDb(value: string | undefined): string | null {
+  if (value === undefined) return null;
+  const t = value.trim();
+  if (!t) return null;
+  const n = normalizeHondurasPhone(t);
+  return n ?? t;
 }
 
 /**
- * Aplica cambios editoriales aprobados sobre `Restaurant` (solo columnas conocidas).
- * `imageUrls` se fusiona con `gallery` existente (deduplicado por string).
+ * Aplica cambios editoriales aprobados sobre `Restaurant`.
  */
 export async function applyApprovedChangesToRestaurant(
   restaurantId: string,
   changes: OwnerChangesJson,
-  imageUrls: string[],
+  images: ChangeRequestImageAsset[],
 ): Promise<void> {
   const current = await prisma.restaurant.findUnique({
     where: { id: restaurantId },
@@ -71,19 +46,47 @@ export async function applyApprovedChangesToRestaurant(
   });
 
   const data: Prisma.RestaurantUpdateInput = {};
-  if (changes.phone !== undefined) data.phone = changes.phone || null;
-  if (changes.whatsapp !== undefined) data.whatsapp = changes.whatsapp || null;
-  if (changes.scheduleLabel !== undefined) data.scheduleLabel = changes.scheduleLabel || null;
-  if (changes.menuUrl !== undefined) data.menuUrl = changes.menuUrl || null;
-  if (changes.instagramUrl !== undefined) data.instagramUrl = changes.instagramUrl || null;
-  if (changes.summary !== undefined) data.summary = changes.summary || null;
-  if (changes.heroUrl !== undefined) data.heroUrl = changes.heroUrl || null;
 
+  if (changes.phone !== undefined) {
+    data.phone = normalizeContactForDb(changes.phone);
+  }
+  if (changes.whatsapp !== undefined) {
+    data.whatsapp = normalizeContactForDb(changes.whatsapp);
+  }
+  if (changes.menuUrl !== undefined) data.menuUrl = changes.menuUrl?.trim() || null;
+  if (changes.instagramUrl !== undefined) data.instagramUrl = changes.instagramUrl?.trim() || null;
+  if (changes.summary !== undefined) data.summary = changes.summary?.trim() || null;
+
+  if (changes.scheduleLabel !== undefined) {
+    data.scheduleLabel = changes.scheduleLabel?.trim() || null;
+    if (isStructuredScheduleUsable(changes.scheduleStructured)) {
+      data.scheduleStructured = changes.scheduleStructured;
+    } else {
+      data.scheduleStructured = Prisma.JsonNull;
+    }
+  } else if (changes.scheduleStructured !== undefined) {
+    if (isStructuredScheduleUsable(changes.scheduleStructured)) {
+      data.scheduleStructured = changes.scheduleStructured;
+    } else {
+      data.scheduleStructured = Prisma.JsonNull;
+    }
+  }
+
+  const heroFromImages = images.find((i) => i.type === "hero");
+  if (heroFromImages?.url) {
+    data.heroUrl = heroFromImages.url;
+  } else if (changes.heroUrl !== undefined) {
+    data.heroUrl = changes.heroUrl?.trim() || null;
+  }
+
+  const galleryUrlsFromImages = images
+    .filter((i) => i.type === "gallery" && i.url)
+    .map((i) => i.url);
   const existingGallery = toGalleryArray(current?.gallery);
   const fromChanges = changes.gallery ?? [];
-  const merged = [...existingGallery, ...fromChanges, ...imageUrls];
+  const merged = [...existingGallery, ...fromChanges, ...galleryUrlsFromImages];
   const dedup = [...new Set(merged.map((s) => s.trim()).filter(Boolean))];
-  if (dedup.length > 0 || imageUrls.length > 0 || fromChanges.length > 0) {
+  if (dedup.length > 0 || galleryUrlsFromImages.length > 0 || fromChanges.length > 0) {
     data.gallery = dedup.length > 0 ? dedup : Prisma.JsonNull;
   }
 

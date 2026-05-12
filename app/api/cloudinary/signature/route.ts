@@ -3,6 +3,8 @@ import { userOwnsRestaurantSlug } from "@/lib/assert-ownership";
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 
+const CLOUDINARY_ROOT = "mevoyasigua/restaurants";
+
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -16,9 +18,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Cloudinary no está configurado en el servidor." }, { status: 503 });
   }
 
-  let body: { slug?: string; folder?: string };
+  let body: { slug?: string };
   try {
-    body = (await req.json()) as { slug?: string; folder?: string };
+    body = (await req.json()) as { slug?: string };
   } catch {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
@@ -33,10 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Sin permiso para este restaurante" }, { status: 403 });
   }
 
-  const folder =
-    typeof body.folder === "string" && body.folder.trim().length > 0
-      ? body.folder.trim()
-      : `restaurantes/${slug}/owner`;
+  const folder = `${CLOUDINARY_ROOT}/${slug}`;
 
   const timestamp = Math.round(Date.now() / 1000);
   const paramsToSign: Record<string, string | number> = { timestamp, folder };

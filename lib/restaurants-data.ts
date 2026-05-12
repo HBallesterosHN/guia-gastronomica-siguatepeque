@@ -4,6 +4,8 @@
  */
 import type { Restaurant as DbRestaurant } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { formatHondurasPhone } from "@/lib/formatters/phone";
+import { isStructuredScheduleUsable, type StructuredHourRow } from "@/lib/formatters/schedule";
 import {
   filterRestaurantsList,
   getAllRestaurantsFromFiles,
@@ -46,6 +48,21 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
   const category = parseCategory(row.category);
   const priceRange = parsePriceRange(row.priceRange);
 
+  const rowExt = row as DbRestaurant & { scheduleStructured?: unknown };
+  let structuredFromDb: StructuredHourRow[] | undefined;
+  if (Array.isArray(rowExt.scheduleStructured)) {
+    const rows: StructuredHourRow[] = [];
+    for (const item of rowExt.scheduleStructured) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+      const r = item as Record<string, unknown>;
+      const day = typeof r.day === "string" ? r.day.trim() : "";
+      const open = typeof r.open === "string" ? r.open.trim() : "";
+      const close = typeof r.close === "string" ? r.close.trim() : "";
+      if (day && open && close) rows.push({ day, open, close });
+    }
+    if (isStructuredScheduleUsable(rows)) structuredFromDb = rows;
+  }
+
   let galleryPaths: RestaurantPublicImagePath[] = [];
   if (row.gallery != null && Array.isArray(row.gallery)) {
     galleryPaths = row.gallery
@@ -62,6 +79,13 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
       ? heroRaw
       : "/restaurants/placeholders/hero-placeholder.svg"
   ) as RestaurantPublicImagePath;
+
+  const phoneRaw = row.phone?.trim() || "Por confirmar";
+  const waRaw = row.whatsapp?.trim() || row.phone?.trim() || "Por confirmar";
+  const phoneDisplay = formatHondurasPhone(phoneRaw);
+  const waDisplay = formatHondurasPhone(waRaw);
+
+  const scheduleLabelDb = row.scheduleLabel?.trim() || "Horario por confirmar.";
 
   return {
     identity: { name: row.name, slug },
@@ -81,11 +105,12 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
       },
     },
     contact: {
-      phone: row.phone?.trim() || "Por confirmar",
-      whatsapp: row.whatsapp?.trim() || row.phone?.trim() || "Por confirmar",
+      phone: phoneDisplay,
+      whatsapp: waDisplay,
     },
     hours: {
-      scheduleLabel: row.scheduleLabel?.trim() || "Horario por confirmar.",
+      scheduleLabel: scheduleLabelDb,
+      ...(structuredFromDb ? { structured: structuredFromDb } : {}),
     },
     media: {
       hero,

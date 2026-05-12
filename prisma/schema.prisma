@@ -88,7 +88,9 @@ model Restaurant {
   lng           Float?
   phone         String?
   whatsapp      String?
-  scheduleLabel String?
+  scheduleLabel      String?
+  /// Horario por día (JSON: `[{ "day": "Lunes", "open": "8:00", "close": "20:00" }, ...]`) cuando existe en DB.
+  scheduleStructured Json?
   menuUrl       String?
   instagramUrl  String?
   googleMapsUrl String?
@@ -140,20 +142,27 @@ model RestaurantClaim {
 enum OwnershipRole {
   owner
   manager
+  editor
+}
+
+enum OwnershipStatus {
+  active
+  inactive
 }
 
 model RestaurantOwnership {
-  id           String          @id @default(cuid())
+  id           String            @id @default(cuid())
   restaurantId String
   userId       String
-  role         OwnershipRole   @default(owner)
-  status       String          @default("active")
-  createdAt    DateTime        @default(now())
+  role         OwnershipRole     @default(owner)
+  status       OwnershipStatus   @default(active)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
   restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([restaurantId, userId])
+  @@unique([userId, restaurantId])
   @@map("restaurant_ownerships")
 }
 

@@ -1,4 +1,5 @@
 import type { Restaurant } from "@/types/restaurant";
+import { telUriFromInput, whatsAppDigitsFromInput } from "@/lib/formatters/phone";
 import { PhoneIcon, WhatsAppIcon } from "@/components/icons/ContactIcons";
 import { hasDialablePhone, hasMapCoordinates, hasWhatsAppLink } from "@/lib/contact-validation";
 
@@ -11,7 +12,7 @@ export function RestaurantActions({ restaurant }: RestaurantActionsProps) {
   const showTel = hasDialablePhone(contact.phone);
   const showWa = hasWhatsAppLink(contact.whatsapp);
   const showMap = hasMapCoordinates(location.coordinates);
-  const whatsappNumber = contact.whatsapp.replace(/\D/g, "");
+  const whatsappNumber = whatsAppDigitsFromInput(contact.whatsapp);
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${location.coordinates.lat},${location.coordinates.lng}`;
   const menuUrl = menu?.url?.trim();
   const menuLabel = menu?.label?.trim() || "Ver menú";
@@ -30,7 +31,7 @@ export function RestaurantActions({ restaurant }: RestaurantActionsProps) {
     <div className="flex flex-wrap gap-3">
       {showTel ? (
         <a
-          href={`tel:${contact.phone.replace(/\s/g, "")}`}
+          href={telUriFromInput(contact.phone)}
           className="inline-flex min-w-[8.5rem] flex-1 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-zinc-700 sm:min-w-0 sm:flex-1"
         >
           <PhoneIcon className="h-5 w-5 shrink-0" />

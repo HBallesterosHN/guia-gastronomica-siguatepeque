@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ChangeRequestImageAsset } from "@/lib/change-request-types";
 
 function fdString(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -37,27 +38,39 @@ export const ownerChangeRequestFormSchema = z.object({
     },
     z.union([z.undefined(), z.string().max(12000)]),
   ),
-  heroUrl: optUrl,
+  ownerMessage: z.preprocess(
+    (v) => {
+      if (typeof v !== "string") return undefined;
+      const s = v.trim();
+      return s.length === 0 ? undefined : s;
+    },
+    z.union([z.undefined(), z.string().max(4000)]),
+  ),
 });
 
-export function parseOwnerChangeRequestForm(formData: FormData) {
-  return ownerChangeRequestFormSchema.safeParse({
-    phone: fdString(formData, "phone"),
-    whatsapp: fdString(formData, "whatsapp"),
-    scheduleLabel: fdString(formData, "scheduleLabel"),
-    menuUrl: fdString(formData, "menuUrl"),
-    instagramUrl: fdString(formData, "instagramUrl"),
-    summary: fdString(formData, "summary"),
-    heroUrl: fdString(formData, "heroUrl"),
-  });
-}
-
-export function parseImageUrlsHiddenField(raw: string): string[] {
+export function parseImageAssetsFromHiddenJson(raw: string): ChangeRequestImageAsset[] {
   if (!raw.trim()) return [];
   try {
     const v = JSON.parse(raw) as unknown;
     if (!Array.isArray(v)) return [];
-    return v.filter((u): u is string => typeof u === "string" && u.trim().length > 0);
+    const out: ChangeRequestImageAsset[] = [];
+    for (const item of v) {
+      if (
+        item &&
+        typeof item === "object" &&
+        typeof (item as { url?: string }).url === "string" &&
+        typeof (item as { publicId?: string }).publicId === "string" &&
+        ((item as { type?: string }).type === "hero" || (item as { type?: string }).type === "gallery")
+      ) {
+        const o = item as { url: string; publicId: string; type: "hero" | "gallery" };
+        out.push({
+          url: o.url.trim(),
+          publicId: o.publicId.trim(),
+          type: o.type,
+        });
+      }
+    }
+    return out;
   } catch {
     return [];
   }

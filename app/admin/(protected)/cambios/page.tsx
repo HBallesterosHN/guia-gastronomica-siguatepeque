@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { summarizeChangeRequestForAdminList } from "@/lib/admin-change-summary";
 
 function orderStatus(s: string): number {
   if (s === "pending") return 0;
@@ -26,13 +27,14 @@ export default async function AdminCambiosPage() {
     <main className="space-y-6">
       <h1 className="text-2xl font-bold text-zinc-900">Solicitudes de cambios</h1>
       <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <table className="min-w-[760px] w-full text-left text-sm">
+        <table className="min-w-[880px] w-full text-left text-sm">
           <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-semibold uppercase text-zinc-600">
             <tr>
               <th className="px-3 py-2">Restaurante</th>
               <th className="px-3 py-2">Usuario</th>
               <th className="px-3 py-2">Estado</th>
               <th className="px-3 py-2">Fecha</th>
+              <th className="px-3 py-2">Resumen</th>
               <th className="px-3 py-2 text-right">Ver</th>
             </tr>
           </thead>
@@ -47,6 +49,9 @@ export default async function AdminCambiosPage() {
                 <td className="px-3 py-2 capitalize">{r.status}</td>
                 <td className="px-3 py-2 whitespace-nowrap text-zinc-600">
                   {r.createdAt.toLocaleString("es-HN", { dateStyle: "short", timeStyle: "short" })}
+                </td>
+                <td className="px-3 py-2 text-xs text-zinc-700">
+                  {summarizeChangeRequestForAdminList(r.changes, r.imageUrls)}
                 </td>
                 <td className="px-3 py-2 text-right">
                   <Link

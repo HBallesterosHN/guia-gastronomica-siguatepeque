@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -62,19 +63,26 @@ export async function submitRestaurantClaim(
   });
   if (existing) restaurantId = existing.id;
 
-  await prisma.restaurantClaim.create({
-    data: {
-      restaurantSlug: trimmedSlug,
-      restaurantId,
-      userId: session.user.id,
-      ownerName: parsed.data.ownerName,
-      ownerPhone: parsed.data.ownerPhone,
-      ownerEmail: parsed.data.ownerEmail ?? null,
-      message: parsed.data.message,
-      evidenceUrl: parsed.data.evidenceUrl ?? null,
-      status: "pending",
-    },
-  });
+  try {
+    await prisma.restaurantClaim.create({
+      data: {
+        restaurantSlug: trimmedSlug,
+        restaurantId,
+        userId: session.user.id,
+        ownerName: parsed.data.ownerName,
+        ownerPhone: parsed.data.ownerPhone,
+        ownerEmail: parsed.data.ownerEmail ?? null,
+        message: parsed.data.message,
+        evidenceUrl: parsed.data.evidenceUrl ?? null,
+        status: "pending",
+      },
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return { ok: false, message: "Ya tienes una solicitud pendiente para este restaurante." };
+    }
+    throw e;
+  }
 
   revalidatePath(`/admin/reclamos`);
   revalidatePath(`/restaurantes/${trimmedSlug}/reclamar`);
