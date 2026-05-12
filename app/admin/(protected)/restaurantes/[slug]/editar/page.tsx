@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { prismaRowToAdminEditorInitial } from "@/lib/admin-restaurant-editor-initial";
 import { getRestaurantBySlugFromFiles } from "@/lib/restaurants-file";
+import { getGuideMembershipsForRestaurant, listAllGuidesForRestaurantEditor } from "@/lib/guides-data";
 import { importRestaurantFromFileToDbAction } from "../../actions";
 import { AdminRestaurantEditForm } from "./admin-restaurant-edit-form";
+import { AdminRestaurantGuidesSection } from "./admin-restaurant-guides-section";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -41,6 +43,21 @@ export default async function AdminRestaurantEditPage({ params }: PageProps) {
 
   const initial = prismaRowToAdminEditorInitial(row);
 
+  const allGuides = await listAllGuidesForRestaurantEditor();
+  const memberships = await getGuideMembershipsForRestaurant(row.id);
+  const guideRows = allGuides.map((g) => {
+    const m = memberships.find((x) => x.guideId === g.id);
+    return {
+      guideId: g.id,
+      slug: g.slug,
+      title: g.title,
+      status: g.status,
+      selected: Boolean(m),
+      label: m?.label?.trim() ?? "",
+      note: m?.note?.trim() ?? "",
+    };
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -64,6 +81,10 @@ export default async function AdminRestaurantEditPage({ params }: PageProps) {
         </div>
       </div>
       <AdminRestaurantEditForm initial={initial} />
+      <AdminRestaurantGuidesSection
+        restaurantId={row.id}
+        rows={guideRows}
+      />
     </div>
   );
 }

@@ -111,8 +111,49 @@ model Restaurant {
   claims         RestaurantClaim[]
   ownerships     RestaurantOwnership[]
   changeRequests RestaurantChangeRequest[]
+  guideLinks     GuideRestaurant[]
 
   @@map("restaurants")
+}
+
+/// Guía editorial (contenido curado; prioridad sobre definiciones en código cuando el slug coincide).
+model Guide {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  subtitle        String?
+  intro           String?  @db.Text
+  description     String?  @db.Text
+  status          String   @default("published")
+  featured        Boolean  @default(false)
+  coverImageUrl   String?
+  seoTitle        String?
+  seoDescription  String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  guideRestaurants GuideRestaurant[]
+
+  @@map("guides")
+}
+
+model GuideRestaurant {
+  id             String   @id @default(cuid())
+  guideId        String
+  restaurantId  String
+  rank           Int      @default(0)
+  label          String?
+  note           String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  guide       Guide       @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  restaurant  Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([guideId, restaurantId])
+  @@index([guideId])
+  @@index([restaurantId])
+  @@map("guide_restaurants")
 }
 
 enum ClaimStatus {

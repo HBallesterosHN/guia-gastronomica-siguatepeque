@@ -24,6 +24,9 @@ export default async function AdminProtectedLayout({
             <Link href="/admin/intake" className="text-emerald-700 hover:underline">
               Intake
             </Link>
+            <Link href="/admin/guias" className="text-emerald-700 hover:underline">
+              Guías
+            </Link>
             <Link href="/admin/restaurantes" className="text-emerald-700 hover:underline">
               Restaurantes
             </Link>

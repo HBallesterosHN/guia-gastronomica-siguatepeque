@@ -15,7 +15,8 @@
     "restaurant:add-draft": "tsx scripts/add-restaurant-draft.ts",
     "restaurant:enrich-draft": "tsx scripts/enrich-restaurant-draft.ts",
     "restaurant:delete": "tsx scripts/delete-restaurant.ts",
-    "restaurant:intake": "tsx scripts/restaurant-intake/index.ts"
+    "restaurant:intake": "tsx scripts/restaurant-intake/index.ts",
+    "guides:migrate": "tsx scripts/migrate-guides-to-db.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.0",
