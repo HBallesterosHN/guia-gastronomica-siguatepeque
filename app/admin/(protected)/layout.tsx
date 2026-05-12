@@ -21,6 +21,9 @@ export default async function AdminProtectedLayout({
             <Link href="/admin/cambios" className="text-emerald-700 hover:underline">
               Cambios
             </Link>
+            <Link href="/admin/intake" className="text-emerald-700 hover:underline">
+              Intake
+            </Link>
           </nav>
           <form action={logoutAdminSecret}>
             <button

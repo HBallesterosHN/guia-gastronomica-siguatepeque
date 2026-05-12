@@ -1,6 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ImageDownloadScope } from "./types";
+import { buildPlacePhotoMediaUrl } from "../../lib/restaurant-intake/place-photo-url";
+
+export { buildPlacePhotoMediaUrl };
 
 const ROOT = process.cwd();
 const PUBLIC_RESTAURANTS_DIR = path.join(ROOT, "public", "restaurants");
@@ -80,13 +83,6 @@ export async function saveRestaurantImages(
   }
 
   return { paths, errors };
-}
-
-/** URL de medios Place Photos (New). @see https://developers.google.com/maps/documentation/places/web-service/place-photos */
-export function buildPlacePhotoMediaUrl(photoResourceName: string, apiKey: string, maxH = 1600, maxW = 1600): string {
-  const base = "https://places.googleapis.com/v1";
-  const rel = photoResourceName.replace(/^\/+/, "");
-  return `${base}/${rel}/media?maxHeightPx=${maxH}&maxWidthPx=${maxW}&key=${encodeURIComponent(apiKey)}`;
 }
 
 export type PlacePhotosDownloadResult = {

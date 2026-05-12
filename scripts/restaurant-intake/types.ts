@@ -2,7 +2,17 @@ import type { Restaurant, RestaurantCategory } from "../../types/restaurant";
 
 export type ImageDownloadScope = "all" | "hero" | "gallery";
 
+export type IntakeTarget = "file" | "db";
+
 export type IntakeInput = {
+  /** Destino de escritura: archivos TS + public vs Neon (Prisma). */
+  target: IntakeTarget;
+  /** True si el usuario pasó `--target` explícitamente. */
+  targetExplicit: boolean;
+  /** Con `--target file`, permite sobrescribir entry aunque el slug ya exista en Neon. */
+  forceFile: boolean;
+  /** Con `--target db`, permite actualizar fila existente en Neon. */
+  forceDb: boolean;
   /** Opcional si hay --maps y/o --instagram con datos suficientes para inferir el nombre. */
   name?: string;
   category: RestaurantCategory;

@@ -2,22 +2,13 @@ import process from "node:process";
 import dotenv from "dotenv";
 import { RESTAURANT_CATEGORIES, type RestaurantCategory } from "../../types/restaurant";
 import { getRestaurantBySlugFromFiles } from "../../lib/restaurants-file";
+import { buildRestaurantFromSources } from "../../lib/restaurant-intake/build-restaurant-from-sources";
 
 dotenv.config({ path: ".env.local" });
 dotenv.config({ path: ".env" });
-import {
-  fetchDirectInstagramHints,
-  fetchDirectMapsHints,
-  guessNameFromGoogleMapsUrlPath,
-  suggestedNameFromInstagramOgTitle,
-} from "./direct-fetch";
 import { enrichDraftBySlug } from "../enrich-restaurant-draft";
-import { displayNameFromSocialHandle, normalizeIntake, normalizeNameInput } from "./normalize";
 import { persistDraft } from "./persist";
-import { resolveHeroImageCandidate } from "./hero-image";
-import { saveRestaurantImagesFromPlacePhotos } from "./images";
-import { mergePlacesIntoSourceCandidates, runPlacesIntake } from "./google-places";
-import { gatherSourceCandidates } from "./sources";
+import { persistDraftToNeon, restaurantSlugExistsInNeon } from "./persist-neon";
 import { isGoogleMapsLink, reasonForDiscard } from "./scoring";
 import type {
   CandidateDebug,
@@ -176,6 +167,10 @@ function parseArgs(argv: string[]): IntakeInput {
   const map = new Map<string, string>();
   let dryRun = false;
   let textOnly = false;
+  let forceFile = false;
+  let forceDb = false;
+  let targetExplicit = false;
+  let target: IntakeInput["target"] = "file";
 
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
@@ -185,6 +180,27 @@ function parseArgs(argv: string[]): IntakeInput {
     }
     if (token === "--text-only") {
       textOnly = true;
+      continue;
+    }
+    if (token === "--force-file") {
+      forceFile = true;
+      continue;
+    }
+    if (token === "--force") {
+      forceDb = true;
+      continue;
+    }
+    if (token === "--target") {
+      const next = argv[i + 1];
+      if (!next || next.startsWith("--")) {
+        throw new Error("Valor faltante para --target (usa file o db).");
+      }
+      if (next !== "file" && next !== "db") {
+        throw new Error(`--target inválido: "${next}". Usa file o db.`);
+      }
+      target = next;
+      targetExplicit = true;
+      i += 1;
       continue;
     }
     if (!token.startsWith("--")) continue;
@@ -217,8 +233,11 @@ function parseArgs(argv: string[]): IntakeInput {
     throw new Error(
       'Indica al menos uno entre --name, --maps y --instagram (los tres son opcionales salvo que debas elegir al menos una fuente). ' +
         'Ej.: solo nombre: --name "Restaurante". Solo Instagram: --instagram "https://...". Solo Maps: --maps "https://...". ' +
-        "Combinar: npm run restaurant:intake -- --name \"...\" [--maps URL] [--instagram URL] [--menu URL] [--menu-label Texto] [--slug mi-restaurante] [--category familiar] [--images-scope all|hero|gallery] [--text-only] [--dry-run] [--verbose-search]",
+        "Combinar: npm run restaurant:intake -- --name \"...\" [--maps URL] [--instagram URL] [--menu URL] [--menu-label Texto] [--slug mi-restaurante] [--category familiar] [--images-scope all|hero|gallery] [--target file|db] [--force-file] [--force] [--text-only] [--dry-run] [--verbose-search]",
     );
+  }
+  if (target === "db" && !process.env.DATABASE_URL?.trim()) {
+    throw new Error("--target db requiere DATABASE_URL en .env / .env.local.");
   }
   if (!RESTAURANT_CATEGORIES.includes(rawCategory)) {
     throw new Error(`Categoria invalida: ${rawCategory}. Usa: ${RESTAURANT_CATEGORIES.join(", ")}`);
@@ -245,6 +264,10 @@ function parseArgs(argv: string[]): IntakeInput {
   }
 
   return {
+    target,
+    targetExplicit,
+    forceFile,
+    forceDb,
     name,
     category: rawCategory,
     categoryProvided,
@@ -259,276 +282,75 @@ function parseArgs(argv: string[]): IntakeInput {
   };
 }
 
-function stripVersionFromMediaPath(pathWithVersion: string): string {
-  const idx = pathWithVersion.indexOf("?");
-  return idx === -1 ? pathWithVersion : pathWithVersion.slice(0, idx);
-}
-
 async function main(): Promise<void> {
   const { argv, verboseSearch } = stripVerboseSearchFlag(process.argv.slice(2));
   const input = parseArgs(argv);
 
-  const [hintsMaps, hintsInsta] = await Promise.all([
-    input.mapsUrlCli ? fetchDirectMapsHints(input.mapsUrlCli) : Promise.resolve(undefined),
-    input.instagramUrlCli ? fetchDirectInstagramHints(input.instagramUrlCli) : Promise.resolve(undefined),
-  ]);
-
-  if (input.mapsUrlCli && !hintsMaps?.canonicalUrl) {
-    throw new Error(`--maps no válido: ${(hintsMaps?.notes ?? []).join("; ") || "revisa el enlace"}`);
-  }
-  if (input.instagramUrlCli && !hintsInsta?.canonicalUrl) {
-    throw new Error(`--instagram no válido: ${(hintsInsta?.notes ?? []).join("; ") || "revisa el enlace"}`);
-  }
-
-  const fromInsta =
-    hintsInsta?.suggestedDisplayName ??
-    (hintsInsta?.ogTitle ? suggestedNameFromInstagramOgTitle(hintsInsta.ogTitle) : undefined);
-
-  const fromMapsPath = guessNameFromGoogleMapsUrlPath(
-    input.mapsUrlCli ?? hintsMaps?.canonicalUrl ?? "",
-  );
-  const fromMaps = hintsMaps?.placeTitle ?? fromMapsPath;
-
-  const displayRaw =
-    input.name?.trim() ||
-    fromInsta ||
-    fromMaps ||
-    (hintsInsta?.handle ? displayNameFromSocialHandle(hintsInsta.handle) : undefined);
-
-  if (!displayRaw) {
+  if (input.target === "db" && input.imagesScope !== "all") {
     throw new Error(
-      "No se pudo determinar el nombre comercial. Añade --name o usa --maps / --instagram con título o ruta /place/ legible.",
+      'Con --target db no se soporta --images-scope "hero" ni "gallery" (solo flujo completo o --text-only). Para imágenes solo en disco usa --target file.',
     );
   }
 
-  const nameNorm = normalizeNameInput(displayRaw);
-
   console.log("restaurant:intake");
-  console.log(`- nombre mostrado (entrada o inferido): ${displayRaw}`);
+  console.log(`- --target: ${input.target}${input.targetExplicit ? "" : " (default file)"}`);
   if (input.name?.trim()) console.log(`- --name explícito: ${input.name.trim()}`);
   if (input.mapsUrlCli) console.log(`- --maps: ${input.mapsUrlCli}`);
   if (input.instagramUrlCli) console.log(`- --instagram: ${input.instagramUrlCli}`);
   if (input.menuUrlCli) console.log(`- --menu: ${input.menuUrlCli}`);
   if (input.menuLabelCli) console.log(`- --menu-label: ${input.menuLabelCli}`);
-  console.log(`- nombre busqueda: ${nameNorm.searchName}`);
-  console.log(`- nombre comercial: ${nameNorm.displayName}`);
-  console.log(`- slug sugerido: ${nameNorm.slugBase}`);
   if (input.slug) console.log(`- --slug destino: ${input.slug}`);
   console.log(`- images scope: ${input.imagesScope}`);
   if (input.textOnly) console.log("- modo: text-only (sin descarga/escritura de imágenes)");
   if (verboseSearch) {
     console.log("- flag: --verbose-search (HTML preview largo por consulta)");
   }
-  console.log("- etapa 1: fuentes (CLI directas y/o busqueda publica)");
-  const candidates = await gatherSourceCandidates(nameNorm, {
-    directMapsUrl: input.mapsUrlCli,
-    directInstagramUrl: input.instagramUrlCli,
-    directHints: { maps: hintsMaps, instagram: hintsInsta },
+
+  const { draft, report } = await buildRestaurantFromSources({
+    input,
+    mediaMode: "cli-disk",
+    imageDryRun: input.dryRun,
   });
-  const lp = candidates.debug.linkPipeline;
+
+  console.log(`- nombre busqueda: ${report.searchName}`);
+  console.log(`- nombre comercial: ${report.displayName}`);
+  console.log(`- slug definitivo: ${draft.slug}`);
+  const lp = report.linkPipeline;
   console.log(
     `  resumen DDG (si aplica): Maps [${lp.maps.stage}] brutos=${lp.maps.totalRaw} norm=${lp.maps.totalNormalized} mapsLike=${lp.maps.mapsLikeCount} | ` +
       `Instagram [${lp.instagram.stage}] brutos=${lp.instagram.totalRaw} norm=${lp.instagram.totalNormalized} instaLike=${lp.instagram.instagramLikeCount}`,
   );
-
-  let placesIntakeMessages: string[] = [];
-  let placesIntakeErrors: string[] = [];
-  let placesPhotoDownloadLog: string[] = [];
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY?.trim();
-  if (apiKey) {
-    console.log("- etapa 1.5: Google Places API (fuente principal de datos)");
-    const pr = await runPlacesIntake({
-      apiKey,
-      nameNorm,
-      mapsCanonicalUrl: hintsMaps?.canonicalUrl,
-      mapsCoords: hintsMaps?.coords,
-    });
-    placesIntakeMessages = pr.report.messages;
-    placesIntakeErrors = pr.report.httpErrors;
-    pr.report.messages.forEach((m) => console.log(`  ${m}`));
-    pr.report.httpErrors.forEach((m) => console.log(`  (error) ${m}`));
-    mergePlacesIntoSourceCandidates(candidates, pr.details, { categoryProvided: input.categoryProvided });
-  } else {
+  if (report.placesIntakeMessages?.length) {
+    console.log("- Google Places (log):");
+    report.placesIntakeMessages.forEach((m) => console.log(`  ${m}`));
+  } else if (!process.env.GOOGLE_MAPS_API_KEY?.trim()) {
     console.log("- etapa 1.5: Google Places API omitida (sin GOOGLE_MAPS_API_KEY en .env.local / .env)");
   }
-
-  console.log("- etapa 2: normalizacion");
-  const { draft, report } = normalizeIntake(input, nameNorm, candidates);
-  if (input.slug) {
-    draft.slug = input.slug;
+  report.placesIntakeErrors?.forEach((m) => console.log(`  (error) ${m}`));
+  if (report.placesPhotoDownloadLog?.length) {
+    console.log("- Google Place Photos (log):");
+    report.placesPhotoDownloadLog.forEach((m) => console.log(`  ${m}`));
   }
-  const existingBeforePersist = getRestaurantBySlugFromFiles(draft.slug);
-  if (input.textOnly && input.slug) {
-    const existing = getRestaurantBySlugFromFiles(input.slug);
-    if (!existing) {
-      throw new Error(`No existe restaurante con slug "${input.slug}" para --text-only.`);
-    }
-    draft.hero = stripVersionFromMediaPath(existing.media.hero);
-    draft.gallery = (existing.media.gallery ?? []).map(stripVersionFromMediaPath);
-  }
-  if (existingBeforePersist?.menu && !draft.menu) {
-    draft.menu = existingBeforePersist.menu;
-  }
-  if (existingBeforePersist?.profileStatus) {
-    draft.profileStatus = existingBeforePersist.profileStatus;
+  console.log("- etapa 2: normalizacion (completada en pipeline)");
+  if (!input.textOnly) {
+    console.log(`- etapa 2.1 imágenes: ${report.heroImageReason ?? "(sin detalle)"}`);
   } else {
-    draft.profileStatus = { source: "auto", verified: false };
+    console.log("- etapa 2.1 imágenes: omitido (--text-only)");
   }
-  report.placesIntakeMessages = placesIntakeMessages;
-  report.placesIntakeErrors = placesIntakeErrors;
 
-  const photoNames = candidates.placesPhotoResources ?? [];
-  let heroResult: Awaited<ReturnType<typeof resolveHeroImageCandidate>> = {
-    downloaded: false,
-    galleryPublicPaths: [],
-    candidatesFound: 0,
-    downloadedCount: 0,
-    discarded: [],
-    selectedGalleryUrls: [],
-    reason: "(pendiente)",
-  };
-  let imagesFromPlaces = false;
+  const existingBeforePersist = getRestaurantBySlugFromFiles(draft.slug);
 
-  if (!input.textOnly && apiKey && photoNames.length) {
-    console.log("- etapa 2.1: imágenes (prioridad: Place Photos API)");
-    const prPhotos = await saveRestaurantImagesFromPlacePhotos(
-      draft.slug,
-      photoNames,
-      apiKey,
-      input.dryRun,
-      input.imagesScope,
+  const dbHasSlug =
+    Boolean(process.env.DATABASE_URL?.trim()) && (await restaurantSlugExistsInNeon(draft.slug));
+
+  if (!input.targetExplicit && input.target === "file") {
+    console.warn(
+      "────────────────────────────────────────────────────────────────────────────\n" +
+        "AVISO: Modo file (default; no pasaste --target). Se escribirá en data/restaurants y public/restaurants.\n" +
+        "Si este slug ya está en Neon, la web puede seguir mostrando la DB (tiene prioridad sobre el archivo).\n" +
+        "Para volcar el intake a Neon: --target db  |  Para forzar solo archivos: --force-file\n" +
+        "────────────────────────────────────────────────────────────────────────────",
     );
-    prPhotos.log.forEach((m) => console.log(`  ${m}`));
-    prPhotos.errors.forEach((e) => console.log(`  (error) ${e}`));
-    placesPhotoDownloadLog = [...prPhotos.log, ...prPhotos.errors.map((e) => `ERROR ${e}`)];
-    heroResult = {
-      downloaded: prPhotos.downloaded,
-      heroPublicPath: prPhotos.heroPublicPath,
-      galleryPublicPaths: prPhotos.galleryPublicPaths,
-      candidatesFound: photoNames.length,
-      downloadedCount: prPhotos.downloaded ? 1 + prPhotos.galleryPublicPaths.length : 0,
-      discarded: prPhotos.errors.map((reason, i) => ({ url: `places-photo#${i + 1}`, reason })),
-      selectedHeroUrl: prPhotos.selectedUrls[0],
-      selectedGalleryUrls: prPhotos.selectedUrls.slice(1),
-      reason: prPhotos.downloaded
-        ? "Descargadas vía Google Place Photos (New)."
-        : input.dryRun
-          ? "Dry-run: rutas proyectadas para Place Photos (sin escritura)."
-          : prPhotos.errors[0] ?? "Place Photos no produjo un hero descargable.",
-    };
-    if ((input.imagesScope === "all" || input.imagesScope === "hero") && prPhotos.heroPublicPath) {
-      draft.hero = prPhotos.heroPublicPath;
-    }
-    if (input.imagesScope === "all" || input.imagesScope === "gallery") {
-      draft.gallery = prPhotos.galleryPublicPaths;
-    } else if (input.imagesScope === "hero") {
-      // no mutar gallery
-    }
-
-    if (
-      input.imagesScope === "all" &&
-      draft.gallery.length < 10 &&
-      (candidates.imageCandidateOrigins?.length ?? 0) > 0
-    ) {
-      const missing = 10 - draft.gallery.length;
-      console.log(`  Place Photos devolvió ${draft.gallery.length}/10 gallery; intentando completar ${missing} con fallback público.`);
-      const topUp = await resolveHeroImageCandidate(
-        draft.slug,
-        candidates.imageCandidateOrigins ?? [],
-        input.dryRun,
-        "gallery",
-        draft.gallery.length + 1,
-        missing,
-      );
-      if (topUp.galleryPublicPaths.length) {
-        const merged = Array.from(new Set([...draft.gallery, ...topUp.galleryPublicPaths]));
-        draft.gallery = merged.slice(0, 10);
-        // Añadimos descartes/fuentes al reporte principal.
-        heroResult.discarded = [...heroResult.discarded, ...topUp.discarded];
-        heroResult.selectedGalleryUrls = [...heroResult.selectedGalleryUrls, ...topUp.selectedGalleryUrls];
-        heroResult.galleryPublicPaths = draft.gallery;
-        heroResult.downloadedCount =
-          (heroResult.heroPublicPath ? 1 : 0) + heroResult.galleryPublicPaths.length;
-      }
-    }
-    if (
-      input.imagesScope === "all" &&
-      draft.gallery.length < 10 &&
-      heroResult.selectedHeroUrl
-    ) {
-      const missing = 10 - draft.gallery.length;
-      console.log(`  Aún faltan ${missing} gallery; reutilizando hero como fallback final para completar correlativo.`);
-      const heroAsGallery = await resolveHeroImageCandidate(
-        draft.slug,
-        [{ url: heroResult.selectedHeroUrl, source: "places:hero-fallback" }],
-        input.dryRun,
-        "gallery",
-        draft.gallery.length + 1,
-        missing,
-      );
-      if (heroAsGallery.galleryPublicPaths.length) {
-        const merged = Array.from(new Set([...draft.gallery, ...heroAsGallery.galleryPublicPaths]));
-        draft.gallery = merged.slice(0, 10);
-        heroResult.discarded = [...heroResult.discarded, ...heroAsGallery.discarded];
-        heroResult.selectedGalleryUrls = [...heroResult.selectedGalleryUrls, ...heroAsGallery.selectedGalleryUrls];
-        heroResult.galleryPublicPaths = draft.gallery;
-        heroResult.downloadedCount =
-          (heroResult.heroPublicPath ? 1 : 0) + heroResult.galleryPublicPaths.length;
-      }
-    }
-    imagesFromPlaces = Boolean(
-      prPhotos.galleryPublicPaths.length ||
-        ((input.imagesScope === "all" || input.imagesScope === "hero") && prPhotos.heroPublicPath),
-    );
-  }
-
-  if (!input.textOnly && !imagesFromPlaces) {
-    if (apiKey && photoNames.length) {
-      console.log("  Place Photos sin hero utilizable → fallback Maps/Instagram.");
-    }
-    console.log("- etapa 2.1: imagen hero (candidatas Maps/IG)");
-    heroResult = await resolveHeroImageCandidate(
-      draft.slug,
-      candidates.imageCandidateOrigins ??
-        (report.heroImageCandidateUrl
-          ? [{ url: report.heroImageCandidateUrl, source: report.heroImageCandidateSource ?? "unknown" }]
-          : []),
-      input.dryRun,
-      input.imagesScope,
-    );
-    if ((input.imagesScope === "all" || input.imagesScope === "hero") && heroResult.heroPublicPath) {
-      draft.hero = heroResult.heroPublicPath;
-    }
-    if (input.imagesScope === "all" || input.imagesScope === "gallery") {
-      draft.gallery = heroResult.galleryPublicPaths;
-    } else if (input.imagesScope === "hero") {
-      // no mutar gallery
-    }
-  }
-  report.heroImageDownloaded = heroResult.downloaded;
-  report.heroImageLocalPath = heroResult.heroPublicPath;
-  report.heroImageReason = heroResult.reason;
-  report.imageCandidatesFound = heroResult.candidatesFound;
-  report.galleryImagesDownloaded = heroResult.galleryPublicPaths.length;
-  report.galleryLocalPaths = heroResult.galleryPublicPaths;
-  report.imageDiscarded = heroResult.discarded;
-  report.selectedHeroUrl = heroResult.selectedHeroUrl;
-  report.selectedGalleryUrls = heroResult.selectedGalleryUrls;
-  report.imageCandidatesDetected = candidates.imageCandidateOrigins ?? [];
-  report.imageSourceCounts = (candidates.imageCandidateOrigins ?? []).reduce<Record<string, number>>((acc, c) => {
-    acc[c.source] = (acc[c.source] ?? 0) + 1;
-    return acc;
-  }, {});
-  report.galleryReason =
-    heroResult.galleryPublicPaths.length > 0
-      ? `Se descargaron ${heroResult.galleryPublicPaths.length} imágenes para galería.`
-      : "Gallery quedó vacía porque no hubo más candidatas utilizables.";
-  if (placesPhotoDownloadLog.length) {
-    report.placesPhotoDownloadLog = placesPhotoDownloadLog;
-  }
-  if (input.textOnly) {
-    report.heroImageReason = "Omitido por --text-only.";
-    report.galleryReason = "Omitido por --text-only; se conserva media existente.";
   }
 
   const imagesOnlyMode = input.imagesScope !== "all";
@@ -537,13 +359,28 @@ async function main(): Promise<void> {
     variableName: "(sin persistencia)",
     entryExistedBefore: false,
   };
+  let neonPersist: Awaited<ReturnType<typeof persistDraftToNeon>> | undefined;
+
+  if (input.target === "file" && !input.dryRun && !imagesOnlyMode) {
+    if (dbHasSlug && !input.forceFile) {
+      throw new Error(
+        "Este restaurante existe en DB (Neon). Actualizar solo el archivo NO cambia lo que ve la web en producción. Usa --target db (y --force si la fila ya existe) o --force-file si quieres sobrescribir el entry TS a propósito.",
+      );
+    }
+  }
+  if (input.target === "file" && input.dryRun && !imagesOnlyMode && dbHasSlug && !input.forceFile) {
+    console.warn(
+      "AVISO: con --dry-run no se aborta; en ejecución real fallaría sin --force-file porque el slug ya existe en Neon.",
+    );
+  }
+
   if (imagesOnlyMode) {
     console.log("- etapa 3: persistencia draft omitida (modo solo imágenes)");
     console.log(
       `  scope=${input.imagesScope}; se actualizaron archivos de /public/restaurants/${draft.slug}/ sin tocar data/restaurants/entries.`,
     );
-  } else {
-    console.log("- etapa 3: persistencia draft");
+  } else if (input.target === "file") {
+    console.log("- etapa 3: persistencia draft (archivos)");
     persisted = await persistDraft(draft, input.dryRun);
     if (input.dryRun) {
       console.log(
@@ -562,15 +399,64 @@ async function main(): Promise<void> {
         `  OK: creado data/restaurants/entries/${persisted.slug}.ts y actualizado data/restaurants/index.ts (${persisted.variableName}).`,
       );
     }
+  } else {
+    console.log("- etapa 3: persistencia en archivos omitida (--target db)");
+    persisted = {
+      slug: draft.slug,
+      variableName: "(target-db)",
+      entryExistedBefore: Boolean(existingBeforePersist),
+    };
+    console.log("- etapa 3b: Neon (Prisma)");
+    neonPersist = await persistDraftToNeon({
+      draft,
+      dryRun: input.dryRun,
+      textOnly: input.textOnly,
+      force: input.forceDb,
+    });
+    if (!input.dryRun && neonPersist.wroteDb) {
+      console.log(
+        neonPersist.created
+          ? `  OK: creado restaurante "${draft.slug}" en Neon.`
+          : `  OK: actualizado restaurante "${draft.slug}" en Neon.`,
+      );
+    }
   }
 
-  if (!imagesOnlyMode && !input.dryRun) {
+  if (!imagesOnlyMode && input.target === "file" && !input.dryRun) {
     console.log("- etapa 4: enriquecimiento");
     await enrichDraftBySlug(draft.slug, false);
+  } else if (!imagesOnlyMode && input.target === "file" && input.dryRun) {
+    console.log("- etapa 4: enriquecimiento omitido (--dry-run)");
+  } else if (!imagesOnlyMode && input.target === "db") {
+    console.log("- etapa 4: enriquecimiento omitido (--target db; no aplica a entries TS)");
   }
 
   console.log("");
   console.log("REPORTE FINAL");
+  console.log(`- --target: ${input.target}${input.targetExplicit ? "" : " (implícito: file)"}`);
+  const fileTsWritten = input.target === "file" && !imagesOnlyMode && !input.dryRun;
+  const fileTsDryRun = input.target === "file" && !imagesOnlyMode && input.dryRun;
+  const dbWritten = Boolean(neonPersist?.wroteDb);
+  console.log(
+    `- escribió data/restaurants (entries + index): ${
+      fileTsWritten ? "sí" : fileTsDryRun ? "no (dry-run)" : input.target === "db" ? "no (--target db)" : imagesOnlyMode ? "no (solo imágenes en /public)" : "no"
+    }`,
+  );
+  console.log(
+    `- escribió Neon (Prisma): ${
+      input.target !== "db" || imagesOnlyMode ? "no" : input.dryRun ? "no (dry-run)" : dbWritten ? "sí" : "no"
+    }`,
+  );
+  console.log(
+    `- prioridad en la web para slug "${draft.slug}": con DATABASE_URL, la fila Neon publicada gana sobre el archivo (${
+      Boolean(process.env.DATABASE_URL?.trim()) && (dbHasSlug || Boolean(neonPersist?.wroteDb))
+        ? "hay o quedará fila en Neon tras esta ejecución"
+        : "no hay DATABASE_URL o no hay fila"
+    }).`,
+  );
+  console.log(
+    "- próximos pasos: si quieres producción alineada con el intake y usaste --target file, vuelve a ejecutar con --target db (y --force si ya existe). Revisa Vercel/revalidación según tu despliegue.",
+  );
   console.log(`- slug: ${persisted.slug}`);
   console.log(`- variable: ${persisted.variableName}`);
   console.log(`- confianza: ${report.confidence}`);
