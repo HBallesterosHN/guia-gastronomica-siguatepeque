@@ -243,16 +243,20 @@ export async function getRestaurantBySlug(slug: string): Promise<Restaurant | un
   return withDetectedGallery(withSanitizedScheduleHours(file));
 }
 
-/** Destacados: mismas reglas que en archivos (`featured: true`), sobre lista ya fusionada. */
-export async function getFeaturedRestaurants(limit = 6): Promise<Restaurant[]> {
+/**
+ * Restaurantes con `featured: true` sobre la lista fusionada (Neon + archivos).
+ * Sin `limit` devuelve todos los destacados (p. ej. home). Con número, recorta (p. ej. OG con `1`).
+ */
+export async function getFeaturedRestaurants(limit?: number): Promise<Restaurant[]> {
   const merged = await getAllRestaurants();
-  return merged.filter((r) => r.classification.featured).slice(0, limit);
+  const list = merged.filter((r) => r.classification.featured);
+  return limit === undefined ? list : list.slice(0, limit);
 }
 
 /**
  * Lista destacada solo desde archivos (p. ej. metadatos OG sin tocar DB en build sin `DATABASE_URL`).
  */
-export function getFeaturedRestaurantsFromFilesOnly(limit = 6): Restaurant[] {
+export function getFeaturedRestaurantsFromFilesOnly(limit?: number): Restaurant[] {
   return getFeaturedRestaurantsFromFiles(limit);
 }
 

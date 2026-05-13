@@ -136,10 +136,12 @@ export function getRestaurantBySlugFromFiles(slug: string): Restaurant | undefin
   );
 }
 
-export function getFeaturedRestaurantsFromFiles(limit = 6): Restaurant[] {
-  return getRestaurantsWithDetectedGalleryFromFiles()
-    .filter((restaurant) => restaurant.classification.featured)
-    .slice(0, limit);
+/** Sin `limit` devuelve todos los destacados en archivos; con número, recorta. */
+export function getFeaturedRestaurantsFromFiles(limit?: number): Restaurant[] {
+  const list = getRestaurantsWithDetectedGalleryFromFiles().filter(
+    (restaurant) => restaurant.classification.featured,
+  );
+  return limit === undefined ? list : list.slice(0, limit);
 }
 
 /** URL de Google Maps desde comentario o cuerpo del entry TS (intake). */
