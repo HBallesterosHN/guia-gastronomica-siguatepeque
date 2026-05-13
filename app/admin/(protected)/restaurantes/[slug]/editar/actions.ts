@@ -23,6 +23,10 @@ export async function saveAdminRestaurantAction(payload: unknown): Promise<SaveA
       return { ok: false, message: result.message };
     }
     revalidatePath("/admin/restaurantes");
+    revalidatePath(`/admin/restaurantes/${encodeURIComponent(parsed.slug)}/editar`);
+    if (parsed.slug !== parsed.originalSlug) {
+      revalidatePath(`/admin/restaurantes/${encodeURIComponent(parsed.originalSlug)}/editar`);
+    }
     revalidatePath("/restaurantes");
     revalidatePath(`/restaurantes/${parsed.slug}`);
     revalidatePath(`/restaurantes/${parsed.originalSlug}`);

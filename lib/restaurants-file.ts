@@ -68,13 +68,19 @@ function detectHeroFromPublic(slug: string): RestaurantPublicImagePath | undefin
   return undefined;
 }
 
+function isRemoteImageUrl(url: string): boolean {
+  return url.startsWith("https://") || url.startsWith("http://");
+}
+
+/**
+ * Ajusta hero/galería detectando archivos en /public solo cuando no hay medios remotos
+ * ya resueltos (p. ej. Neon + Cloudinary). Antes, `hero.*` en disco pisaba siempre el hero
+ * de la DB y la ficha pública quedaba desactualizada.
+ */
 export function withDetectedGallery(restaurant: Restaurant): Restaurant {
-  const detectedHero = detectHeroFromPublic(restaurant.identity.slug);
-  const detectedGallery = detectNumberedImages(
-    restaurant.identity.slug,
-    "gallery",
-    MAX_GALLERY_IMAGES,
-  );
+  const slug = restaurant.identity.slug;
+  const detectedHero = detectHeroFromPublic(slug);
+  const detectedGallery = detectNumberedImages(slug, "gallery", MAX_GALLERY_IMAGES);
   const fallbackGallery = Array.from(
     new Set([
       ...(restaurant.media.gallery ?? []),
@@ -85,13 +91,30 @@ export function withDetectedGallery(restaurant: Restaurant): Restaurant {
     .map((imagePath) => withAutoVersion(imagePath))
     .slice(0, MAX_GALLERY_IMAGES);
 
-  const gallery = detectedGallery.length > 0 ? detectedGallery : fallbackGallery;
+  const mergedGallery = restaurant.media.gallery ?? [];
+  const prefersRemoteGallery =
+    mergedGallery.length > 0 && mergedGallery.some((u) => isRemoteImageUrl(u));
+
+  const gallery = prefersRemoteGallery
+    ? mergedGallery
+        .map((imagePath) =>
+          isRemoteImageUrl(imagePath) ? imagePath : withAutoVersion(imagePath),
+        )
+        .slice(0, MAX_GALLERY_IMAGES)
+    : detectedGallery.length > 0
+      ? detectedGallery
+      : fallbackGallery;
+
+  const currentHero = restaurant.media.hero;
+  const hero = isRemoteImageUrl(currentHero)
+    ? (currentHero as RestaurantPublicImagePath)
+    : (detectedHero ?? withAutoVersion(currentHero));
 
   return {
     ...restaurant,
     media: {
       ...restaurant.media,
-      hero: detectedHero ?? withAutoVersion(restaurant.media.hero),
+      hero,
       gallery,
       featured: (restaurant.media.featured ?? []).map((imagePath) => withAutoVersion(imagePath)),
       place: (restaurant.media.place ?? []).map((imagePath) => withAutoVersion(imagePath)),

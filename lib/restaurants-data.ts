@@ -49,6 +49,21 @@ function parseProfileSource(raw: string): RestaurantProfileSource {
   return "auto";
 }
 
+/**
+ * Ancla la URL a la última actualización de la fila para que CDN/navegador no sirvan
+ * un asset viejo cuando la cadena base (p. ej. mismo public_id en Cloudinary) no cambia.
+ */
+function bustRemoteImageUrl(url: string, versionMs: number): string {
+  const v = String(versionMs);
+  try {
+    const u = new URL(url);
+    u.searchParams.set("_hv", v);
+    return u.toString();
+  } catch {
+    return url.includes("?") ? `${url}&_hv=${v}` : `${url}?_hv=${v}`;
+  }
+}
+
 /** Normaliza espacios en horario (DB, archivos o cambios aprobados) para la ficha pública. */
 export function withSanitizedScheduleHours(restaurant: Restaurant): Restaurant {
   const h = restaurant.hours;
@@ -96,22 +111,33 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
     hoursStructured = parsedFromLabel.structured;
   }
 
+  const versionMs = row.updatedAt.getTime();
+
   let galleryPaths: RestaurantPublicImagePath[] = [];
   if (row.gallery != null && Array.isArray(row.gallery)) {
     galleryPaths = row.gallery
       .filter(
         (u): u is string =>
-          typeof u === "string" && (u.startsWith("/") || u.startsWith("https://")),
+          typeof u === "string" &&
+          (u.startsWith("/") || u.startsWith("https://") || u.startsWith("http://")),
       )
-      .map((u) => u as RestaurantPublicImagePath);
+      .map((u) => {
+        if (u.startsWith("https://") || u.startsWith("http://")) {
+          return bustRemoteImageUrl(u, versionMs) as RestaurantPublicImagePath;
+        }
+        return u as RestaurantPublicImagePath;
+      });
   }
 
   const heroRaw = row.heroUrl?.trim() ?? "";
-  const hero = (
-    heroRaw.startsWith("/") || heroRaw.startsWith("https://")
+  let heroStr =
+    heroRaw.startsWith("/") || heroRaw.startsWith("https://") || heroRaw.startsWith("http://")
       ? heroRaw
-      : "/restaurants/placeholders/hero-placeholder.svg"
-  ) as RestaurantPublicImagePath;
+      : "/restaurants/placeholders/hero-placeholder.svg";
+  if (heroStr.startsWith("https://") || heroStr.startsWith("http://")) {
+    heroStr = bustRemoteImageUrl(heroStr, versionMs);
+  }
+  const hero = heroStr as RestaurantPublicImagePath;
 
   const phoneRaw = row.phone?.trim() || "Por confirmar";
   const waRaw = row.whatsapp?.trim() || row.phone?.trim() || "Por confirmar";
