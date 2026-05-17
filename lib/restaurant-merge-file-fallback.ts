@@ -1,5 +1,4 @@
-import "server-only";
-
+import { isNeonRestaurant } from "@/lib/restaurant-source-meta";
 import type { Restaurant } from "@/types/restaurant";
 import { isStructuredScheduleUsable } from "@/lib/formatters/schedule";
 
@@ -11,10 +10,15 @@ function isPlaceholderHero(url: string | undefined): boolean {
 }
 
 /**
- * DB gana como base, pero rellena huecos que Prisma no persiste o que quedaron vacíos tras migraciones / aprobaciones.
+ * DB gana como base. Para filas Neon no se mezcla archivo TS (valores vacíos en DB se respetan).
+ * Solo restaurantes solo-archivo usan fallback completo.
  */
 export function mergeRestaurantWithFileFallback(db: Restaurant, file: Restaurant | undefined): Restaurant {
   if (!file) return db;
+
+  if (isNeonRestaurant(db)) {
+    return db;
+  }
 
   const dbStructOk = isStructuredScheduleUsable(db.hours.structured);
   const fileStructOk = isStructuredScheduleUsable(file.hours.structured);
@@ -28,7 +32,6 @@ export function mergeRestaurantWithFileFallback(db: Restaurant, file: Restaurant
   if (isPlaceholderHero(db.media.hero) && !isPlaceholderHero(file.media.hero)) {
     media = { ...media, hero: file.media.hero };
   }
-  /** Galería definida en Neon (incluso `[]` tras borrar en admin): no mezclar con TS ni carpetas en public/. */
   const dbGalleryAuthoritative = Array.isArray(db.media.gallery);
   if (!dbGalleryAuthoritative && file.media.gallery && file.media.gallery.length > 0) {
     media = { ...media, gallery: file.media.gallery };

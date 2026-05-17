@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "lint": "eslint",
+    "test": "tsx --test lib/restaurant-hybrid.test.ts",
     "restaurant:add-draft": "tsx scripts/add-restaurant-draft.ts",
     "restaurant:enrich-draft": "tsx scripts/enrich-restaurant-draft.ts",
     "restaurant:delete": "tsx scripts/delete-restaurant.ts",

@@ -39,6 +39,25 @@ export interface RestaurantReview {
 export type RestaurantProfileSource = "auto" | "manual" | "owner_submitted";
 
 /**
+ * Marca restaurantes cargados desde Neon para el pipeline público híbrido.
+ * Evita que valores vacíos en DB se rellenen desde `data/restaurants` o `public/`.
+ */
+export type RestaurantSourceMeta = {
+  kind: "neon";
+  heroUrlSet: boolean;
+  galleryAuthoritative: true;
+  summarySet: boolean;
+  addressSet: boolean;
+  phoneSet: boolean;
+  whatsappSet: boolean;
+  menuUrlSet: boolean;
+  instagramUrlSet: boolean;
+  scheduleLabelSet: boolean;
+  scheduleStructuredSet: boolean;
+  servicesAuthoritative: true;
+};
+
+/**
  * Un restaurante completo. Pensado para editarse a mano en data/restaurants/entries/*.ts
  * sin base de datos.
  */
@@ -123,4 +142,6 @@ export interface Restaurant {
    * la UI no muestra plantillas ni texto generado.
    */
   reviews: RestaurantReview[];
+  /** Presente solo en fichas construidas desde Prisma (capa pública híbrida). */
+  sourceMeta?: RestaurantSourceMeta;
 }

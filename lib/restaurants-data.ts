@@ -14,6 +14,7 @@ import {
   type StructuredHourRow,
 } from "@/lib/formatters/schedule";
 import { mergeRestaurantWithFileFallback } from "@/lib/restaurant-merge-file-fallback";
+import { buildNeonRestaurantSourceMeta } from "@/lib/restaurant-source-meta";
 import {
   filterRestaurantsList,
   getAllRestaurantsFromFiles,
@@ -106,10 +107,15 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
     if (isStructuredScheduleUsable(rows)) structuredFromDb = rows;
   }
 
-  const scheduleLabelDb = row.scheduleLabel?.trim() || "Horario por confirmar.";
-  const parsedFromLabel = parseScheduleManualInput(scheduleLabelDb);
+  const scheduleLabelDb = row.scheduleLabel?.trim() ?? "";
+  const parsedFromLabel = scheduleLabelDb
+    ? parseScheduleManualInput(scheduleLabelDb)
+    : { scheduleLabel: "", structured: undefined };
   let hoursStructured = structuredFromDb;
-  if (!isStructuredScheduleUsable(hoursStructured) && isStructuredScheduleUsable(parsedFromLabel.structured)) {
+  if (
+    !isStructuredScheduleUsable(hoursStructured) &&
+    isStructuredScheduleUsable(parsedFromLabel.structured)
+  ) {
     hoursStructured = parsedFromLabel.structured;
   }
 
@@ -141,10 +147,10 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
   }
   const hero = heroStr as RestaurantPublicImagePath;
 
-  const phoneRaw = row.phone?.trim() || "Por confirmar";
-  const waRaw = row.whatsapp?.trim() || row.phone?.trim() || "Por confirmar";
-  const phoneDisplay = formatHondurasPhone(phoneRaw);
-  const waDisplay = formatHondurasPhone(waRaw);
+  const phoneRaw = row.phone?.trim() ?? "";
+  const waRaw = row.whatsapp?.trim() ?? row.phone?.trim() ?? "";
+  const phoneDisplay = phoneRaw ? formatHondurasPhone(phoneRaw) : "";
+  const waDisplay = waRaw ? formatHondurasPhone(waRaw) : "";
 
   return withSanitizedScheduleHours({
     identity: { name: row.name, slug },
@@ -154,10 +160,10 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
       featured: Boolean(row.featured),
     },
     copy: {
-      summary: row.summary?.trim() || `${row.name} en Siguatepeque.`,
+      summary: row.summary?.trim() ?? "",
     },
     location: {
-      address: row.address?.trim() || "Por confirmar",
+      address: row.address?.trim() ?? "",
       coordinates: {
         lat: row.lat ?? 0,
         lng: row.lng ?? 0,
@@ -190,6 +196,7 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
       verified: row.verified,
     },
     reviews: [],
+    sourceMeta: buildNeonRestaurantSourceMeta(row),
   });
 }
 
@@ -312,12 +319,14 @@ export async function getRestaurantInstagramUrlBySlug(slug: string): Promise<str
         where: { slug, status: "published" },
         select: { instagramUrl: true },
       });
-      const u = row?.instagramUrl?.trim();
-      if (u && /^https?:\/\/(www\.)?instagram\.com\//i.test(u)) {
-        return u;
+      if (row) {
+        const u = row.instagramUrl?.trim();
+        if (!u) return undefined;
+        if (/^https?:\/\/(www\.)?instagram\.com\//i.test(u)) return u;
+        return undefined;
       }
     } catch {
-      // seguir con archivo
+      // seguir con archivo si no hay DB
     }
   }
   return getRestaurantInstagramUrlFromEntryFile(slug);

@@ -3,6 +3,7 @@
  * El intake y scripts deben usar esta capa para no mezclar con Neon.
  */
 import { restaurants } from "@/data/restaurants";
+import { isNeonRestaurant } from "@/lib/restaurant-source-meta";
 import type {
   PriceRange,
   Restaurant,
@@ -78,9 +79,12 @@ function isRemoteImageUrl(url: string): boolean {
  * de la DB y la ficha pública quedaba desactualizada.
  */
 export function withDetectedGallery(restaurant: Restaurant): Restaurant {
+  const fromNeon = isNeonRestaurant(restaurant);
   const slug = restaurant.identity.slug;
-  const detectedHero = detectHeroFromPublic(slug);
-  const detectedGallery = detectNumberedImages(slug, "gallery", MAX_GALLERY_IMAGES);
+  const detectedHero = fromNeon ? undefined : detectHeroFromPublic(slug);
+  const detectedGallery = fromNeon
+    ? []
+    : detectNumberedImages(slug, "gallery", MAX_GALLERY_IMAGES);
   const fallbackGallery = Array.from(
     new Set([
       ...(restaurant.media.gallery ?? []),
@@ -111,9 +115,13 @@ export function withDetectedGallery(restaurant: Restaurant): Restaurant {
       })();
 
   const currentHero = restaurant.media.hero;
-  const hero = isRemoteImageUrl(currentHero)
-    ? (currentHero as RestaurantPublicImagePath)
-    : (detectedHero ?? withAutoVersion(currentHero));
+  const hero = fromNeon
+    ? isRemoteImageUrl(currentHero)
+      ? (currentHero as RestaurantPublicImagePath)
+      : (withAutoVersion(currentHero) as RestaurantPublicImagePath)
+    : isRemoteImageUrl(currentHero)
+      ? (currentHero as RestaurantPublicImagePath)
+      : (detectedHero ?? withAutoVersion(currentHero));
 
   return {
     ...restaurant,
@@ -121,8 +129,12 @@ export function withDetectedGallery(restaurant: Restaurant): Restaurant {
       ...restaurant.media,
       hero,
       gallery,
-      featured: (restaurant.media.featured ?? []).map((imagePath) => withAutoVersion(imagePath)),
-      place: (restaurant.media.place ?? []).map((imagePath) => withAutoVersion(imagePath)),
+      featured: fromNeon
+        ? []
+        : (restaurant.media.featured ?? []).map((imagePath) => withAutoVersion(imagePath)),
+      place: fromNeon
+        ? []
+        : (restaurant.media.place ?? []).map((imagePath) => withAutoVersion(imagePath)),
     },
   };
 }
