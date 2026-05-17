@@ -91,19 +91,24 @@ export function withDetectedGallery(restaurant: Restaurant): Restaurant {
     .map((imagePath) => withAutoVersion(imagePath))
     .slice(0, MAX_GALLERY_IMAGES);
 
-  const mergedGallery = restaurant.media.gallery ?? [];
-  const prefersRemoteGallery =
-    mergedGallery.length > 0 && mergedGallery.some((u) => isRemoteImageUrl(u));
+  const dbGalleryAuthoritative = Array.isArray(restaurant.media.gallery);
 
-  const gallery = prefersRemoteGallery
-    ? mergedGallery
+  const gallery = dbGalleryAuthoritative
+    ? (restaurant.media.gallery ?? [])
         .map((imagePath) =>
           isRemoteImageUrl(imagePath) ? imagePath : withAutoVersion(imagePath),
         )
         .slice(0, MAX_GALLERY_IMAGES)
-    : detectedGallery.length > 0
-      ? detectedGallery
-      : fallbackGallery;
+    : (() => {
+        const prefersRemoteGallery =
+          fallbackGallery.length > 0 && fallbackGallery.some((u) => isRemoteImageUrl(u));
+        if (prefersRemoteGallery) {
+          return fallbackGallery
+            .filter((u) => isRemoteImageUrl(u))
+            .slice(0, MAX_GALLERY_IMAGES);
+        }
+        return detectedGallery.length > 0 ? detectedGallery : fallbackGallery;
+      })();
 
   const currentHero = restaurant.media.hero;
   const hero = isRemoteImageUrl(currentHero)

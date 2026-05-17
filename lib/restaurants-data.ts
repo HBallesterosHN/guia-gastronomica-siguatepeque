@@ -173,7 +173,8 @@ export function mapPrismaRestaurantToRestaurant(row: DbRestaurant): Restaurant {
     },
     media: {
       hero,
-      gallery: galleryPaths.length > 0 ? galleryPaths : undefined,
+      /** Array (puede estar vacío): indica galería autoritativa desde Neon; no rellenar desde archivos/disco. */
+      gallery: galleryPaths,
     },
     ratings: {
       average: row.ratingAverage,

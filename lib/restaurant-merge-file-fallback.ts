@@ -28,10 +28,14 @@ export function mergeRestaurantWithFileFallback(db: Restaurant, file: Restaurant
   if (isPlaceholderHero(db.media.hero) && !isPlaceholderHero(file.media.hero)) {
     media = { ...media, hero: file.media.hero };
   }
-  const dbGalleryEmpty = !(db.media.gallery && db.media.gallery.length > 0);
-  if (dbGalleryEmpty && file.media.gallery && file.media.gallery.length > 0) {
+  /** Galería definida en Neon (incluso `[]` tras borrar en admin): no mezclar con TS ni carpetas en public/. */
+  const dbGalleryAuthoritative = Array.isArray(db.media.gallery);
+  if (!dbGalleryAuthoritative && file.media.gallery && file.media.gallery.length > 0) {
     media = { ...media, gallery: file.media.gallery };
-  } else if (dbGalleryEmpty && (file.media.featured?.length || file.media.place?.length)) {
+  } else if (
+    !dbGalleryAuthoritative &&
+    (file.media.featured?.length || file.media.place?.length)
+  ) {
     media = {
       ...media,
       ...(file.media.featured?.length ? { featured: file.media.featured } : {}),
