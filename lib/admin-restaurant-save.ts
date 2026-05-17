@@ -56,7 +56,9 @@ function resolveSchedule(p: AdminRestaurantUpdateInput): {
 
 export async function saveAdminRestaurantUpdate(
   p: AdminRestaurantUpdateInput,
-): Promise<{ ok: true } | { ok: false; message: string }> {
+): Promise<
+  { ok: true; restaurantId: string; slug: string; previousSlug: string } | { ok: false; message: string }
+> {
   const existing = await prisma.restaurant.findUnique({
     where: { slug: p.originalSlug },
     select: { id: true },
@@ -115,7 +117,7 @@ export async function saveAdminRestaurantUpdate(
         data,
       });
     });
-    return { ok: true };
+    return { ok: true, restaurantId: existing.id, slug: p.slug, previousSlug: p.originalSlug };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     return { ok: false, message: msg };

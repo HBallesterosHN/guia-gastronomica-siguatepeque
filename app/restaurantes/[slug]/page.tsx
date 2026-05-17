@@ -22,6 +22,7 @@ interface RestaurantDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
+/** Pre-render en build; se invalida on-demand con `revalidateRestaurantPublicCache` al guardar en admin. */
 export async function generateStaticParams() {
   const all = await getAllRestaurants();
   return all.map((restaurant) => ({

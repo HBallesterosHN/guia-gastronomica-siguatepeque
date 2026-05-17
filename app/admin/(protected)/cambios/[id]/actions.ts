@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { revalidateRestaurantPublicCache } from "@/lib/revalidate-public-cache";
 import {
   applyApprovedChangesToRestaurant,
   parseImageAssetsJson,
@@ -34,8 +35,7 @@ export async function approveChangeRequestAction(requestId: string, _formData: F
   });
 
   if (rest?.slug) {
-    revalidatePath(`/restaurantes/${rest.slug}`);
-    revalidatePath("/restaurantes");
+    await revalidateRestaurantPublicCache({ slug: rest.slug, restaurantId: row.restaurantId });
     revalidatePath("/dashboard");
     revalidatePath(`/dashboard/restaurantes/${rest.slug}`);
     revalidatePath(`/dashboard/restaurantes/${rest.slug}/fotos`);

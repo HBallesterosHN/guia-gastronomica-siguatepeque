@@ -1,7 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { buildRestaurantFromSources } from "@/lib/restaurant-intake/build-restaurant-from-sources";
+import { revalidateRestaurantPublicCache } from "@/lib/revalidate-public-cache";
 import {
   restaurantSlugExistsInNeon,
   saveRestaurantToDatabase,
@@ -116,9 +116,7 @@ export async function saveIntakeRestaurantFormAction(
 
   try {
     await saveRestaurantToDatabase({ draft, dryRun: false, textOnly: false, force });
-    revalidatePath("/restaurantes");
-    revalidatePath(`/restaurantes/${draft.slug}`);
-    revalidatePath("/");
+    await revalidateRestaurantPublicCache({ slug: draft.slug });
     return { status: "success", created: !existed, slug: draft.slug };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

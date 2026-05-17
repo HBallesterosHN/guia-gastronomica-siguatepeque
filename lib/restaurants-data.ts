@@ -3,6 +3,8 @@
  * Si un slug existe en ambos, gana la fila de la base de datos.
  */
 import type { Restaurant as DbRestaurant } from "@prisma/client";
+import { unstable_cache } from "next/cache";
+import { RESTAURANTS_LIST_TAG, restaurantCacheTag } from "@/lib/cache-tags";
 import { prisma } from "@/lib/prisma";
 import { formatHondurasPhone } from "@/lib/formatters/phone";
 import {
@@ -208,7 +210,7 @@ async function fetchPublishedRestaurantsFromDb(): Promise<Restaurant[]> {
   }
 }
 
-export async function getAllRestaurants(): Promise<Restaurant[]> {
+async function getAllRestaurantsUncached(): Promise<Restaurant[]> {
   const fromFiles = getAllRestaurantsFromFiles();
   const fromDb = await fetchPublishedRestaurantsFromDb();
   const bySlug = new Map<string, Restaurant>();
@@ -223,7 +225,13 @@ export async function getAllRestaurants(): Promise<Restaurant[]> {
   return [...bySlug.values()];
 }
 
-export async function getRestaurantBySlug(slug: string): Promise<Restaurant | undefined> {
+export async function getAllRestaurants(): Promise<Restaurant[]> {
+  return unstable_cache(getAllRestaurantsUncached, ["all-restaurants-merged-v1"], {
+    tags: [RESTAURANTS_LIST_TAG],
+  })();
+}
+
+async function getRestaurantBySlugUncached(slug: string): Promise<Restaurant | undefined> {
   if (hasDatabaseUrl()) {
     try {
       const row = await prisma.restaurant.findFirst({
@@ -241,6 +249,16 @@ export async function getRestaurantBySlug(slug: string): Promise<Restaurant | un
   const file = getRestaurantBySlugFromFiles(slug);
   if (!file) return undefined;
   return withDetectedGallery(withSanitizedScheduleHours(file));
+}
+
+export async function getRestaurantBySlug(slug: string): Promise<Restaurant | undefined> {
+  const normalized = slug.trim();
+  if (!normalized) return undefined;
+  return unstable_cache(
+    async () => getRestaurantBySlugUncached(normalized),
+    ["restaurant-by-slug-v1", normalized],
+    { tags: [restaurantCacheTag(normalized), RESTAURANTS_LIST_TAG] },
+  )();
 }
 
 /**

@@ -4,6 +4,8 @@
 import "server-only";
 
 import type { Guide, GuideRestaurant } from "@prisma/client";
+import { unstable_cache } from "next/cache";
+import { GUIDES_LIST_TAG, guideCacheTag } from "@/lib/cache-tags";
 import { prisma } from "@/lib/prisma";
 import {
   FILE_GUIDE_DEFINITIONS,
@@ -139,7 +141,7 @@ function mapDbToResolved(
 }
 
 /** Une listas: si hay guía en DB con el mismo slug, gana DB (solo published con al menos un restaurante en listado). */
-export async function mergeDbGuidesWithFileGuides(): Promise<GuideListItem[]> {
+async function mergeDbGuidesWithFileGuidesUncached(): Promise<GuideListItem[]> {
   const bySlug = new Map<string, GuideListItem>();
 
   if (hasDatabaseUrl()) {
@@ -179,6 +181,12 @@ export async function mergeDbGuidesWithFileGuides(): Promise<GuideListItem[]> {
   return list;
 }
 
+export async function mergeDbGuidesWithFileGuides(): Promise<GuideListItem[]> {
+  return unstable_cache(mergeDbGuidesWithFileGuidesUncached, ["guides-list-merged-v1"], {
+    tags: [GUIDES_LIST_TAG],
+  })();
+}
+
 export async function getAllGuides(): Promise<GuideListItem[]> {
   return mergeDbGuidesWithFileGuides();
 }
@@ -212,7 +220,7 @@ export async function getPublishedGuideSlugs(): Promise<string[]> {
 /**
  * Ficha pública: DB published gana sobre archivo. Borrador u oculta en DB no hace fallback a archivo.
  */
-export async function getGuideBySlug(slug: string): Promise<ResolvedGuidePage | null> {
+async function getGuideBySlugUncached(slug: string): Promise<ResolvedGuidePage | null> {
   if (hasDatabaseUrl()) {
     try {
       const row = await prisma.guide.findUnique({
@@ -235,6 +243,16 @@ export async function getGuideBySlug(slug: string): Promise<ResolvedGuidePage | 
   const file = getFileGuideBySlug(slug);
   if (file) return mapFileToResolved(file);
   return null;
+}
+
+export async function getGuideBySlug(slug: string): Promise<ResolvedGuidePage | null> {
+  const normalized = slug.trim();
+  if (!normalized) return null;
+  return unstable_cache(
+    async () => getGuideBySlugUncached(normalized),
+    ["guide-by-slug-v1", normalized],
+    { tags: [guideCacheTag(normalized), GUIDES_LIST_TAG] },
+  )();
 }
 
 export async function getOtherPublishedGuideSummaries(

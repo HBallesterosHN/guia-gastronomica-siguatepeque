@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { revalidateGuidePublicCache, revalidateRestaurantPublicCache } from "@/lib/revalidate-public-cache";
 import { requirePlatformAdmin } from "@/lib/require-admin";
 import {
   createGuideSchema,
@@ -43,8 +44,7 @@ export async function createGuideAction(payload: unknown): Promise<CreateGuideRe
     return { ok: false, message: e instanceof Error ? e.message : "No se pudo crear la guía." };
   }
   revalidatePath("/admin/guias");
-  revalidatePath("/guias");
-  revalidatePath(`/guias/${p.slug}`);
+  revalidateGuidePublicCache(p.slug);
   return { ok: true, slug: p.slug };
 }
 
@@ -118,10 +118,14 @@ export async function saveGuideFullAction(payload: unknown): Promise<ActionResul
   }
 
   revalidatePath("/admin/guias");
-  revalidatePath("/guias");
-  revalidatePath(`/guias/${p.originalSlug}`);
-  revalidatePath(`/guias/${p.slug}`);
-  revalidatePath("/");
+  revalidateGuidePublicCache(p.slug, p.originalSlug);
+  const entryRestaurants = await prisma.restaurant.findMany({
+    where: { id: { in: restaurantIds } },
+    select: { id: true, slug: true },
+  });
+  for (const r of entryRestaurants) {
+    await revalidateRestaurantPublicCache({ slug: r.slug, restaurantId: r.id });
+  }
   return { ok: true };
 }
 
@@ -181,10 +185,10 @@ export async function saveRestaurantGuideLinksAction(payload: unknown): Promise<
 
   revalidatePath("/admin/restaurantes");
   revalidatePath(`/admin/restaurantes/${encodeURIComponent(rest.slug)}/editar`);
-  revalidatePath("/guias");
+  await revalidateRestaurantPublicCache({ slug: rest.slug, restaurantId: rest.id });
   for (const l of links) {
-    const g = await prisma.guide.findUnique({ where: { id: l.guideId }, select: { slug: true } });
-    if (g) revalidatePath(`/guias/${g.slug}`);
+    const g = await prisma.guide.findUnique({ where: { id: l.guideId }, select: { slug: true, status: true } });
+    if (g?.status === "published") revalidateGuidePublicCache(g.slug);
   }
   return { ok: true };
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { saveAdminRestaurantUpdate } from "@/lib/admin-restaurant-save";
+import { revalidateRestaurantPublicCache } from "@/lib/revalidate-public-cache";
 import { requirePlatformAdmin } from "@/lib/require-admin";
 import { adminRestaurantUpdateSchema } from "@/lib/validations/admin-restaurant-update";
 
@@ -22,15 +23,19 @@ export async function saveAdminRestaurantAction(payload: unknown): Promise<SaveA
     if (!result.ok) {
       return { ok: false, message: result.message };
     }
+
+    await revalidateRestaurantPublicCache({
+      slug: result.slug,
+      previousSlug: result.previousSlug,
+      restaurantId: result.restaurantId,
+    });
+
     revalidatePath("/admin/restaurantes");
-    revalidatePath(`/admin/restaurantes/${encodeURIComponent(parsed.slug)}/editar`);
-    if (parsed.slug !== parsed.originalSlug) {
-      revalidatePath(`/admin/restaurantes/${encodeURIComponent(parsed.originalSlug)}/editar`);
+    revalidatePath(`/admin/restaurantes/${encodeURIComponent(result.slug)}/editar`);
+    if (result.slug !== result.previousSlug) {
+      revalidatePath(`/admin/restaurantes/${encodeURIComponent(result.previousSlug)}/editar`);
     }
-    revalidatePath("/restaurantes");
-    revalidatePath(`/restaurantes/${parsed.slug}`);
-    revalidatePath(`/restaurantes/${parsed.originalSlug}`);
-    revalidatePath("/");
+
     return { ok: true };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
