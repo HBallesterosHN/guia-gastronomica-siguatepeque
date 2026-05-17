@@ -229,6 +229,105 @@ const DETAILS_MASK =
   "id,name,displayName,formattedAddress,location,nationalPhoneNumber,internationalPhoneNumber," +
   "regularOpeningHours,currentOpeningHours,rating,userRatingCount,types,googleMapsUri,photos";
 
+/** Máscara mínima para refrescar solo puntuación y reseñas (menor costo de API). */
+export const PLACE_RATINGS_FIELD_MASK = "rating,userRatingCount,name";
+
+export type PlaceRatingsOnly = {
+  resourceName: string;
+  rating?: number;
+  userRatingCount?: number;
+};
+
+function parsePlaceRatingsJson(raw: unknown): PlaceRatingsOnly | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const o = raw as Record<string, unknown>;
+  const name = typeof o.name === "string" ? o.name : undefined;
+  if (!name?.startsWith("places/")) return undefined;
+  const rating = typeof o.rating === "number" && Number.isFinite(o.rating) ? o.rating : undefined;
+  const userRatingCount =
+    typeof o.userRatingCount === "number" && Number.isFinite(o.userRatingCount) ? o.userRatingCount : undefined;
+  if (rating === undefined && userRatingCount === undefined) return undefined;
+  return { resourceName: name, rating, userRatingCount };
+}
+
+export async function getPlaceRatingsOnly(
+  placeResourceName: string,
+  apiKey: string,
+): Promise<PlaceRatingsOnly | undefined> {
+  const path = placeResourceName.replace(/^\/+/, "");
+  const r = await placesGetJson(path, apiKey, PLACE_RATINGS_FIELD_MASK);
+  if (!r.ok) {
+    throw new Error(`placeRatings HTTP ${r.status}: ${r.text}`);
+  }
+  return parsePlaceRatingsJson(r.data);
+}
+
+export type ResolvePlaceRatingsInput = {
+  displayName: string;
+  mapsUrl?: string | null;
+  address?: string | null;
+  coords?: { lat: number; lng: number };
+};
+
+export type ResolvePlaceRatingsResult =
+  | { ok: true; ratings: PlaceRatingsOnly }
+  | { ok: false; reason: string };
+
+function buildRatingsTextQuery(displayName: string, address?: string | null): string {
+  const name = displayName.trim();
+  const addr = address?.trim();
+  const porConfirmar = !addr || /^por\s*confirmar/i.test(addr);
+  if (!porConfirmar && addr) {
+    return `${name} ${addr}`;
+  }
+  return `${name} Siguatepeque`;
+}
+
+/**
+ * Resuelve rating y reseñas: URL Maps (place_id) → búsqueda por texto (nombre + dirección o Siguatepeque).
+ */
+export async function resolvePlaceRatings(
+  apiKey: string,
+  input: ResolvePlaceRatingsInput,
+): Promise<ResolvePlaceRatingsResult> {
+  const mapsUrl = input.mapsUrl?.trim();
+  const fromUrl = mapsUrl ? extractPlaceResourceNameFromMapsUrl(mapsUrl) : undefined;
+  if (fromUrl) {
+    try {
+      const ratings = await getPlaceRatingsOnly(fromUrl, apiKey);
+      if (ratings) return { ok: true, ratings };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return { ok: false, reason: `Detalle por URL Maps falló: ${msg.slice(0, 200)}` };
+    }
+  }
+
+  const textQuery = buildRatingsTextQuery(input.displayName, input.address);
+  let search: Awaited<ReturnType<typeof searchPlace>>;
+  try {
+    search = await searchPlace(textQuery, apiKey);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { ok: false, reason: `Búsqueda Places falló: ${msg.slice(0, 200)}` };
+  }
+
+  const resource = pickBestSearchPlace(search.places, input.coords);
+  if (!resource) {
+    return { ok: false, reason: "Sin resultados en Google Places para la búsqueda." };
+  }
+
+  try {
+    const ratings = await getPlaceRatingsOnly(resource, apiKey);
+    if (!ratings) {
+      return { ok: false, reason: "Lugar encontrado pero sin rating en la respuesta." };
+    }
+    return { ok: true, ratings };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { ok: false, reason: `Detalle tras búsqueda falló: ${msg.slice(0, 200)}` };
+  }
+}
+
 /**
  * Búsqueda de texto (Places API New). Devuelve candidatos mínimos.
  * @see https://developers.google.com/maps/documentation/places/web-service/text-search

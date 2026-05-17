@@ -9,6 +9,7 @@ import {
   type IntakeSaveState,
 } from "./actions";
 import { RESTAURANT_CATEGORIES } from "@/types/restaurant";
+import { RefreshRatingsSection } from "./refresh-ratings-section";
 
 const initialGenerate: IntakeGenerateState = { status: "idle" };
 const initialSave: IntakeSaveState = { status: "idle" };
@@ -35,6 +36,8 @@ export function IntakeClient() {
           guarda en Neon.
         </p>
       </div>
+
+      <RefreshRatingsSection />
 
       <form action={genAction} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         <div className="grid gap-4 sm:grid-cols-2">

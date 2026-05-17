@@ -9,6 +9,7 @@ import type {
 } from "@/lib/admin-restaurant-editor-initial";
 import { isStructuredScheduleUsable, type StructuredHourRow } from "@/lib/formatters/schedule";
 import { RESTAURANT_CATEGORIES } from "@/types/restaurant";
+import { refreshSingleRestaurantRatingAction } from "../../../intake/ratings-actions";
 import { saveAdminRestaurantAction } from "./actions";
 
 function rowsToStructured(rows: AdminScheduleRowState[]): StructuredHourRow[] {
@@ -54,7 +55,9 @@ async function uploadToCloudinary(slug: string, file: File): Promise<string> {
 export function AdminRestaurantEditForm({ initial }: { initial: AdminRestaurantEditorInitial }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [ratingRefreshPending, startRatingRefresh] = useTransition();
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [ratingRefreshMsg, setRatingRefreshMsg] = useState<string | null>(null);
 
   const [slug, setSlug] = useState(initial.slug);
   const [name, setName] = useState(initial.name);
@@ -487,7 +490,42 @@ export function AdminRestaurantEditForm({ initial }: { initial: AdminRestaurantE
 
       <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Ratings (Google u otras fuentes)</h2>
-        <p className="mt-1 text-xs text-zinc-500">Normalmente vienen de Google Places; puedes ajustarlos manualmente.</p>
+        <p className="mt-1 text-xs text-zinc-500">
+          Normalmente vienen de Google Places; puedes ajustarlos manualmente o refrescar solo estos campos
+          desde la API.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={ratingRefreshPending}
+            onClick={() => {
+              setRatingRefreshMsg(null);
+              startRatingRefresh(async () => {
+                const res = await refreshSingleRestaurantRatingAction(initial.slug);
+                if (!res.ok) {
+                  setRatingRefreshMsg(res.message);
+                  return;
+                }
+                const { row } = res;
+                if (row.newRating != null) setRatingAverage(String(row.newRating));
+                if (row.newReviews != null) setReviewsCount(String(row.newReviews));
+                const detail =
+                  row.status === "updated"
+                    ? `Guardado en Neon: ${row.previousRating.toFixed(1)}→${row.newRating?.toFixed(1)}, reseñas ${row.previousReviews}→${row.newReviews}.`
+                    : row.status === "skipped"
+                      ? row.reason ?? "Sin cambios."
+                      : row.reason ?? "Error al consultar Places.";
+                setRatingRefreshMsg(detail);
+              });
+            }}
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
+          >
+            {ratingRefreshPending ? "Consultando Places…" : "Actualizar rating desde Google"}
+          </button>
+        </div>
+        {ratingRefreshMsg ? (
+          <p className="mt-2 rounded-lg bg-sky-50 px-3 py-2 text-xs text-sky-950">{ratingRefreshMsg}</p>
+        ) : null}
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm">
             <span className="font-medium text-zinc-800">Promedio (0–5)</span>
