@@ -10,7 +10,7 @@ import type {
 import { isStructuredScheduleUsable, type StructuredHourRow } from "@/lib/formatters/schedule";
 import { RESTAURANT_CATEGORIES } from "@/types/restaurant";
 import { refreshSingleRestaurantRatingAction } from "../../../intake/ratings-actions";
-import { saveAdminRestaurantAction } from "./actions";
+import { saveAdminRestaurantAction, signCloudinaryUploadAction } from "./actions";
 
 function rowsToStructured(rows: AdminScheduleRowState[]): StructuredHourRow[] {
   return rows.map((r) =>
@@ -21,22 +21,11 @@ function rowsToStructured(rows: AdminScheduleRowState[]): StructuredHourRow[] {
 }
 
 async function uploadToCloudinary(slug: string, file: File): Promise<string> {
-  const sigRes = await fetch("/api/cloudinary/signature", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ slug }),
-  });
-  if (!sigRes.ok) {
-    const t = await sigRes.text();
-    throw new Error(t || "No se pudo firmar la subida.");
+  const signed = await signCloudinaryUploadAction(slug);
+  if (!signed.ok) {
+    throw new Error(signed.message || "No se pudo firmar la subida.");
   }
-  const { signature, timestamp, apiKey, cloudName, folder } = (await sigRes.json()) as {
-    signature: string;
-    timestamp: number;
-    apiKey: string;
-    cloudName: string;
-    folder: string;
-  };
+  const { signature, timestamp, apiKey, cloudName, folder } = signed.data;
   const body = new FormData();
   body.append("file", file);
   body.append("api_key", apiKey);

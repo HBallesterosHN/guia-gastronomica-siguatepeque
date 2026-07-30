@@ -2,10 +2,10 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ADMIN_SESSION_COOKIE } from "./admin-session-cookie";
 import { createAdminSessionToken, verifyAdminSessionToken } from "./admin-session-crypto";
 
-export const ADMIN_SESSION_COOKIE = "rs_admin_session";
-
+export { ADMIN_SESSION_COOKIE };
 export { createAdminSessionToken, verifyAdminSessionToken };
 
 /**
@@ -24,6 +24,20 @@ export function getAdminCookieSetOptions() {
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   };
+}
+
+/** Clears both current and legacy cookie paths. */
+export async function clearAdminSessionCookies(): Promise<void> {
+  const jar = await cookies();
+  jar.delete({ name: ADMIN_SESSION_COOKIE, path: "/" });
+  jar.delete({ name: ADMIN_SESSION_COOKIE, path: "/admin" });
+}
+
+export async function setAdminSessionCookie(token: string): Promise<void> {
+  const jar = await cookies();
+  // Drop legacy path so only path=/ remains.
+  jar.delete({ name: ADMIN_SESSION_COOKIE, path: "/admin" });
+  jar.set(ADMIN_SESSION_COOKIE, token, getAdminCookieSetOptions());
 }
 
 export async function isAdminSessionValid(): Promise<boolean> {

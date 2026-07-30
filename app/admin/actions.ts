@@ -1,13 +1,12 @@
 "use server";
 
 import { timingSafeEqual } from "node:crypto";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
-  ADMIN_SESSION_COOKIE,
+  clearAdminSessionCookies,
   createAdminSessionToken,
-  getAdminCookieSetOptions,
   getAdminSecret,
+  setAdminSessionCookie,
 } from "@/lib/admin-session";
 
 function safeEqualString(a: string, b: string): boolean {
@@ -27,14 +26,11 @@ export async function loginAdminSecret(formData: FormData): Promise<void> {
   }
 
   const token = createAdminSessionToken(envSecret);
-  (await cookies()).set(ADMIN_SESSION_COOKIE, token, getAdminCookieSetOptions());
+  await setAdminSessionCookie(token);
   redirect("/admin/reclamos");
 }
 
 export async function logoutAdminSecret(): Promise<void> {
-  const jar = await cookies();
-  // Clear current path and legacy /admin path from older sessions.
-  jar.delete({ name: ADMIN_SESSION_COOKIE, path: "/" });
-  jar.delete({ name: ADMIN_SESSION_COOKIE, path: "/admin" });
+  await clearAdminSessionCookies();
   redirect("/admin");
 }

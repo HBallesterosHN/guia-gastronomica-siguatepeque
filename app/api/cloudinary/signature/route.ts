@@ -1,10 +1,8 @@
 import { auth } from "@/auth";
 import { userOwnsRestaurantSlug } from "@/lib/assert-ownership";
+import { createRestaurantImageUploadSignature } from "@/lib/cloudinary-upload-signature";
 import { isPlatformAdmin } from "@/lib/require-admin";
-import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
-
-const CLOUDINARY_ROOT = "mevoyasigua/restaurants";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -14,13 +12,6 @@ export async function POST(req: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
-  }
-
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
-  if (!cloudName || !apiKey || !apiSecret) {
-    return NextResponse.json({ error: "Cloudinary no está configurado en el servidor." }, { status: 503 });
   }
 
   let body: { slug?: string };
@@ -42,19 +33,10 @@ export async function POST(req: Request) {
     }
   }
 
-  const folder = `${CLOUDINARY_ROOT}/${slug}`;
+  const signed = createRestaurantImageUploadSignature(slug);
+  if (!signed.ok) {
+    return NextResponse.json({ error: signed.error }, { status: signed.status });
+  }
 
-  const timestamp = Math.round(Date.now() / 1000);
-  const paramsToSign: Record<string, string | number> = { timestamp, folder };
-
-  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
-  const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
-
-  return NextResponse.json({
-    signature,
-    timestamp,
-    apiKey,
-    cloudName,
-    folder,
-  });
+  return NextResponse.json(signed.data);
 }

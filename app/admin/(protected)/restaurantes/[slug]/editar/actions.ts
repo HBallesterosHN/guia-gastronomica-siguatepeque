@@ -2,6 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { saveAdminRestaurantUpdate } from "@/lib/admin-restaurant-save";
+import {
+  createRestaurantImageUploadSignature,
+  type CloudinaryUploadSignature,
+} from "@/lib/cloudinary-upload-signature";
 import { revalidateRestaurantPublicCache } from "@/lib/revalidate-public-cache";
 import { requirePlatformAdmin } from "@/lib/require-admin";
 import { adminRestaurantUpdateSchema } from "@/lib/validations/admin-restaurant-update";
@@ -9,6 +13,20 @@ import { adminRestaurantUpdateSchema } from "@/lib/validations/admin-restaurant-
 export type SaveAdminRestaurantResult =
   | { ok: true }
   | { ok: false; message: string };
+
+export type SignCloudinaryUploadResult =
+  | { ok: true; data: CloudinaryUploadSignature }
+  | { ok: false; message: string };
+
+/** Firma vía Server Action (cookie admin path=/admin también llega aquí). */
+export async function signCloudinaryUploadAction(slug: string): Promise<SignCloudinaryUploadResult> {
+  await requirePlatformAdmin();
+  const signed = createRestaurantImageUploadSignature(slug);
+  if (!signed.ok) {
+    return { ok: false, message: signed.error };
+  }
+  return { ok: true, data: signed.data };
+}
 
 export async function saveAdminRestaurantAction(payload: unknown): Promise<SaveAdminRestaurantResult> {
   await requirePlatformAdmin();
