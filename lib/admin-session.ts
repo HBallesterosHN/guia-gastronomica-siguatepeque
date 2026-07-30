@@ -20,7 +20,8 @@ export function getAdminCookieSetOptions() {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
-    path: "/admin",
+    // Must cover /api/* (e.g. Cloudinary signature) as well as /admin.
+    path: "/",
     maxAge: 60 * 60 * 24 * 7,
   };
 }

@@ -32,6 +32,9 @@ export async function loginAdminSecret(formData: FormData): Promise<void> {
 }
 
 export async function logoutAdminSecret(): Promise<void> {
-  (await cookies()).delete({ name: ADMIN_SESSION_COOKIE, path: "/admin" });
+  const jar = await cookies();
+  // Clear current path and legacy /admin path from older sessions.
+  jar.delete({ name: ADMIN_SESSION_COOKIE, path: "/" });
+  jar.delete({ name: ADMIN_SESSION_COOKIE, path: "/admin" });
   redirect("/admin");
 }
